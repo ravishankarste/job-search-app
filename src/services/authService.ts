@@ -28,7 +28,29 @@ export const authService = {
     }
   },
 
-  // Note: Actual login/signup logic will typically be handled in the feature slice
-  // (e.g. features/auth/api/...) but global auth service methods can stay here
-  // or act as a wrapper if needed.
+  async signUp(email: string, password: string): Promise<AuthResponse> {
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+      if (error) throw error;
+      return { user: data.user, session: data.session };
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  async signIn(email: string, password: string): Promise<AuthResponse> {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) throw error;
+      return { user: data.user, session: data.session };
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
 };
