@@ -8,7 +8,6 @@ export type ResumeVersion = Database['public']['Tables']['resume_versions']['Row
 export const resumeService = {
   /**
    * 1. createResume
-   * Inserts a new resume for the logged-in user.
    */
   async createResume(name: string, target_role?: string): Promise<Resume> {
     try {
@@ -34,7 +33,6 @@ export const resumeService = {
 
   /**
    * 2. getUserResumes
-   * Fetches all resumes for the logged-in user.
    */
   async getUserResumes(): Promise<Resume[]> {
     try {
@@ -48,7 +46,7 @@ export const resumeService = {
         .order('updated_at', { ascending: false });
 
       if (error) throw error;
-      return data;
+      return data || [];
     } catch (error) {
       return handleApiError(error);
     }
@@ -56,7 +54,6 @@ export const resumeService = {
 
   /**
    * 3. deleteResume
-   * Deletes a resume by id (RLS ensures user owns it).
    */
   async deleteResume(id: string): Promise<void> {
     try {
@@ -72,9 +69,7 @@ export const resumeService = {
   },
 
   /**
-   * 4. createResumeVersion
-   * Uploads file to Supabase Storage and inserts a record into resume_versions.
-   * Note: `label` is merged into the JSON `content` field as the schema does not have a dedicated `label` column.
+   * 4. createResumeVersion (FIXED)
    */
   async createResumeVersion(
     resumeId: string,
@@ -90,7 +85,7 @@ export const resumeService = {
       const versionId = crypto.randomUUID();
       const filePath = `${user.id}/resumes/${resumeId}/${versionId}.pdf`;
 
-      // Upload file to the "resumes" bucket
+      // Upload file
       const { error: uploadError } = await supabase.storage
         .from('resumes')
         .upload(filePath, file, {
@@ -104,12 +99,12 @@ export const resumeService = {
         .from('resumes')
         .getPublicUrl(filePath);
 
-      // Merge label into content if provided, since label column doesn't exist natively
-      const enrichedContent: Json = typeof content === 'object' && content !== null && !Array.isArray(content)
-        ? { ...content, label: label || `Version ${versionNumber}` }
-        : content;
+      const enrichedContent: Json =
+        typeof content === 'object' && content !== null && !Array.isArray(content)
+          ? { ...content, label: label || `Version ${versionNumber}` }
+          : content;
 
-      // Insert into resume_versions table
+      // INSERT (FIXED - keep .single())
       const { data, error } = await supabase
         .from('resume_versions')
         .insert({
@@ -121,10 +116,15 @@ export const resumeService = {
         .select()
         .single();
 
+      console.log("INSERT RESULT:", { data, error });
+
       if (error) {
-        // Rollback upload on DB failure (best-effort)
         await supabase.storage.from('resumes').remove([filePath]);
         throw error;
+      }
+
+      if (!data) {
+        throw new Error('No data returned from resume version insert');
       }
 
       return data;
@@ -135,7 +135,6 @@ export const resumeService = {
 
   /**
    * 5. getResumeVersions
-   * Fetches all versions for a given resume.
    */
   async getResumeVersions(resumeId: string): Promise<ResumeVersion[]> {
     try {
@@ -146,7 +145,7 @@ export const resumeService = {
         .order('version_number', { ascending: false });
 
       if (error) throw error;
-      return data;
+      return data || [];
     } catch (error) {
       return handleApiError(error);
     }
@@ -154,7 +153,6 @@ export const resumeService = {
 
   /**
    * 6. linkResumeToApplication
-   * Updates an application to reference a specific resume.
    */
   async linkResumeToApplication(applicationId: string, resumeId: string): Promise<void> {
     try {
