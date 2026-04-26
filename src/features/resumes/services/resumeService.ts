@@ -69,7 +69,7 @@ export const resumeService = {
   },
 
   /**
-   * 4. createResumeVersion (FIXED)
+   * 4. createResumeVersion
    */
   async createResumeVersion(
     resumeId: string,
@@ -79,32 +79,43 @@ export const resumeService = {
     content: Json = {}
   ): Promise<ResumeVersion> {
     try {
+      console.log("[resumeService] Starting createResumeVersion...");
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError || !user) throw new Error('User not authenticated');
 
       const versionId = crypto.randomUUID();
       const filePath = `${user.id}/resumes/${resumeId}/${versionId}.pdf`;
 
-      // Upload file
+      console.log("[resumeService] Uploading file to:", filePath);
+      
       const { error: uploadError } = await supabase.storage
         .from('resumes')
         .upload(filePath, file, {
           cacheControl: '3600',
           upsert: false,
+          contentType: 'application/pdf'
         });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error("[resumeService] Upload failed:", uploadError);
+        throw uploadError;
+      }
 
+      console.log("[resumeService] Upload successful. Getting public URL...");
       const { data: publicUrlData } = supabase.storage
         .from('resumes')
         .getPublicUrl(filePath);
+
+      if (!publicUrlData?.publicUrl) {
+        throw new Error("Failed to generate public URL for uploaded file.");
+      }
 
       const enrichedContent: Json =
         typeof content === 'object' && content !== null && !Array.isArray(content)
           ? { ...content, label: label || `Version ${versionNumber}` }
           : content;
 
-      // INSERT (FIXED - keep .single())
+      console.log("[resumeService] Inserting version record into DB...");
       const { data, error } = await supabase
         .from('resume_versions')
         .insert({
@@ -116,9 +127,9 @@ export const resumeService = {
         .select()
         .single();
 
-      console.log("INSERT RESULT:", { data, error });
-
       if (error) {
+        console.error("[resumeService] DB Insert failed:", error);
+        // Rollback upload on DB failure (best-effort)
         await supabase.storage.from('resumes').remove([filePath]);
         throw error;
       }
@@ -127,8 +138,10 @@ export const resumeService = {
         throw new Error('No data returned from resume version insert');
       }
 
+      console.log("[resumeService] Success:", data);
       return data;
     } catch (error) {
+      console.error("[resumeService] Global Catch:", error);
       return handleApiError(error);
     }
   },

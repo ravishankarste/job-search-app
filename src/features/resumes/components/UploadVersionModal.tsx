@@ -23,6 +23,7 @@ export const UploadVersionModal: React.FC<UploadVersionModalProps> = ({
     versionNumber: suggestedVersionNumber,
     label: '',
   });
+  const [localError, setLocalError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Sync suggested version number if it changes
@@ -30,10 +31,10 @@ export const UploadVersionModal: React.FC<UploadVersionModalProps> = ({
     setMetadata(prev => ({ ...prev, versionNumber: suggestedVersionNumber }));
   }, [suggestedVersionNumber]);
 
-  // MOVE EARLY RETURN HERE - AFTER ALL HOOKS
   if (!isOpen) return null;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocalError(null);
     if (e.target.files && e.target.files.length > 0) {
       setFile(e.target.files[0]);
     }
@@ -41,12 +42,13 @@ export const UploadVersionModal: React.FC<UploadVersionModalProps> = ({
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
+    setLocalError(null);
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const droppedFile = e.dataTransfer.files[0];
       if (droppedFile.type === 'application/pdf') {
         setFile(droppedFile);
       } else {
-        alert('Please upload a PDF file.');
+        setLocalError('Please upload a PDF file.');
       }
     }
   };
@@ -54,9 +56,16 @@ export const UploadVersionModal: React.FC<UploadVersionModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) return;
-    await onSubmit(file, metadata);
-    setFile(null);
-    setMetadata({ versionNumber: suggestedVersionNumber, label: '' });
+    setLocalError(null);
+    
+    try {
+      await onSubmit(file, metadata);
+      setFile(null);
+      setMetadata({ versionNumber: suggestedVersionNumber, label: '' });
+    } catch (err: any) {
+      console.error("Submit Error Catch:", err);
+      setLocalError(err.message || 'An unexpected error occurred during upload.');
+    }
   };
 
   return (
@@ -114,6 +123,12 @@ export const UploadVersionModal: React.FC<UploadVersionModalProps> = ({
             onChange={setMetadata}
             suggestedVersionNumber={suggestedVersionNumber}
           />
+
+          {localError && (
+            <div className="p-3 bg-red-50 border border-red-200 text-red-600 text-xs rounded-lg animate-pulse">
+              {localError}
+            </div>
+          )}
 
           <div className="pt-2 flex justify-end space-x-3">
             <button
