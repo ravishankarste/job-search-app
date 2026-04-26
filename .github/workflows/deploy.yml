@@ -1,4 +1,4 @@
-name: Deploy to Hostinger
+name: Deploy to Hostinger (SSH)
 
 on:
   push:
@@ -7,14 +7,14 @@ on:
 
 jobs:
   build-and-deploy:
-    name: Build and Deploy
+    name: Build and Deploy via SSH
     runs-on: ubuntu-latest
 
     steps:
       - name: 🚚 Get latest code
         uses: actions/checkout@v4
 
-      - name: ⚙️ Use Node.js 20
+      - name: ⚙️ Setup Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -23,20 +23,20 @@ jobs:
       - name: 📦 Install dependencies
         run: npm ci
 
-      - name: 🏗️ Build Project
+      - name: 🏗️ Build project
         run: npm run build
         env:
-          # These must be added to GitHub Secrets for the app to work on production
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
-      - name: 🚀 Sync files
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: 🔐 Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
         with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./dist/
-          server-dir: job-search-os/
-          # Recommended for SamKirkland/FTP-Deploy-Action to avoid re-uploading everything
-          state-name: .ftp-deploy-sync-state.json
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: 🚀 Deploy via rsync
+        run: |
+          rsync -avz --delete \
+            -e "ssh -o StrictHostKeyChecking=no" \
+            dist/ \
+            ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:/home/u816535991/domains/upanita.com/public_html/job-search-os/
