@@ -1,63 +1,53 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { Building2, MapPin, ChevronRight, ExternalLink } from 'lucide-react';
 import type { JobWithApplication } from '../services/jobService';
-import { StatusBadge } from './StatusBadge';
-import { Building2, MapPin, Calendar, ExternalLink } from 'lucide-react';
 
 interface JobCardProps {
   job: JobWithApplication;
 }
 
 export const JobCard: React.FC<JobCardProps> = ({ job }) => {
-  const formattedDate = job.created_at
-    ? new Date(job.created_at).toLocaleDateString()
-    : 'Recently';
-
   return (
-    <Link
-      to={`/jobs/${job.id}`}
-      className="block group bg-white border border-gray-200 rounded-xl p-5 hover:border-blue-500 hover:shadow-md transition-all duration-200"
-    >
-      <div className="flex items-start justify-between">
-        <div className="space-y-1">
-          <div className="flex items-center space-x-2">
-            <h3 className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
-              {job.title}
-            </h3>
-          </div>
-          <div className="flex items-center text-sm text-gray-600">
-            <Building2 className="w-4 h-4 mr-1.5 text-gray-400" />
-            {job.company_name}
-          </div>
+    <div className="clean-card p-5 group relative">
+      <div className="flex items-start justify-between mb-4">
+        <div className="w-12 h-12 bg-blue-50 border border-blue-100 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-[#007bff] transition-colors">
+          <Building2 className="w-6 h-6 text-[#007bff] group-hover:text-white transition-colors" />
         </div>
-        {job.application && <StatusBadge status={job.application.status || 'saved'} />}
-      </div>
-
-      <div className="mt-4 flex flex-wrap gap-y-2 gap-x-4">
-        {job.location && (
-          <div className="flex items-center text-xs text-gray-500">
-            <MapPin className="w-3.5 h-3.5 mr-1 text-gray-400" />
-            {job.location}
-          </div>
+        
+        {job.url && (
+          <a
+            href={job.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-1.5 text-gray-400 hover:text-[#007bff] hover:bg-blue-50 rounded-lg transition-all"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <ExternalLink className="w-4 h-4" />
+          </a>
         )}
-        <div className="flex items-center text-xs text-gray-500">
-          <Calendar className="w-3.5 h-3.5 mr-1 text-gray-400" />
-          Saved {formattedDate}
-        </div>
       </div>
 
-      {job.url && (
-        <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
-          <span className="text-xs text-blue-600 font-medium group-hover:underline flex items-center">
-            View details <ExternalLink className="w-3 h-3 ml-1" />
-          </span>
-          {job.employment_type && (
-            <span className="text-[10px] uppercase tracking-wider font-bold text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded">
-              {job.employment_type}
-            </span>
-          )}
+      <div className="space-y-1 mb-6">
+        <h4 className="text-base font-bold text-gray-900 group-hover:text-[#007bff] transition-colors line-clamp-1">
+          {job.title}
+        </h4>
+        <p className="text-sm font-semibold text-gray-500">{job.company_name}</p>
+      </div>
+
+      <div className="flex items-center justify-between pt-4 border-t border-gray-50">
+        <div className="flex items-center text-[11px] text-gray-400 font-bold uppercase tracking-wider">
+          <MapPin className="w-3.5 h-3.5 mr-1.5 text-blue-300" />
+          {job.location || 'Remote'}
         </div>
-      )}
-    </Link>
+        
+        <Link
+          to={`/jobs/${job.id}`}
+          className="p-1.5 bg-gray-50 text-gray-400 group-hover:bg-[#007bff] group-hover:text-white rounded-lg transition-all"
+        >
+          <ChevronRight className="w-4 h-4" />
+        </Link>
+      </div>
+    </div>
   );
 };

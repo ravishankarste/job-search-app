@@ -16,9 +16,12 @@ export const AuthLayout: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Job Search OS
+        <h2 className="mt-6 text-center text-4xl font-black text-gray-900 tracking-tight">
+          CareerFlow
         </h2>
+        <p className="mt-2 text-center text-sm font-bold text-blue-600 uppercase tracking-widest opacity-70">
+          Professional Career Workspace
+        </p>
       </div>
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
