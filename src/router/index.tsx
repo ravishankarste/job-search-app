@@ -4,6 +4,7 @@ import { DashboardLayout } from '../layouts/DashboardLayout';
 import { Login } from '../pages/Login';
 import { Signup } from '../pages/Signup';
 import { Dashboard } from '../pages/Dashboard';
+import { Discovery } from '../pages/Discovery';
 import { ResumeListPage } from '../features/resumes/pages/ResumeListPage';
 import { ResumeDetailPage } from '../features/resumes/pages/ResumeDetailPage';
 import { JobListPage } from '../features/jobs/pages/JobListPage';
@@ -34,6 +35,10 @@ export const router = createBrowserRouter([
       {
         path: '/dashboard',
         element: <Dashboard />,
+      },
+      {
+        path: '/discovery',
+        element: <Discovery />,
       },
       {
         path: '/jobs',

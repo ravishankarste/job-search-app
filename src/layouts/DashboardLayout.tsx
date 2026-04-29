@@ -11,7 +11,8 @@ import {
   Layers,
   Search,
   Bell,
-  ChevronRight
+  ChevronRight,
+  Compass
 } from 'lucide-react';
 
 export const DashboardLayout: React.FC = () => {
@@ -36,6 +37,7 @@ export const DashboardLayout: React.FC = () => {
 
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+    { name: 'Discovery', path: '/discovery', icon: Compass },
     { name: 'Job Pipeline', path: '/jobs', icon: Briefcase },
     { name: 'Resumes', path: '/resumes', icon: FileText },
     { name: 'Analytics', path: '/analytics', icon: BarChart3 },
