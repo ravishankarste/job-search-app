@@ -8,7 +8,6 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
-  // We keep the base path for production deployment to Hostinger
-  // For local development, Vite handles the root path automatically
-  base: process.env.NODE_ENV === 'production' ? '/job-search-os/' : '/',
+  // We keep the base path at root for deployment to upanita.com
+  base: '/',
 })
