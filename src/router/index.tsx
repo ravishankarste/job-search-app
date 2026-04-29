@@ -8,6 +8,7 @@ import { ResumeListPage } from '../features/resumes/pages/ResumeListPage';
 import { ResumeDetailPage } from '../features/resumes/pages/ResumeDetailPage';
 import { JobListPage } from '../features/jobs/pages/JobListPage';
 import { JobDetailPage } from '../features/jobs/pages/JobDetailPage';
+import { Analytics } from '../pages/Analytics';
 
 export const router = createBrowserRouter([
   {
@@ -49,6 +50,10 @@ export const router = createBrowserRouter([
       {
         path: '/resumes/:id',
         element: <ResumeDetailPage />,
+      },
+      {
+        path: '/analytics',
+        element: <Analytics />,
       },
     ],
   },

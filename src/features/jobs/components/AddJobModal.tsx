@@ -1,10 +1,5 @@
 import React, { useState } from 'react';
-import { X, Briefcase, Link as LinkIcon, MapPin, Building2, Plus } from 'lucide-react';
-
-// Helper for tailwind classes if needed later
-// function cn(...inputs: ClassValue[]) {
-//   return twMerge(clsx(inputs));
-// }
+import { X, Plus } from 'lucide-react';
 
 interface AddJobModalProps {
   isOpen: boolean;
@@ -23,6 +18,7 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({
     company_name: '',
     title: '',
     url: '',
+    description: '',
     location: '',
     employment_type: 'full-time',
   });
@@ -34,112 +30,111 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({
     onSubmit(formData);
   };
 
-  const inputClasses = "w-full pl-11 pr-4 py-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all duration-200 text-sm placeholder:text-gray-400";
-  const labelClasses = "block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1";
+  const inputClasses = "w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:bg-white/10 focus:ring-1 focus:ring-[#FC6100] focus:border-[#FC6100] outline-none transition-all duration-200 text-sm text-white placeholder:text-gray-600";
+  const labelClasses = "block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2";
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
-      {/* Backdrop with extreme blur */}
+      {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-gray-900/40 backdrop-blur-md animate-in fade-in duration-300" 
+        className="absolute inset-0 bg-black/80 backdrop-blur-md" 
         onClick={onClose} 
       />
       
       {/* Modal Content */}
-      <div className="relative bg-white rounded-[2rem] shadow-2xl w-full max-w-xl overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
+      <div className="relative bg-[#121212] border border-white/10 rounded-3xl shadow-2xl w-full max-w-xl overflow-hidden">
         {/* Header */}
         <div className="px-8 pt-8 pb-4 flex justify-between items-start">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Add New Opportunity</h2>
+            <h2 className="text-2xl font-bold text-white tracking-tight">Add New Opportunity</h2>
             <p className="text-gray-500 text-sm mt-1">Found a great role? Let's track it in your pipeline.</p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-600"
+            className="p-2 hover:bg-white/5 rounded-full transition-colors text-gray-500 hover:text-white"
           >
             <X className="w-6 h-6" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-8 pt-4 space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <form onSubmit={handleSubmit} className="p-8 pt-4 space-y-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             {/* Company Name */}
-            <div className="space-y-1">
-              <label className={labelClasses}>Company <span className="text-blue-500">*</span></label>
-              <div className="relative">
-                <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  required
-                  type="text"
-                  placeholder="e.g. Google, Stripe"
-                  className={inputClasses}
-                  value={formData.company_name}
-                  onChange={e => setFormData({ ...formData, company_name: e.target.value })}
-                />
-              </div>
+            <div>
+              <label className={labelClasses}>Company <span className="text-[#FC6100]">*</span></label>
+              <input
+                required
+                type="text"
+                placeholder="e.g. Google, Stripe"
+                className={inputClasses}
+                value={formData.company_name}
+                onChange={e => setFormData({ ...formData, company_name: e.target.value })}
+              />
             </div>
 
             {/* Job Title */}
-            <div className="space-y-1">
-              <label className={labelClasses}>Role Title <span className="text-blue-500">*</span></label>
-              <div className="relative">
-                <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  required
-                  type="text"
-                  placeholder="e.g. Senior Frontend Engineer"
-                  className={inputClasses}
-                  value={formData.title}
-                  onChange={e => setFormData({ ...formData, title: e.target.value })}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Job URL */}
-          <div className="space-y-1">
-            <label className={labelClasses}>Job Posting URL</label>
-            <div className="relative">
-              <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <div>
+              <label className={labelClasses}>Role Title <span className="text-[#FC6100]">*</span></label>
               <input
-                type="url"
-                placeholder="https://careers.company.com/..."
+                required
+                type="text"
+                placeholder="e.g. Senior Frontend Engineer"
                 className={inputClasses}
-                value={formData.url}
-                onChange={e => setFormData({ ...formData, url: e.target.value })}
+                value={formData.title}
+                onChange={e => setFormData({ ...formData, title: e.target.value })}
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {/* Job URL */}
+          <div>
+            <label className={labelClasses}>Job Posting URL</label>
+            <input
+              type="url"
+              placeholder="https://careers.company.com/..."
+              className={inputClasses}
+              value={formData.url}
+              onChange={e => setFormData({ ...formData, url: e.target.value })}
+            />
+          </div>
+
+          {/* Job Description */}
+          <div>
+            <label className={labelClasses}>Job Description (For ATS Match Scoring)</label>
+            <textarea
+              placeholder="Paste the full job description here..."
+              className={`${inputClasses} h-24 resize-y`}
+              value={formData.description}
+              onChange={e => setFormData({ ...formData, description: e.target.value })}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             {/* Location */}
-            <div className="space-y-1">
+            <div>
               <label className={labelClasses}>Location</label>
-              <div className="relative">
-                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="e.g. Remote, New York, NY"
-                  className={inputClasses}
-                  value={formData.location}
-                  onChange={e => setFormData({ ...formData, location: e.target.value })}
-                />
-              </div>
+              <input
+                type="text"
+                placeholder="e.g. Remote, New York, NY"
+                className={inputClasses}
+                value={formData.location}
+                onChange={e => setFormData({ ...formData, location: e.target.value })}
+              />
             </div>
 
             {/* Employment Type */}
-            <div className="space-y-1">
+            <div>
               <label className={labelClasses}>Type</label>
               <select
-                className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all duration-200 text-sm appearance-none cursor-pointer"
+                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:bg-white/10 focus:ring-1 focus:ring-[#FC6100] focus:border-[#FC6100] outline-none transition-all duration-200 text-sm text-white appearance-none cursor-pointer"
                 value={formData.employment_type}
                 onChange={e => setFormData({ ...formData, employment_type: e.target.value })}
               >
-                <option value="full-time">Full-time</option>
-                <option value="part-time">Part-time</option>
-                <option value="contract">Contract</option>
-                <option value="internship">Internship</option>
-                <option value="freelance">Freelance</option>
+                <option value="full-time" className="bg-[#121212]">Full-time</option>
+                <option value="part-time" className="bg-[#121212]">Part-time</option>
+                <option value="contract" className="bg-[#121212]">Contract</option>
+                <option value="internship" className="bg-[#121212]">Internship</option>
+                <option value="freelance" className="bg-[#121212]">Freelance</option>
               </select>
             </div>
           </div>
@@ -150,14 +145,14 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="flex-1 px-6 py-4 text-sm font-bold text-gray-500 bg-gray-50 hover:bg-gray-100 rounded-2xl transition-all duration-200 active:scale-95"
+              className="flex-1 px-6 py-4 text-sm font-bold text-gray-400 bg-white/5 hover:bg-white/10 rounded-2xl transition-all duration-200 active:scale-95"
             >
               Discard
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex-[2] inline-flex items-center justify-center px-6 py-4 border border-transparent text-sm font-bold rounded-2xl shadow-xl shadow-blue-200 text-white bg-blue-600 hover:bg-blue-700 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 transition-all duration-200 disabled:opacity-50"
+              className="flex-[2] inline-flex items-center justify-center px-6 py-4 text-sm font-bold rounded-2xl shadow-xl shadow-[#FC6100]/10 text-white bg-[#FC6100] hover:bg-[#E35205] hover:-translate-y-0.5 active:translate-y-0 active:scale-95 transition-all duration-200 disabled:opacity-50"
             >
               {isSubmitting ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

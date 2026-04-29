@@ -18,21 +18,21 @@ export const ResumeSelector: React.FC<ResumeSelectorProps> = ({
   if (isLoadingResumes) {
     return (
       <div className="flex items-center justify-center py-8">
-        <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+        <Loader2 className="w-6 h-6 animate-spin text-[#FC6100]" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-3">
-      <h3 className="text-sm font-semibold text-gray-900">Link a Resume</h3>
+    <div className="space-y-4">
+      <h3 className="text-sm font-bold text-white uppercase tracking-widest opacity-60">Link a Resume</h3>
       <div className="grid grid-cols-1 gap-3">
         <button
           onClick={() => onSelect(null)}
-          className={`flex items-center justify-between p-3 rounded-lg border text-sm transition-all ${
+          className={`flex items-center justify-between p-4 rounded-xl border text-sm font-bold transition-all ${
             currentResumeId === null
-              ? 'border-blue-500 bg-blue-50 text-blue-700'
-              : 'border-gray-200 hover:border-gray-300 bg-white text-gray-600'
+              ? 'border-[#FC6100] bg-[#FC6100]/10 text-[#FC6100]'
+              : 'border-white/5 hover:border-white/10 bg-white/2 text-gray-500 hover:text-gray-400'
           }`}
         >
           <span className="flex items-center">
@@ -46,19 +46,19 @@ export const ResumeSelector: React.FC<ResumeSelectorProps> = ({
             key={resume.id}
             onClick={() => onSelect(resume.id)}
             disabled={isLinking}
-            className={`flex items-center justify-between p-3 rounded-lg border text-sm transition-all ${
+            className={`flex items-center justify-between p-4 rounded-xl border text-sm font-bold transition-all ${
               currentResumeId === resume.id
-                ? 'border-blue-500 bg-blue-50 text-blue-700'
-                : 'border-gray-200 hover:border-gray-300 bg-white text-gray-600'
+                ? 'border-[#FC6100] bg-[#FC6100]/10 text-[#FC6100]'
+                : 'border-white/5 hover:border-white/10 bg-white/2 text-gray-400 hover:text-white'
             }`}
           >
             <div className="flex items-center space-x-3 text-left">
-              <div className={`p-1.5 rounded ${currentResumeId === resume.id ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400'}`}>
+              <div className={`p-2 rounded-lg transition-colors ${currentResumeId === resume.id ? 'bg-[#FC6100] text-white' : 'bg-white/5 text-gray-500'}`}>
                 <FileText className="w-4 h-4" />
               </div>
               <div>
-                <div className="font-medium">{resume.name}</div>
-                {resume.target_role && <div className="text-[10px] opacity-70 uppercase tracking-wider">{resume.target_role}</div>}
+                <div className="font-bold">{resume.name}</div>
+                {resume.target_role && <div className="text-[10px] opacity-50 uppercase tracking-widest">{resume.target_role}</div>}
               </div>
             </div>
             {currentResumeId === resume.id && (
@@ -68,7 +68,7 @@ export const ResumeSelector: React.FC<ResumeSelectorProps> = ({
         ))}
 
         {resumes?.length === 0 && (
-          <div className="text-center py-4 text-xs text-gray-500 border border-dashed border-gray-200 rounded-lg">
+          <div className="text-center py-6 text-[10px] font-bold text-gray-600 uppercase tracking-widest border border-dashed border-white/5 rounded-xl">
             No resumes found. Create one in the Resumes section first.
           </div>
         )}

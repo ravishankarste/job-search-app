@@ -69,13 +69,13 @@ export const UploadVersionModal: React.FC<UploadVersionModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-          <h2 className="text-lg font-semibold text-gray-900">Upload New Version</h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+      <div className="bg-[#121212] border border-white/10 rounded-3xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95">
+        <div className="px-6 py-4 border-b border-white/5 flex justify-between items-center">
+          <h2 className="text-lg font-bold text-white">Upload New Version</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-500 hover:text-white transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -85,33 +85,33 @@ export const UploadVersionModal: React.FC<UploadVersionModalProps> = ({
           {/* File Upload Area */}
           <div>
             <div
-              className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-xl transition-colors ${
-                file ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'
+              className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-2xl transition-all cursor-pointer ${
+                file 
+                  ? 'border-[#FC6100] bg-[#FC6100]/5' 
+                  : 'border-white/10 hover:border-white/20 bg-white/2 hover:bg-white/5'
               }`}
               onDragOver={(e) => e.preventDefault()}
               onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
             >
               <div className="space-y-1 text-center">
-                <UploadCloud className={`mx-auto h-12 w-12 ${file ? 'text-blue-500' : 'text-gray-400'}`} />
-                <div className="flex text-sm text-gray-600 justify-center">
-                  <label
-                    htmlFor="file-upload"
-                    className="relative cursor-pointer rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none"
-                  >
-                    <span>{file ? 'Change file' : 'Upload a file'}</span>
-                    <input
-                      id="file-upload"
-                      name="file-upload"
-                      type="file"
-                      accept=".pdf"
-                      className="sr-only"
-                      ref={fileInputRef}
-                      onChange={handleFileChange}
-                    />
-                  </label>
+                <UploadCloud className={`mx-auto h-12 w-12 transition-colors ${file ? 'text-[#FC6100]' : 'text-gray-600'}`} />
+                <div className="flex text-sm text-gray-400 justify-center">
+                  <span className="font-bold text-[#FC6100]">
+                    {file ? 'Change file' : 'Upload a file'}
+                  </span>
                   {!file && <p className="pl-1">or drag and drop</p>}
+                  <input
+                    id="file-upload"
+                    name="file-upload"
+                    type="file"
+                    accept=".pdf"
+                    className="sr-only"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                  />
                 </div>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 font-medium">
                   {file ? file.name : 'PDF up to 10MB'}
                 </p>
               </div>
@@ -125,7 +125,7 @@ export const UploadVersionModal: React.FC<UploadVersionModalProps> = ({
           />
 
           {localError && (
-            <div className="p-3 bg-red-50 border border-red-200 text-red-600 text-xs rounded-lg animate-pulse">
+            <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-bold rounded-lg">
               {localError}
             </div>
           )}
@@ -135,14 +135,14 @@ export const UploadVersionModal: React.FC<UploadVersionModalProps> = ({
               type="button"
               onClick={onClose}
               disabled={isUploading}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+              className="px-6 py-2 text-sm font-bold text-gray-400 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={!file || isUploading}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 flex items-center"
+              className="px-6 py-2 text-sm font-bold text-white bg-[#FC6100] border border-transparent rounded-xl hover:bg-[#E35205] transition-all disabled:opacity-50 flex items-center shadow-lg shadow-[#FC6100]/10"
             >
               {isUploading ? 'Uploading...' : 'Upload File'}
             </button>

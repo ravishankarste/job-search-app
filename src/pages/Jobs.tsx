@@ -2,19 +2,19 @@ import React from 'react';
 
 export const Jobs: React.FC = () => {
   return (
-    <div className="h-screen flex bg-gray-50">
+    <div className="h-screen flex bg-black">
       {/* Sidebar placeholder */}
-      <div className="w-64 bg-white border-r">
-        Sidebar
+      <div className="w-64 bg-[#121212] border-r border-white/10">
+        <span className="text-gray-500 p-4 block">Sidebar</span>
       </div>
 
       {/* Main content area */}
       <div className="flex-1 flex flex-col">
         {/* Top bar */}
-        <div className="h-14 bg-white border-b flex items-center justify-between px-4">
-          <div className="font-medium text-gray-800">Jobs</div>
+        <div className="h-14 bg-[#121212] border-b border-white/10 flex items-center justify-between px-4">
+          <div className="font-bold text-white">Jobs</div>
 
-          <button className="px-3 py-1.5 bg-black text-white text-sm rounded-md">
+          <button className="px-3 py-1.5 bg-[#FC6100] text-white text-sm font-bold rounded-lg">
             Add Job
           </button>
         </div>

@@ -54,6 +54,18 @@ export function useJobActions() {
     },
   });
 
+  // Update Job Description Mutation
+  const updateJobDescriptionMutation = useMutation<
+    void,
+    Error,
+    { jobId: string; description: string }
+  >({
+    mutationFn: ({ jobId, description }) => jobService.updateJobDescription(jobId, description),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: JOB_DETAIL_QUERY_KEY(variables.jobId) });
+    },
+  });
+
   return {
     createJob: createJobMutation.mutateAsync,
     isCreating: createJobMutation.isPending,
@@ -66,5 +78,8 @@ export function useJobActions() {
 
     deleteJob: deleteJobMutation.mutateAsync,
     isDeleting: deleteJobMutation.isPending,
+
+    updateJobDescription: updateJobDescriptionMutation.mutateAsync,
+    isUpdatingJobDescription: updateJobDescriptionMutation.isPending,
   };
 }

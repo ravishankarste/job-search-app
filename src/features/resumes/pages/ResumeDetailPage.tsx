@@ -21,15 +21,15 @@ export const ResumeDetailPage: React.FC = () => {
   const resume = resumes?.find((r) => r.id === id);
 
   if (isLoadingResumes) {
-    return <div className="p-6 animate-pulse bg-gray-100 rounded-xl h-64"></div>;
+    return <div className="p-6 animate-pulse bg-white/5 border border-white/10 rounded-2xl h-64"></div>;
   }
 
   if (!resume) {
     return (
-      <div className="text-center py-20">
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">Resume Not Found</h2>
-        <p className="text-gray-500 mb-6">The resume you're looking for doesn't exist or you don't have access.</p>
-        <Link to="/resumes" className="text-blue-600 hover:text-blue-800 font-medium flex items-center justify-center">
+      <div className="text-center py-24 bg-white/5 border border-white/10 rounded-3xl">
+        <h2 className="text-2xl font-bold text-white mb-2">Resume Not Found</h2>
+        <p className="text-gray-400 mb-8">The resume you're looking for doesn't exist or you don't have access.</p>
+        <Link to="/resumes" className="inline-flex items-center text-[#FC6100] font-bold hover:underline transition-all">
           <ArrowLeft className="w-4 h-4 mr-2" /> Back to Resumes
         </Link>
       </div>
@@ -55,34 +55,34 @@ export const ResumeDetailPage: React.FC = () => {
   const nextVersionNumber = versions.length > 0 ? Math.max(...versions.map(v => v.version_number)) + 1 : 1;
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
+    <div className="space-y-8 max-w-4xl mx-auto fade-in-up">
       {/* Header */}
       <div>
-        <Link to="/resumes" className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-700 mb-4 transition-colors">
-          <ArrowLeft className="w-4 h-4 mr-1" /> Back to Resumes
+        <Link to="/resumes" className="inline-flex items-center text-sm font-bold text-gray-500 hover:text-[#FC6100] mb-6 transition-colors">
+          <ArrowLeft className="w-4 h-4 mr-2" /> Back to Resumes
         </Link>
-        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6 bg-[#121212] p-8 rounded-3xl border border-white/10">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{resume.name}</h1>
+            <h1 className="text-3xl font-bold text-white mb-2">{resume.name}</h1>
             {resume.target_role && (
-              <div className="flex items-center text-sm text-gray-500 mt-2">
-                <Briefcase className="w-4 h-4 mr-1.5" />
-                Target Role: <span className="ml-1 font-medium text-gray-700">{resume.target_role}</span>
+              <div className="flex items-center text-sm font-bold text-gray-500 uppercase tracking-widest mt-3">
+                <Briefcase className="w-4 h-4 mr-2 text-[#FC6100]/50" />
+                Target Role: <span className="ml-2 text-white">{resume.target_role}</span>
               </div>
             )}
           </div>
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center gap-4">
             <button
               onClick={handleDelete}
               disabled={isDeleting}
-              className="inline-flex items-center justify-center p-2 border border-gray-300 rounded-lg text-gray-500 hover:text-red-600 hover:border-red-300 hover:bg-red-50 focus:outline-none transition-colors disabled:opacity-50"
+              className="p-3 bg-white/5 border border-white/10 rounded-xl text-gray-500 hover:text-red-500 hover:bg-red-500/10 transition-all disabled:opacity-50"
               title="Delete Resume"
             >
               <Trash2 className="w-5 h-5" />
             </button>
             <button
               onClick={() => setIsUploadModalOpen(true)}
-              className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              className="inline-flex items-center justify-center px-6 py-3 bg-[#FC6100] text-white text-sm font-bold rounded-xl shadow-lg hover:bg-[#E35205] transition-all"
             >
               <Upload className="w-4 h-4 mr-2" />
               Upload Version
@@ -92,8 +92,8 @@ export const ResumeDetailPage: React.FC = () => {
       </div>
 
       {/* Version History Section */}
-      <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-        <h2 className="text-lg font-semibold text-gray-900 mb-6 border-b border-gray-100 pb-4">Version History</h2>
+      <div className="bg-[#121212] p-8 rounded-3xl border border-white/10">
+        <h2 className="text-xl font-bold text-white mb-8 border-b border-white/5 pb-6">Version History</h2>
         <ResumeVersionTimeline versions={versions} isLoading={isLoadingVersions} />
       </div>
 

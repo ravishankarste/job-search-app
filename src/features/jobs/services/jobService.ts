@@ -157,5 +157,21 @@ export const jobService = {
     } catch (error) {
       handleApiError(error);
     }
+  },
+
+  /**
+   * Update job description
+   */
+  async updateJobDescription(jobId: string, description: string): Promise<void> {
+    try {
+      const { error } = await supabase
+        .from('jobs')
+        .update({ description, updated_at: new Date().toISOString() })
+        .eq('id', jobId);
+
+      if (error) throw error;
+    } catch (error) {
+      handleApiError(error);
+    }
   }
 };
