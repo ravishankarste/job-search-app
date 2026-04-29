@@ -26,10 +26,7 @@ export const UploadVersionModal: React.FC<UploadVersionModalProps> = ({
   const [localError, setLocalError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Sync suggested version number if it changes
-  React.useEffect(() => {
-    setMetadata(prev => ({ ...prev, versionNumber: suggestedVersionNumber }));
-  }, [suggestedVersionNumber]);
+
 
   if (!isOpen) return null;
 

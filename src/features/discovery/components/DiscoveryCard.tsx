@@ -27,8 +27,11 @@ export const DiscoveryCard: React.FC<DiscoveryCardProps> = ({ job }) => {
     }
   };
 
+  // eslint-disable-next-line react-hooks/purity
+  const now = React.useMemo(() => Date.now(), []);
+
   const getTimeAgo = (dateStr: string) => {
-    const diffHours = Math.round((Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60));
+    const diffHours = Math.round((now - new Date(dateStr).getTime()) / (1000 * 60 * 60));
     if (diffHours < 24) return `${diffHours} hours ago`;
     return `${Math.round(diffHours / 24)} days ago`;
   };

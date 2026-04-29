@@ -22,7 +22,7 @@ export const Dashboard: React.FC = () => {
   const { tasks, toggleFollowup, isLoading: isTasksLoading } = useUpcomingTasks();
 
   const firstName = session?.user?.user_metadata?.full_name?.split(' ')[0] || 
-                    (session?.user?.email?.split('@')[0].includes('ravishankar') ? 'Ravishankar' : session?.user?.email?.split('@')[0].split(/[\._]/)[0]) || 
+                    (session?.user?.email?.split('@')[0].includes('ravishankar') ? 'Ravishankar' : session?.user?.email?.split('@')[0].split(/[._]/)[0]) || 
                     'User';
 
   const stats = [

@@ -36,7 +36,7 @@ export const apifyService = {
 
     // Different Apify actors require completely different input schemas.
     // We dynamically build the payload based on which actor you installed.
-    let input: any = {};
+    let input: any;
 
     if (actorId.includes('get-leads')) {
       // Schema for get-leads/linkedin-scraper

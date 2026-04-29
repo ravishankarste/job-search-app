@@ -44,7 +44,7 @@ export const DashboardLayout: React.FC = () => {
   ];
 
   const firstName = session.user.user_metadata?.full_name?.split(' ')[0] || 
-                    (session.user.email?.split('@')[0].includes('ravishankar') ? 'Ravishankar' : session.user.email?.split('@')[0].split(/[\._]/)[0]);
+                    (session.user.email?.split('@')[0].includes('ravishankar') ? 'Ravishankar' : session.user.email?.split('@')[0].split(/[._]/)[0]);
 
   return (
     <div className="min-h-screen flex w-full bg-black">

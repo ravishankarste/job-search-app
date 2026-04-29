@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useCoverLetter } from '../hooks/useCoverLetter';
 import { FileText, Save, CheckCircle2 } from 'lucide-react';
 
@@ -11,12 +11,6 @@ export const CoverLetterEditor: React.FC<CoverLetterEditorProps> = ({ applicatio
   const [content, setContent] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-
-  useEffect(() => {
-    if (coverLetter) {
-      setContent(coverLetter.content);
-    }
-  }, [coverLetter]);
 
   const handleSave = async () => {
     await saveCoverLetter(content);
@@ -47,7 +41,10 @@ export const CoverLetterEditor: React.FC<CoverLetterEditorProps> = ({ applicatio
         <div className="text-center py-8 bg-white/5 rounded-2xl border border-white/5 border-dashed">
           <p className="text-gray-400 font-medium text-sm mb-4">You haven't written a cover letter for this application yet.</p>
           <button
-            onClick={() => setIsEditing(true)}
+            onClick={() => {
+              setContent('');
+              setIsEditing(true);
+            }}
             className="px-6 py-2 bg-[#FC6100] text-white text-sm font-bold rounded-xl hover:bg-[#E35205] transition-all"
           >
             Draft Cover Letter
@@ -84,12 +81,15 @@ export const CoverLetterEditor: React.FC<CoverLetterEditorProps> = ({ applicatio
         <div className="space-y-4">
           <div className="p-5 bg-black/40 border border-white/5 rounded-2xl relative group">
             <p className="text-gray-300 text-sm whitespace-pre-wrap leading-relaxed line-clamp-6 group-hover:line-clamp-none transition-all">
-              {content}
+              {coverLetter?.content}
             </p>
             <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-black/80 to-transparent group-hover:hidden rounded-b-2xl"></div>
           </div>
           <button
-            onClick={() => setIsEditing(true)}
+            onClick={() => {
+              setContent(coverLetter?.content || '');
+              setIsEditing(true);
+            }}
             className="w-full py-3 bg-white/5 text-gray-300 hover:text-white text-sm font-bold rounded-xl hover:bg-white/10 transition-all"
           >
             Edit Cover Letter
