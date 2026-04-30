@@ -10,6 +10,7 @@ import { ResumeDetailPage } from '../features/resumes/pages/ResumeDetailPage';
 import { JobListPage } from '../features/jobs/pages/JobListPage';
 import { JobDetailPage } from '../features/jobs/pages/JobDetailPage';
 import { Analytics } from '../pages/Analytics';
+import { Settings } from '../pages/Settings';
 
 export const router = createBrowserRouter([
   {
@@ -59,6 +60,10 @@ export const router = createBrowserRouter([
       {
         path: '/analytics',
         element: <Analytics />,
+      },
+      {
+        path: '/settings',
+        element: <Settings />,
       },
     ],
   },

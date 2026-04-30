@@ -12,7 +12,8 @@ import {
   Search,
   Bell,
   ChevronRight,
-  Compass
+  Compass,
+  Settings
 } from 'lucide-react';
 
 export const DashboardLayout: React.FC = () => {
@@ -41,6 +42,7 @@ export const DashboardLayout: React.FC = () => {
     { name: 'Job Pipeline', path: '/jobs', icon: Briefcase },
     { name: 'Resumes', path: '/resumes', icon: FileText },
     { name: 'Analytics', path: '/analytics', icon: BarChart3 },
+    { name: 'Settings', path: '/settings', icon: Settings },
   ];
 
   const firstName = session.user.user_metadata?.full_name?.split(' ')[0] || 
