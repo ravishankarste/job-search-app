@@ -4,14 +4,14 @@ import { DiscoveryCard } from '../features/discovery/components/DiscoveryCard';
 import { Search, AlertCircle, ChevronDown } from 'lucide-react';
 
 export const Discovery: React.FC = () => {
-  const [queryInput, setQueryInput] = useState('React Developer');
-  const [locationInput, setLocationInput] = useState('Remote');
-  const [daysAgo, setDaysAgo] = useState(7);
+  const [queryInput, setQueryInput] = useState(() => localStorage.getItem('discovery_q') || 'React Developer');
+  const [locationInput, setLocationInput] = useState(() => localStorage.getItem('discovery_loc') || 'Remote');
+  const [daysAgo, setDaysAgo] = useState(() => Number(localStorage.getItem('discovery_days')) || 7);
   
   // The values actually used for the query
-  const [activeQuery, setActiveQuery] = useState('');
-  const [activeLocation, setActiveLocation] = useState('');
-  const [activeDaysAgo, setActiveDaysAgo] = useState(7);
+  const [activeQuery, setActiveQuery] = useState(() => localStorage.getItem('discovery_active_q') || '');
+  const [activeLocation, setActiveLocation] = useState(() => localStorage.getItem('discovery_active_loc') || '');
+  const [activeDaysAgo, setActiveDaysAgo] = useState(() => Number(localStorage.getItem('discovery_active_days')) || 7);
 
   const { data: jobs, isLoading, isFetching, error } = useDiscovery(activeQuery, activeLocation, activeDaysAgo);
 
@@ -20,6 +20,14 @@ export const Discovery: React.FC = () => {
     setActiveQuery(queryInput);
     setActiveLocation(locationInput);
     setActiveDaysAgo(daysAgo);
+
+    // Persist to local storage so results remain when navigating away
+    localStorage.setItem('discovery_q', queryInput);
+    localStorage.setItem('discovery_loc', locationInput);
+    localStorage.setItem('discovery_days', daysAgo.toString());
+    localStorage.setItem('discovery_active_q', queryInput);
+    localStorage.setItem('discovery_active_loc', locationInput);
+    localStorage.setItem('discovery_active_days', daysAgo.toString());
   };
 
   return (
