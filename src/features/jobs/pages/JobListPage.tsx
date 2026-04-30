@@ -3,6 +3,7 @@ import { useJobs } from '../hooks/useJobs';
 import { useJobActions } from '../hooks/useJobActions';
 import { JobCard } from '../components/JobCard';
 import { AddJobModal } from '../components/AddJobModal';
+import { FollowUpModal } from '../components/FollowUpModal';
 import { Plus, Search } from 'lucide-react';
 
 export const JobListPage: React.FC = () => {
@@ -11,6 +12,7 @@ export const JobListPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter] = useState('all');
+  const [followUpCompany, setFollowUpCompany] = useState<string | null>(null);
 
   const handleCreate = async (data: any) => {
     await createJob(data);
@@ -104,7 +106,11 @@ export const JobListPage: React.FC = () => {
                  </div>
                ) : (
                  groupedJobs[status]?.map(job => (
-                   <JobCard key={job.id} job={job} />
+                   <JobCard 
+                     key={job.id} 
+                     job={job} 
+                     onFollowUpClick={(companyName) => setFollowUpCompany(companyName)} 
+                   />
                  ))
                )}
             </div>
@@ -117,6 +123,12 @@ export const JobListPage: React.FC = () => {
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleCreate}
         isSubmitting={isCreating}
+      />
+
+      <FollowUpModal
+        isOpen={!!followUpCompany}
+        onClose={() => setFollowUpCompany(null)}
+        companyName={followUpCompany || ''}
       />
     </div>
   );

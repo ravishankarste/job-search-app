@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Plus } from 'lucide-react';
 
 interface AddJobModalProps {
@@ -33,8 +34,8 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({
   const inputClasses = "w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:bg-white/10 focus:ring-1 focus:ring-[#FC6100] focus:border-[#FC6100] outline-none transition-all duration-200 text-sm text-white placeholder:text-gray-600";
   const labelClasses = "block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2";
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+  return createPortal(
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6">
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-black/80 backdrop-blur-md" 
@@ -42,7 +43,7 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({
       />
       
       {/* Modal Content */}
-      <div className="relative bg-[#121212] border border-white/10 rounded-3xl shadow-2xl w-full max-w-xl overflow-hidden">
+      <div className="relative bg-[#121212] border border-white/10 rounded-3xl shadow-2xl w-full max-w-xl overflow-hidden fade-in-up">
         {/* Header */}
         <div className="px-8 pt-8 pb-4 flex justify-between items-start">
           <div>
@@ -166,6 +167,7 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
