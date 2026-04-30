@@ -41,4 +41,4 @@ jobs:
           rsync -avz --delete \
             -e "ssh -p 65002 -o StrictHostKeyChecking=no" \
             dist/ \
-            ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:/home/u816535991/domains/upanita.com/public_html/job-search-os/
+            ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:/home/u816535991/domains/upanita.com/public_html/jobs/
