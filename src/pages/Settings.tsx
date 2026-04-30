@@ -46,6 +46,46 @@ export const Settings: React.FC = () => {
     }
   };
 
+  const handleExportCSV = async () => {
+    setIsExporting(true);
+    try {
+      const jobs = await jobService.getJobs();
+      
+      // Create CSV headers
+      let csvContent = "Company,Job Title,Location,Status,Date Added,Job URL\n";
+      
+      // Add rows
+      jobs.forEach(job => {
+        const company = `"${(job.company_name || '').replace(/"/g, '""')}"`;
+        const title = `"${(job.title || '').replace(/"/g, '""')}"`;
+        const location = `"${(job.location || '').replace(/"/g, '""')}"`;
+        const status = job.application?.status || 'unknown';
+        const date = job.created_at ? new Date(job.created_at).toLocaleDateString() : '';
+        const url = job.url || '';
+        
+        csvContent += `${company},${title},${location},${status},${date},${url}\n`;
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.href = url;
+      link.download = `udyog_marg_pipeline_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      setExportSuccess(true);
+      setTimeout(() => setExportSuccess(false), 3000);
+    } catch (error) {
+      console.error('Failed to export CSV:', error);
+      alert('Failed to export CSV. Please try again.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const handleDeleteAccount = async () => {
     // In a real app, this would call an Edge Function or Supabase Admin API to delete the user
     alert('Account deletion request initiated. (Demo Mode: This requires a Supabase Edge Function to fully delete auth records)');
@@ -69,23 +109,33 @@ export const Settings: React.FC = () => {
             <div className="flex-1">
               <h2 className="text-xl font-bold text-white mb-2">Export Your Data</h2>
               <p className="text-gray-400 text-sm mb-6 max-w-2xl">
-                Download a complete archive of your job search history, including all saved jobs, applications, pipeline statuses, and resume metadata in JSON format.
+                Download a complete archive of your job search history. Use CSV for Excel/Google Sheets to share with a mentor, or JSON for a complete developer backup.
               </p>
               
-              <button 
-                onClick={handleExportData}
-                disabled={isExporting || exportSuccess}
-                className="flex items-center gap-2 px-6 py-3 bg-white/5 border border-white/10 rounded-xl text-white font-bold hover:bg-white/10 hover:border-[#FC6100]/50 transition-all disabled:opacity-50"
-              >
-                {isExporting ? (
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : exportSuccess ? (
-                  <Check className="w-5 h-5 text-green-500" />
-                ) : (
-                  <Download className="w-5 h-5" />
-                )}
-                {isExporting ? 'Preparing Export...' : exportSuccess ? 'Export Successful!' : 'Download JSON Archive'}
-              </button>
+              <div className="flex flex-wrap gap-4">
+                <button 
+                  onClick={handleExportCSV}
+                  disabled={isExporting || exportSuccess}
+                  className="flex items-center gap-2 px-6 py-3 bg-[#FC6100] text-white font-bold rounded-xl hover:bg-[#E35205] shadow-lg shadow-[#FC6100]/10 transition-all disabled:opacity-50"
+                >
+                  {isExporting ? (
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : exportSuccess ? (
+                    <Check className="w-5 h-5 text-green-500" />
+                  ) : (
+                    <Download className="w-5 h-5" />
+                  )}
+                  Export Pipeline (CSV)
+                </button>
+
+                <button 
+                  onClick={handleExportData}
+                  disabled={isExporting || exportSuccess}
+                  className="flex items-center gap-2 px-6 py-3 bg-white/5 border border-white/10 rounded-xl text-white font-bold hover:bg-white/10 hover:border-[#FC6100]/50 transition-all disabled:opacity-50"
+                >
+                  Download JSON Backup
+                </button>
+              </div>
             </div>
           </div>
         </div>
