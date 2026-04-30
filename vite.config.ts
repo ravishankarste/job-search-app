@@ -9,5 +9,5 @@ export default defineConfig({
     tailwindcss(),
   ],
   // We keep the base path for production deployment to Hostinger subdirectory
-  base: process.env.NODE_ENV === 'production' ? '/job-search-os/' : '/',
+  base: process.env.NODE_ENV === 'production' ? '/jobs/' : '/',
 })
