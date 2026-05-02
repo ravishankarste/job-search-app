@@ -214,7 +214,7 @@ export const apifyService = {
     // Note: This will only work if the target has no CORS or we are in a permissive environment
     // In a browser, this is limited, but we try anyway.
     try {
-      const res = await fetch(url, { method: 'GET', mode: 'no-cors' });
+      await fetch(url, { method: 'GET', mode: 'no-cors' });
       // With no-cors, we can't read the body. So this is mostly for future-proofing or proxy use.
       // For now, we return empty to trigger the search peek.
       return {};
