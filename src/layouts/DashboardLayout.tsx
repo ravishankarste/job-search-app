@@ -9,7 +9,6 @@ import {
   BarChart3,
   LogOut,
   Layers,
-  Search,
   Bell,
   ChevronRight,
   Compass,
