@@ -27,7 +27,7 @@ export const SupportBot: React.FC = () => {
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { id: '1', text: "Namaste! I'm your Udyog Guide. How can I help you accelerate your career today?", sender: 'bot', timestamp: new Date() }
+    { id: '1', text: "Namaste! I'm Margi, your career navigator. How can I help you accelerate your journey today?", sender: 'bot', timestamp: new Date() }
   ]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -85,8 +85,8 @@ export const SupportBot: React.FC = () => {
                 <Sparkles className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="text-sm font-black text-white uppercase tracking-widest">Udyog Guide</h3>
-                <p className="text-[10px] text-white/70 font-bold uppercase tracking-tight">Career Intelligence Bot</p>
+                <h3 className="text-xl font-black text-white uppercase tracking-tighter">Margi</h3>
+                <p className="text-[10px] text-white/70 font-bold uppercase tracking-widest">Your Career Navigator</p>
               </div>
             </div>
             <button 
