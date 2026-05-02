@@ -113,8 +113,8 @@ export const UniversalImporter: React.FC<UniversalImporterProps> = ({ onImportSu
       </div>
 
       {error && (
-        <div className="mt-4 flex items-center gap-2 text-red-500 bg-red-500/10 p-3 rounded-xl border border-red-500/20 animate-fade-in">
-          <AlertCircle className="w-4 h-4" />
+        <div className="mt-4 flex items-center gap-2 text-white bg-red-500/20 p-4 rounded-xl border border-red-500/30 animate-fade-in shadow-lg shadow-red-500/5">
+          <AlertCircle className="w-4 h-4 text-red-500" />
           <p className="text-[10px] font-bold uppercase tracking-wider">{error}</p>
         </div>
       )}

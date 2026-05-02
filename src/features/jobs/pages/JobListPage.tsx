@@ -126,7 +126,7 @@ export const JobListPage: React.FC = () => {
             >
               {isRejected && <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />}
               <span className={`text-[10px] font-black uppercase tracking-widest transition-colors ${
-                isRejected ? 'text-red-400 group-hover:text-red-300' : 'text-gray-500 group-hover:text-white'
+                isRejected ? 'text-white group-hover:text-red-200' : 'text-gray-500 group-hover:text-white'
               }`}>
                 {status}
               </span>
@@ -161,7 +161,7 @@ export const JobListPage: React.FC = () => {
                     <div className="flex items-center gap-2">
                       {isRejected && <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />}
                       <h3 className={`text-sm font-bold uppercase tracking-wider capitalize ${
-                        isRejected ? 'text-red-500' : 'text-[#FC6100]'
+                        isRejected ? 'text-white' : 'text-[#FC6100]'
                       }`}>
                         {status}
                       </h3>
