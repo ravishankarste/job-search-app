@@ -1,6 +1,6 @@
 import React from 'react';
 import { Mail, Copy, X, CheckCircle2 } from 'lucide-react';
-import { followUpService } from '../services/followUpService';
+import { followupService } from '../services/followupService';
 
 interface FollowUpModalProps {
   jobTitle: string;
@@ -16,7 +16,7 @@ export const FollowUpModal: React.FC<FollowUpModalProps> = ({
   onClose
 }) => {
   const [copied, setCopied] = React.useState(false);
-  const template = followUpService.generateFollowUp(jobTitle, companyName);
+  const template = followupService.generateFollowUp(jobTitle, companyName);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(template.body);

@@ -6,6 +6,8 @@ import type { JobWithApplication } from '../services/jobService';
 import { useMatchScore } from '../hooks/useMatchScore';
 import { MatchScoreBadge } from './MatchScoreBadge';
 
+import { followupService } from '../services/followupService';
+
 interface JobCardProps {
   job: JobWithApplication;
   onFollowUpClick?: (companyName: string) => void;
@@ -15,23 +17,9 @@ export const JobCard: React.FC<JobCardProps> = ({ job, onFollowUpClick }) => {
   const navigate = useNavigate();
   const { score, isLoading } = useMatchScore(job.title, job.description);
 
-  // Ghost Detection Logic: > 14 days without update on active applications
-  const isGhosted = () => {
-    if (!job.application) return false;
-    const status = job.application.status;
-    if (status !== 'applied' && status !== 'interviewing') return false;
-    
-    const dateString = job.application.updated_at || job.application.created_at;
-    if (!dateString) return false;
-    const updatedDate = new Date(dateString);
-    const now = new Date();
-    const diffTime = Math.abs(now.getTime() - updatedDate.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-    
-    return diffDays > 14;
-  };
-
-  const ghosted = isGhosted();
+  const ghosted = job.application?.status === 'applied' || job.application?.status === 'interviewing'
+    ? followupService.isStale(job.application.updated_at || job.application.created_at)
+    : false;
 
   return (
     <div 
