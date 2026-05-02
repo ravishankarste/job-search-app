@@ -101,7 +101,7 @@ export const LandingPage: React.FC = () => {
           <div className="relative group w-full max-w-2xl mx-auto py-10">
             <div className="absolute inset-0 bg-[#FC6100]/10 blur-[150px] opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
             <img 
-              src="/landing/match_intelligence_demo.png" 
+              src="./match_intelligence_demo.png" 
               alt="Match Intelligence Demo" 
               className="relative rounded-[40px] border border-white/10 shadow-2xl transition-transform duration-700 group-hover:scale-[1.01] z-10 mx-auto w-full h-auto object-contain"
             />
@@ -139,6 +139,13 @@ export const LandingPage: React.FC = () => {
               <p className="text-gray-400 leading-relaxed font-medium max-w-[320px] mx-auto text-center text-lg">
                 Paste any LinkedIn or Indeed URL. Our engine scrapes the data in seconds, building your pipeline with zero manual entry.
               </p>
+              <div className="pt-6">
+                <img 
+                  src="./magic_importer_demo.png" 
+                  alt="Magic Importer Demo" 
+                  className="rounded-2xl border border-white/10 shadow-xl opacity-60 group-hover:opacity-100 transition-opacity duration-500"
+                />
+              </div>
             </div>
           </div>
 
