@@ -28,7 +28,20 @@ export const UniversalImporter: React.FC<UniversalImporterProps> = ({ onImportSu
     }
 
     // 1. Instant Parse: Extract whatever we can from the URL string itself (0ms wait)
-    const parsedData = apifyService.parseJobDetailsFromUrl(url);
+    let parsedData = apifyService.parseJobDetailsFromUrl(url);
+    
+    // 2. Web Peek Fallback: If regex failed, try a quick metadata lookup (3-5s)
+    if (!parsedData.title || !parsedData.company) {
+      const token = import.meta.env.VITE_APIFY_API_TOKEN;
+      if (token) {
+        try {
+          const peekResult = await apifyService.peekUrlMetadata(url, token);
+          parsedData = { ...parsedData, ...peekResult };
+        } catch (e) {
+          console.warn("[UniversalImporter] Web peek failed", e);
+        }
+      }
+    }
     
     // 2. Sprint Scrape: Try to get full details but don't wait more than 15s
     const scrapePromise = apifyService.scrapeJobUrl(url);

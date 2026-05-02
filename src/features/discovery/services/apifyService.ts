@@ -148,16 +148,31 @@ export const apifyService = {
    */
   parseJobDetailsFromUrl(url: string): { title?: string, company?: string } {
     const details: { title?: string, company?: string } = {};
-    const slug = url.split('/view/')[1] || url.split('/jobs/')[1] || "";
     
     if (url.includes('linkedin.com')) {
-      const parts = slug.split('-');
+      const slug = url.split('/view/')[1] || url.split('/jobs/')[1] || "";
+      const cleanSlug = slug.split('?')[0].split('/')[0];
+      const parts = cleanSlug.split('-');
+      
       const atIndex = parts.indexOf('at');
       if (atIndex > 0) {
         details.title = parts.slice(0, atIndex).map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
         details.company = parts.slice(atIndex + 1).filter(p => !/^\d+$/.test(p)).map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
+      } else if (parts.length > 2) {
+        // Fallback for slugs like 'software-engineer-google'
+        details.title = parts.slice(0, -1).map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
+        details.company = parts.slice(-1).map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
       }
     }
+
+    if (url.includes('indeed.com')) {
+      const slug = url.split('/rc/clk?')[1] || url.split('/viewjob?')[1] || "";
+      // Indeed URLs often don't have titles in the slug, so we rely more on the Web Peek here
+      if (slug.includes('jk=')) {
+        // No title in Indeed slug usually, but we keep the structure
+      }
+    }
+
     return details;
   },
 
@@ -172,8 +187,26 @@ export const apifyService = {
     try {
       const results = await this.runActorAndGetResults(actorId, input, token);
       if (results && results[0]?.organicResults?.[0]) {
-        const title = results[0].organicResults[0].title;
-        const parts = title.split(' | ')[0].split(' - ');
+        const fullTitle = results[0].organicResults[0].title || "";
+        console.log(`[apifyService] Peek result: ${fullTitle}`);
+
+        // Pattern 1: "Job Title at Company | LinkedIn"
+        if (fullTitle.includes(' at ') && fullTitle.includes('|')) {
+          const mainPart = fullTitle.split('|')[0];
+          const [title, company] = mainPart.split(' at ');
+          return { title: title.trim(), company: company.trim() };
+        }
+
+        // Pattern 2: "Company hiring Job Title in Location..."
+        if (fullTitle.toLowerCase().includes(' hiring ')) {
+          const parts = fullTitle.split(/ hiring /i);
+          const company = parts[0].trim();
+          const title = parts[1].split(' in ')[0].split('|')[0].trim();
+          return { title, company };
+        }
+
+        // Pattern 3: Generic Split "Title - Company"
+        const parts = fullTitle.split(' | ')[0].split(' - ');
         return {
           title: parts[0]?.trim(),
           company: parts[1]?.trim() || "Unknown Company"
