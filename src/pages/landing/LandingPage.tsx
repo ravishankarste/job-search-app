@@ -101,7 +101,7 @@ export const LandingPage: React.FC = () => {
           <div className="relative group w-full max-w-2xl mx-auto py-10">
             <div className="absolute inset-0 bg-[#FC6100]/10 blur-[150px] opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
             <img 
-              src="./match_intelligence_demo.png" 
+              src="./landing/match_intelligence_demo.png" 
               alt="Match Intelligence Demo" 
               className="relative rounded-[40px] border border-white/10 shadow-2xl transition-transform duration-700 group-hover:scale-[1.01] z-10 mx-auto w-full h-auto object-contain"
             />
