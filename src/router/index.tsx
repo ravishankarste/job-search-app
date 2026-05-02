@@ -12,10 +12,12 @@ import { JobDetailPage } from '../features/jobs/pages/JobDetailPage';
 import { Analytics } from '../pages/Analytics';
 import { Settings } from '../pages/Settings';
 
+import { LandingPage } from '../pages/landing/LandingPage';
+
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <Navigate to="/dashboard" replace />,
+    element: <LandingPage />,
   },
   {
     element: <AuthLayout />,
