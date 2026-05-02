@@ -1,170 +1,216 @@
 import React from 'react';
+import { useAnalytics } from '../features/analytics/hooks/useAnalytics';
 import { 
-  TrendingUp, 
-  Users, 
-  CheckCircle2, 
-  Clock, 
-  Target,
-  ArrowUpRight,
-  Briefcase
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell, AreaChart, Area
+} from 'recharts';
+import { 
+  TrendingUp, Users, Briefcase, Target, 
+  ArrowUpRight
 } from 'lucide-react';
-import { useJobs } from '../features/jobs/hooks/useJobs';
+
+const COLORS = ['#FC6100', '#FF8B3D', '#FFA566', '#FFC094', '#FFE1CC'];
 
 export const Analytics: React.FC = () => {
-  const { data: jobs } = useJobs();
+  const { stats, isLoading } = useAnalytics();
 
-  const totalApps = jobs?.length || 0;
-  const interviewing = jobs?.filter(j => j.application?.status === 'interviewing').length || 0;
-  const offered = jobs?.filter(j => j.application?.status === 'offered').length || 0;
-  const applied = jobs?.filter(j => j.application?.status === 'applied').length || 0;
-  
-  const ghosted = jobs?.filter(job => {
-    if (!job.application) return false;
-    const status = job.application.status;
-    if (status !== 'applied' && status !== 'interviewing') return false;
-    const dateString = job.application.updated_at || job.application.created_at;
-    if (!dateString) return false;
-    const updatedDate = new Date(dateString);
-    const now = new Date();
-    const diffDays = Math.ceil(Math.abs(now.getTime() - updatedDate.getTime()) / (1000 * 60 * 60 * 24));
-    return diffDays > 14;
-  }).length || 0;
+  if (isLoading) {
+    return (
+      <div className="space-y-8 animate-pulse p-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map(i => <div key={i} className="h-32 bg-white/5 rounded-3xl" />)}
+        </div>
+        <div className="h-[400px] bg-white/5 rounded-3xl" />
+      </div>
+    );
+  }
 
-  const successRate = totalApps > 0 ? Math.round((offered / totalApps) * 100) : 0;
+  if (!stats) {
+    return (
+      <div className="h-[60vh] flex flex-col items-center justify-center space-y-4">
+        <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center">
+          <TrendingUp className="w-10 h-10 text-gray-700" />
+        </div>
+        <div className="text-center">
+          <h3 className="text-xl font-bold text-white">No data yet</h3>
+          <p className="text-gray-500">Add some jobs to your pipeline to see analytics.</p>
+        </div>
+      </div>
+    );
+  }
 
-  const stats = [
-    { label: 'Total Applications', value: totalApps, icon: Briefcase, change: '+12%', trend: 'up', color: 'text-[#FC6100]' },
-    { label: 'Ghosted (Stale)', value: ghosted, icon: Clock, change: `${ghosted > 0 ? '+' : ''}${ghosted}`, trend: ghosted > 0 ? 'down' : 'up', color: 'text-red-500' },
-    { label: 'Offers Received', value: offered, icon: CheckCircle2, change: '+1', trend: 'up', color: 'text-emerald-500' },
-    { label: 'Success Rate', value: `${successRate}%`, icon: Target, change: '+5%', trend: 'up', color: 'text-blue-500' },
-  ];
+  const statusData = Object.entries(stats.statusCounts).map(([name, value]) => ({
+    name: name.charAt(0).toUpperCase() + name.slice(1),
+    value
+  }));
 
   return (
-    <div className="max-w-7xl mx-auto space-y-16 fade-in-up pb-12">
+    <div className="max-w-7xl mx-auto space-y-8 pb-12 fade-in-up">
       {/* Header */}
       <div className="space-y-4">
         <div className="flex items-center gap-3 mb-2">
-           <div className="w-8 h-[2px] bg-[#FC6100]"></div>
-           <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#FC6100]">Performance Metrics</span>
+            <div className="w-8 h-[2px] bg-[#FC6100]"></div>
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#FC6100]">Performance Metrics</span>
         </div>
         <h1 className="text-5xl font-bold text-white tracking-tighter">Career Analytics</h1>
-        <p className="text-gray-400 font-medium max-w-xl text-lg">Detailed breakdown of your application lifecycle and pipeline health.</p>
+        <p className="text-gray-400 font-medium max-w-xl text-lg">Real-time breakdown of your pipeline velocity and search momentum.</p>
       </div>
 
-      {/* Stats Grid */}
+      {/* Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-        {stats.map((stat) => (
-          <div key={stat.label} className="clean-card group border-white/5 bg-white/[0.02] relative overflow-hidden">
-            <div className={`absolute top-0 right-0 w-24 h-24 ${stat.color.replace('text-', 'bg-')}/5 rounded-full -mr-8 -mt-8 blur-2xl transition-all group-hover:scale-150 group-hover:opacity-100 opacity-50`}></div>
-            <div className="flex justify-between items-start mb-6 relative z-10">
-              <div className={`w-14 h-14 ${stat.color.replace('text-', 'bg-')}/10 border ${stat.color.replace('text-', 'border-')}/20 rounded-2xl flex items-center justify-center group-hover:${stat.color.replace('text-', 'bg-')} transition-all duration-500 shadow-xl shadow-black/20`}>
-                <stat.icon className={`w-7 h-7 ${stat.color} group-hover:text-white transition-colors`} />
-              </div>
-              <div className={`flex items-center ${stat.trend === 'up' ? 'text-emerald-500 bg-emerald-500/10' : 'text-red-500 bg-red-500/10'} text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-xl border ${stat.trend === 'up' ? 'border-emerald-500/20' : 'border-red-500/20'}`}>
-                <ArrowUpRight className={`w-3.5 h-3.5 mr-1.5 ${stat.trend === 'down' ? 'rotate-90' : ''}`} />
-                {stat.change}
-              </div>
-            </div>
-            <div className="relative z-10">
-              <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">{stat.label}</p>
-              <h3 className="text-4xl font-bold text-white tracking-tighter">{stat.value}</h3>
-            </div>
-          </div>
-        ))}
+        <MetricCard 
+          title="Total Opportunities" 
+          value={stats.metrics.total} 
+          icon={Briefcase}
+          trend="+12% velocity"
+          color="text-[#FC6100]"
+        />
+        <MetricCard 
+          title="Applications Sent" 
+          value={stats.metrics.applied} 
+          icon={Target}
+          trend="Active Search"
+          color="text-blue-400"
+        />
+        <MetricCard 
+          title="Active Interviews" 
+          value={stats.metrics.interviewing} 
+          icon={Users}
+          trend="High Momentum"
+          highlight
+          color="text-emerald-400"
+        />
+        <MetricCard 
+          title="Success Rate" 
+          value={`${stats.metrics.successRate}%`} 
+          icon={TrendingUp}
+          trend="Avg conversion"
+          color="text-purple-400"
+        />
       </div>
 
-      {/* Main Analytics Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        {/* Pipeline Breakdown */}
-        <div className="lg:col-span-2 clean-card border-white/5 bg-white/[0.02]">
+      {/* Main Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Pipeline Velocity */}
+        <div className="lg:col-span-2 clean-card p-10 bg-white/[0.02]">
           <div className="flex items-center justify-between mb-10">
             <div>
-              <h2 className="text-2xl font-bold text-white mb-1">Application Pipeline</h2>
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-widest">Conversion by Stage</p>
+              <h3 className="text-2xl font-bold text-white tracking-tight">Pipeline Velocity</h3>
+              <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.2em] mt-1">Applications over last 14 days</p>
             </div>
-            <div className="flex gap-2 bg-white/5 p-1 rounded-xl border border-white/10">
-              <button className="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-white transition-colors">Weekly</button>
-              <button className="px-4 py-1.5 bg-[#FC6100] rounded-lg text-[10px] font-black uppercase tracking-widest text-white shadow-lg shadow-[#FC6100]/20">Monthly</button>
+            <div className="px-4 py-2 bg-[#FC6100]/10 rounded-xl border border-[#FC6100]/20">
+              <span className="text-[10px] font-black text-[#FC6100] uppercase tracking-widest">Live Activity Feed</span>
             </div>
           </div>
           
-          <div className="space-y-8">
-            {[
-              { label: 'Applied', count: applied, color: 'bg-blue-500', icon: Briefcase },
-              { label: 'Interviewing', count: interviewing, color: 'bg-purple-500', icon: Users },
-              { label: 'Offered', count: offered, color: 'bg-[#FC6100]', icon: Target },
-              { label: 'Saved', count: jobs?.filter(j => j.application?.status === 'saved').length || 0, color: 'bg-gray-500', icon: Clock }
-            ].map((item) => (
-              <div key={item.label} className="group">
-                <div className="flex justify-between items-end mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg ${item.color}/10 border ${item.color.replace('bg-', 'border-')}/20`}>
-                      <item.icon className={`w-4 h-4 ${item.color.replace('bg-', 'text-')}`} />
-                    </div>
-                    <span className="text-sm font-bold text-white">{item.label}</span>
-                  </div>
-                  <span className="text-sm font-black text-white">{item.count}</span>
-                </div>
-                <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
-                  <div 
-                    className={`${item.color} h-full rounded-full transition-all duration-1000 shadow-[0_0_15px_rgba(0,0,0,0.5)]`}
-                    style={{ width: `${totalApps > 0 ? (item.count / totalApps) * 100 : 0}%` }}
-                  ></div>
-                </div>
-              </div>
-            ))}
+          <div className="h-[350px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={stats.timelineData}>
+                <defs>
+                  <linearGradient id="colorApp" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#FC6100" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#FC6100" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
+                <XAxis 
+                  dataKey="date" 
+                  stroke="#4b5563" 
+                  fontSize={10} 
+                  tickLine={false} 
+                  axisLine={false}
+                  dy={10}
+                />
+                <YAxis 
+                  stroke="#4b5563" 
+                  fontSize={10} 
+                  tickLine={false} 
+                  axisLine={false}
+                  allowDecimals={false}
+                />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#111', border: '1px solid #333', borderRadius: '16px', padding: '12px' }}
+                  itemStyle={{ color: '#FC6100', fontWeight: 'bold' }}
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="applications" 
+                  stroke="#FC6100" 
+                  strokeWidth={4}
+                  fillOpacity={1} 
+                  fill="url(#colorApp)" 
+                />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Skills Analysis Side Panel */}
-        <div className="space-y-8">
-          <div className="clean-card border-white/5 bg-white/[0.02] h-full">
-            <h3 className="text-xl font-bold text-white mb-8 flex items-center">
-              <TrendingUp className="w-5 h-5 mr-3 text-[#FC6100]" /> Skill Gap Analysis
-            </h3>
-            
-            <div className="space-y-10">
-              {/* Top Skills You Have */}
-              <div className="space-y-4">
-                <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> Strengths
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {['React', 'TypeScript', 'Node.js', 'SQL', 'Testing'].map(skill => (
-                    <span key={skill} className="px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded-lg uppercase tracking-wider">
-                      {skill}
-                    </span>
+        {/* Status Distribution */}
+        <div className="clean-card p-10 bg-white/[0.02]">
+          <h3 className="text-2xl font-bold text-white mb-10 tracking-tight">Status Funnel</h3>
+          <div className="h-[300px] w-full relative">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={statusData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={70}
+                  outerRadius={100}
+                  paddingAngle={8}
+                  dataKey="value"
+                  stroke="none"
+                >
+                  {statusData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
-                </div>
-              </div>
-
-              {/* Top Skills Missing */}
-              <div className="space-y-4">
-                <p className="text-[10px] font-black text-[#FC6100] uppercase tracking-widest flex items-center gap-2">
-                  <Target className="w-3.5 h-3.5" /> Skills to Learn
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {['Docker', 'Kubernetes', 'AWS', 'Next.js', 'GraphQL'].map(skill => (
-                    <span key={skill} className="px-3 py-1.5 bg-[#FC6100]/10 border border-[#FC6100]/20 text-[#FC6100] text-[10px] font-bold rounded-lg uppercase tracking-wider">
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-              </div>
+                </Pie>
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#111', border: '1px solid #333', borderRadius: '16px' }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
+              <span className="text-3xl font-black text-white">{stats.metrics.total}</span>
+              <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">Total Jobs</p>
             </div>
-
-            <div className="mt-12 pt-8 border-t border-white/5">
-              <div className="flex justify-between items-center mb-4">
-                <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Profile Readyness</span>
-                <span className="text-sm font-bold text-white">74%</span>
+          </div>
+          <div className="mt-10 space-y-3">
+            {statusData.map((item, i) => (
+              <div key={item.name} className="flex items-center justify-between group cursor-default">
+                <div className="flex items-center gap-3">
+                  <div className="w-2.5 h-2.5 rounded-full shadow-[0_0_10px_rgba(0,0,0,0.5)]" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+                  <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest group-hover:text-white transition-colors">{item.name}</span>
+                </div>
+                <span className="text-sm text-white font-black">{item.value}</span>
               </div>
-              <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
-                <div className="w-[74%] h-full bg-gradient-to-r from-[#FC6100] to-orange-400 shadow-[0_0_10px_rgba(252,97,0,0.3)]"></div>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </div>
     </div>
   );
-};
+}
+
+function MetricCard({ title, value, icon: Icon, trend, highlight = false, color }: any) {
+  return (
+    <div className={`clean-card p-8 group transition-all duration-500 hover:scale-[1.02] border-white/5 bg-white/[0.02] relative overflow-hidden ${highlight ? 'border-[#FC6100]/30 bg-[#FC6100]/5' : ''}`}>
+      <div className={`absolute top-0 right-0 w-24 h-24 ${highlight ? 'bg-[#FC6100]' : color.replace('text-', 'bg-')}/5 rounded-full -mr-8 -mt-8 blur-2xl transition-all group-hover:scale-150 opacity-50`}></div>
+      
+      <div className="flex items-center justify-between mb-8 relative z-10">
+        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500 shadow-xl shadow-black/20 ${highlight ? 'bg-[#FC6100] text-white' : 'bg-white/5 text-gray-400 group-hover:bg-[#FC6100] group-hover:text-white'}`}>
+          <Icon className="w-7 h-7" />
+        </div>
+        <div className="flex items-center gap-1.5 text-[#FC6100]">
+          <ArrowUpRight className="w-4 h-4" />
+          <span className="text-[10px] font-black uppercase tracking-widest">Real-time</span>
+        </div>
+      </div>
+      <div className="relative z-10">
+        <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">{title}</p>
+        <h4 className="text-4xl font-bold text-white tracking-tighter">{value}</h4>
+        <p className={`text-[10px] mt-4 font-bold uppercase tracking-widest ${highlight ? 'text-[#FC6100]' : 'text-gray-600'}`}>{trend}</p>
+      </div>
+    </div>
+  );
+}
