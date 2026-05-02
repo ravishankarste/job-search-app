@@ -37,16 +37,16 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
-      - name: 🚀 Force-Sync to /jobs/
+      - name: 🚀 Force-Sync to /jobs/ (Resilient Mode)
         run: |
-          # 1. Clean out any old confusion
-          ssh -p 65002 -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "rm -rf domains/upanita.com/public_html/jobs/*"
+          # 1. Clean out any old confusion with increased timeout
+          ssh -p 65002 -o ConnectTimeout=60 -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "rm -rf domains/upanita.com/public_html/jobs/*"
           
-          # 2. Sync fresh build
+          # 2. Sync fresh build with extra patience
           rsync -avz --delete \
-            -e "ssh -p 65002 -o StrictHostKeyChecking=no" \
+            -e "ssh -p 65002 -o ConnectTimeout=120 -o StrictHostKeyChecking=no" \
             dist/ \
             ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:domains/upanita.com/public_html/jobs/
           
-          # 3. Double-check: list the folder to the logs
-          ssh -p 65002 -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "ls -la domains/upanita.com/public_html/jobs/"
+          # 3. Double-check: list the folder
+          ssh -p 65002 -o ConnectTimeout=60 -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "ls -la domains/upanita.com/public_html/jobs/"
