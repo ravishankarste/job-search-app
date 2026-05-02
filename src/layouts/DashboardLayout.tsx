@@ -17,6 +17,7 @@ import {
   Menu,
   X
 } from 'lucide-react';
+import { SupportBot } from '../components/common/SupportBot';
 
 export const DashboardLayout: React.FC = () => {
   const { session, isLoading } = useAuth();
@@ -169,6 +170,9 @@ export const DashboardLayout: React.FC = () => {
         <div className="layout-spacing flex-1 overflow-x-hidden bg-black">
           <Outlet />
         </div>
+        
+        {/* Help & Support Bot */}
+        <SupportBot />
       </main>
     </div>
   );
