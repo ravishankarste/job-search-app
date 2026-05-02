@@ -161,7 +161,7 @@ export const Analytics: React.FC = () => {
                   dataKey="value"
                   stroke="none"
                 >
-                  {statusData.map((entry, index) => (
+                  {statusData.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>

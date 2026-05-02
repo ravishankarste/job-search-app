@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useJobs } from '../../jobs/hooks/useJobs';
-import { format, subDays, startOfDay, isWithinInterval, eachDayOfInterval } from 'date-fns';
+import { format, subDays, startOfDay, eachDayOfInterval } from 'date-fns';
 
 export function useAnalytics() {
   const { data: jobs = [], isLoading } = useJobs();
@@ -21,9 +21,10 @@ export function useAnalytics() {
       end: startOfDay(new Date())
     });
 
-    const timelineData = last14Days.map(day => {
+    const timelineData = last14Days.map((day: Date) => {
       const dayStr = format(day, 'MMM dd');
       const count = jobs.filter(job => {
+        if (!job.created_at) return false;
         const jobDate = startOfDay(new Date(job.created_at));
         return jobDate.getTime() === day.getTime();
       }).length;
