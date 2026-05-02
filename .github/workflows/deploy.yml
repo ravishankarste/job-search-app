@@ -36,9 +36,16 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
-      - name: 🚀 Deploy via rsync (Hostinger SSH)
+      - name: 🚀 Dominant Deploy (Clean & Sync)
         run: |
+          # 1. Ensure the correct jobs directory exists
+          ssh -p 65002 -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "mkdir -p domains/upanita.com/public_html/jobs/"
+          
+          # 2. Delete the 'sticky' unwanted folder if it exists
+          ssh -p 65002 -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "rm -rf domains/upanita.com/public_html/job-search-os"
+          
+          # 3. Sync the production build
           rsync -avz --delete \
             -e "ssh -p 65002 -o StrictHostKeyChecking=no" \
             dist/ \
-            ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:/home/u816535991/domains/upanita.com/public_html/jobs/
+            ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:domains/upanita.com/public_html/jobs/
