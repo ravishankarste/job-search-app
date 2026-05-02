@@ -1,156 +1,67 @@
-import React, { useState } from 'react';
-import { useDiscovery } from '../hooks/useDiscovery';
-import { DiscoveryCard } from '../components/DiscoveryCard';
-import { Search, Briefcase, Loader2, AlertCircle, ChevronDown } from 'lucide-react';
+import React from 'react';
+import { Compass } from 'lucide-react';
 
 export const DiscoveryPage: React.FC = () => {
-  const [query, setQuery] = useState(() => localStorage.getItem('discovery_q') || '');
-  const [location, setLocation] = useState(() => localStorage.getItem('discovery_loc') || 'Worldwide');
-  const [daysAgo, setDaysAgo] = useState(() => Number(localStorage.getItem('discovery_days')) || 7);
-  
-  const [searchTrigger, setSearchTrigger] = useState({ 
-    query: localStorage.getItem('discovery_active_q') || '', 
-    location: localStorage.getItem('discovery_active_loc') || 'Worldwide', 
-    daysAgo: Number(localStorage.getItem('discovery_active_days')) || 7 
-  });
-
-  const { data: results, isLoading, error, isFetching } = useDiscovery(
-    searchTrigger.query,
-    searchTrigger.location,
-    searchTrigger.daysAgo
-  );
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!query.trim()) return;
-    
-    setSearchTrigger({ query, location, daysAgo });
-    
-    // Persist
-    localStorage.setItem('discovery_q', query);
-    localStorage.setItem('discovery_loc', location);
-    localStorage.setItem('discovery_days', daysAgo.toString());
-    localStorage.setItem('discovery_active_q', query);
-    localStorage.setItem('discovery_active_loc', location);
-    localStorage.setItem('discovery_active_days', daysAgo.toString());
-  };
-
   return (
-    <div className="max-w-7xl space-y-16 fade-in-up">
+    <div className="max-w-7xl mx-auto space-y-16 fade-in-up pb-12">
       {/* Header */}
       <div className="space-y-4">
         <div className="flex items-center gap-3 mb-2">
            <div className="w-8 h-[2px] bg-[#FC6100]"></div>
            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#FC6100]">Market Discovery</span>
         </div>
-        <h1 className="text-5xl font-bold text-white flex items-center gap-4 tracking-tighter leading-none">
+        <h1 className="text-5xl font-bold text-white tracking-tighter leading-none">
           Smart Discovery
         </h1>
         <p className="text-lg text-gray-400 max-w-2xl font-medium">
-          Source the freshest jobs directly from LinkedIn & Indeed. No more "30+ days ago" ghosts.
+          The industry's most advanced job sourcing engine, undergoing a massive architectural evolution.
         </p>
       </div>
 
-      {/* Search Bar */}
-      <div className="clean-card p-6 md:p-8 bg-[#121212]/80 backdrop-blur-md sticky top-2 z-20 shadow-2xl border-white/5">
-        <form onSubmit={handleSearch} className="flex flex-col md:flex-row items-end gap-6">
-          <div className="flex-1 space-y-2">
-            <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-1">Keywords</label>
-            <div className="relative">
-              <input 
-                type="text"
-                placeholder="Title or Skills"
-                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:border-[#FC6100] outline-none transition-all placeholder-gray-600 font-bold"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-              />
-            </div>
+      {/* Trendy Coming Soon / Evolving State */}
+      <div className="h-[60vh] flex flex-col items-center justify-center space-y-10 text-center px-6 relative overflow-hidden rounded-[40px] border border-white/5 bg-white/[0.01]">
+        {/* Animated Background Glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#FC6100]/5 blur-[120px] rounded-full pointer-events-none"></div>
+        
+        <div className="relative group">
+          <div className="absolute inset-0 bg-[#FC6100]/20 blur-3xl rounded-full group-hover:bg-[#FC6100]/30 transition-all animate-pulse"></div>
+          <div className="relative w-24 h-24 bg-black border border-white/10 rounded-[32px] flex items-center justify-center shadow-2xl backdrop-blur-xl transition-transform group-hover:scale-110 duration-500">
+            <Compass className="w-10 h-10 text-[#FC6100] animate-spin-slow" />
           </div>
-          <div className="w-full md:w-64 space-y-2">
-            <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-1">Location</label>
-            <div className="relative">
-              <input 
-                type="text"
-                placeholder="City or Remote"
-                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:border-[#FC6100] outline-none transition-all placeholder-gray-600 font-bold"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-              />
-            </div>
-          </div>
-          <div className="w-full md:w-56 space-y-2">
-            <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-1">Freshness</label>
-            <div className="relative">
-              <select 
-                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:border-[#FC6100] outline-none transition-all font-bold appearance-none cursor-pointer pr-12"
-                value={daysAgo}
-                onChange={(e) => setDaysAgo(Number(e.target.value))}
-              >
-                <option value={1} className="bg-[#121212]">Past 24 Hours</option>
-                <option value={3} className="bg-[#121212]">Past 3 Days</option>
-                <option value={7} className="bg-[#121212]">Past Week</option>
-                <option value={14} className="bg-[#121212]">Past 14 Days</option>
-              </select>
-              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" />
-            </div>
-          </div>
-          <button 
-            type="submit"
-            disabled={isLoading || isFetching || !query.trim()}
-            className="px-10 py-4 h-[60px] bg-gradient-to-r from-[#FC6100] to-[#FF8C00] text-white font-black uppercase tracking-widest text-[10px] rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-3 shadow-xl shadow-[#FC6100]/20 border border-white/10 whitespace-nowrap min-w-fit"
-          >
-            {(isLoading || isFetching) ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Searching...
-              </>
-            ) : (
-              <>
-                <Search className="w-4 h-4" />
-                Find Jobs
-              </>
-            )}
-          </button>
-        </form>
-      </div>
+        </div>
 
-      {/* Results */}
-      <div className="space-y-8">
-        {isLoading || isFetching ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[1, 2, 3, 4, 5, 6].map(i => (
-              <div key={i} className="clean-card h-64 animate-pulse bg-white/5" />
-            ))}
+        <div className="max-w-2xl space-y-6 relative z-10">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#FC6100]/10 border border-[#FC6100]/20 rounded-full">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FC6100] opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#FC6100]"></span>
+            </span>
+            <span className="text-[10px] font-black text-[#FC6100] uppercase tracking-[0.2em]">Next-Gen Intelligence</span>
           </div>
-        ) : error ? (
-          <div className="clean-card p-12 text-center space-y-4 border-red-500/20 bg-red-500/5">
-            <AlertCircle className="w-12 h-12 text-red-500 mx-auto" />
-            <h3 className="text-xl font-bold text-white">Scraping Failed</h3>
-            <p className="text-gray-400 max-w-md mx-auto">
-              The search service is currently unavailable. Please try again later or add jobs manually to your pipeline.
-            </p>
-          </div>
-        ) : results?.length === 0 ? (
-          <div className="clean-card p-24 text-center space-y-6 border-dashed border-white/10">
-            <Briefcase className="w-16 h-16 text-gray-700 mx-auto" />
-            <div>
-              <h3 className="text-2xl font-bold text-white mb-2">
-                {!searchTrigger.query ? "Ready to find your next role?" : "No fresh jobs found"}
-              </h3>
-              <p className="text-gray-400 max-w-md mx-auto">
-                {!searchTrigger.query 
-                  ? "Enter a title and location above to pull the freshest roles from across the web." 
-                  : `We couldn't find any fresh "${searchTrigger.query}" roles in "${searchTrigger.location}" from the past ${searchTrigger.daysAgo} days.`}
-              </p>
+          
+          <h2 className="text-5xl md:text-8xl font-black text-white tracking-tighter uppercase italic leading-[0.9]">
+            The Engine is <br />
+            <span className="text-[#FC6100]">Evolving</span>
+          </h2>
+          
+          <p className="text-gray-500 font-medium text-lg md:text-xl max-w-lg mx-auto leading-relaxed">
+            We're upgrading our hyper-discovery algorithms to bring you deeper, faster, and more exclusive job insights. 
+          </p>
+        </div>
+
+        <div className="pt-8 flex flex-col items-center gap-4 relative z-10">
+          <div className="text-[10px] font-black text-gray-700 uppercase tracking-[0.4em]">Expected Deployment</div>
+          <div className="flex gap-4">
+            <div className="clean-card px-8 py-5 bg-white/[0.03] border-white/10 shadow-2xl">
+              <span className="text-4xl font-black text-white italic tracking-tighter">MAY</span>
+              <span className="ml-3 text-sm font-black text-[#FC6100] uppercase">2026</span>
             </div>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {results?.map((job) => (
-              <DiscoveryCard key={job.id} job={job} />
-            ))}
-          </div>
-        )}
+        </div>
+        
+        <p className="text-[10px] text-gray-700 font-black uppercase tracking-[0.3em] pt-12 relative z-10">
+          Use the <span className="text-white">Universal Importer</span> to track roles in the meantime.
+        </p>
       </div>
     </div>
   );
