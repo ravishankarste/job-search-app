@@ -1,6 +1,22 @@
-# 🚀 Udyog Marg: Project Changelog
+# 🧠 Udyog Marg: Knowledge Log (Bug Fixes & Lessons Learned)
 
-## [2026-05-02] - The "Smart Discovery" Evolution
+## [2026-05-02] - Production Stabilization & "Dominant" Routing
+Resolved critical production deployment conflicts and launched the automated job intake engine.
+
+### 🧭 1. Subdirectory Routing Fix
+*   **The Conflict**: Hostinger's `/jobs/` subdirectory was colliding with the internal `/jobs` route, causing URL doubling (`/jobs/jobs`).
+*   **The Solution**: Renamed the internal route to **`/pipeline`** in `src/router/index.tsx` and updated the `DashboardLayout.tsx` sidebar/breadcrumbs. Production URL is now clean: `upanita.com/jobs/pipeline`.
+
+### 🤖 2. Universal Job Importer
+*   **The Feature**: Added a "Magic Box" at the top of the Job Pipeline.
+*   **How it works**: Users can paste any LinkedIn or Indeed job URL. The app performs an "Instant Parse" of the URL metadata and kicks off a "Sprint Scrape" (15s limit) to auto-fill job details, company, and location.
+
+### 🛡️ 3. "Dominant Deployer" (GitHub Actions)
+*   **Automation**: Rewrote `deploy.yml` to take full control of the Hostinger environment.
+*   **Cleanup**: Added SSH commands to force-create the `/jobs/` directory and actively delete unwanted "ghost" folders (like `job-search-os`) created by legacy Git integrations.
+*   **Strictness**: Cleaned up ~40 TypeScript unused-import errors to ensure a "Zero Tolerance" passing build in CI.
+
+## [2026-05-02] - The "Smart Discovery" Evolution (Morning Session)
 Complete architectural overhaul from manual tracking to an automated, intelligent "Job Search OS."
 
 ### 🧠 1. ATS Match Engine & Logic

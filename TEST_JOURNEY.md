@@ -4,14 +4,14 @@ Welcome! This guide is designed to help you experience the full power of the **J
 
 ---
 
-## 🗺️ Journey 1: The "Smart Discovery" (3 mins)
-*Goal: See how the app automates the boring part of job hunting.*
+## 🗺️ Journey 1: The "Smart Discovery" (2 mins)
+*Goal: Experience the fastest way to add jobs to your radar.*
 
-1.  **Find a Job**: Go to LinkedIn or Indeed and find a job you like (e.g., a "React Developer" role).
-2.  **Paste the Link**: In the **Discovery** box on the Udyog Marg dashboard, paste the URL.
-3.  **The Magic**: Watch the 15-second "Discovery Sprint."
-    *   *Success Check*: Did the app open a modal with the Company Name and Job Title already filled in?
-4.  **Save**: Hit "Save Job" to move it to your pipeline.
+1.  **Find a Job**: Go to LinkedIn or Indeed and copy the URL of a job you like (e.g., a "React Developer" role).
+2.  **Paste the Link**: Go to the **Job Pipeline** page and paste the URL into the **"Universal Job Importer"** box at the top.
+3.  **The Magic**: Watch as the app instantly parses the URL and starts a "Sprint Scrape." 
+    *   *Success Check*: Did the job appear in your list with the Title, Company, and Location already filled in? 
+4.  **Explore**: Click on the job card to see the full details we've captured!
 
 ---
 
