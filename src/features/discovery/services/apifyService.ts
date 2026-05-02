@@ -18,9 +18,7 @@ export const apifyService = {
     
     const token = import.meta.env.VITE_APIFY_API_TOKEN;
     
-    if (!token) {
-      throw new Error("Missing VITE_APIFY_API_TOKEN in Github Secrets / .env");
-    }
+      throw new Error("Search service configuration missing. Please contact support.");
 
     try {
       console.log("[apifyService] Attempting LinkedIn scraping...");
@@ -33,7 +31,7 @@ export const apifyService = {
         return await this.fetchIndeed(query, location, daysAgo, token);
       } catch (fallbackErr: any) {
         console.error("[apifyService] Both sources failed.");
-        throw new Error("Both LinkedIn and Indeed search sources failed. Apify might be out of credits or experiencing downtime.");
+        throw new Error("The discovery service is currently unavailable. Please try again later or add jobs manually to your pipeline.");
       }
     }
   },
@@ -181,41 +179,74 @@ export const apifyService = {
    */
   async peekUrlMetadata(url: string, token: string): Promise<{ title?: string, company?: string }> {
     console.log(`[apifyService] Peeking web for: ${url}`);
+    
+    // First, try a Zero-Cost Direct Fetch (if allowed by CORS/Target)
+    try {
+      const direct = await this.directFetchMetadata(url);
+      if (direct.title) return direct;
+    } catch (e) {
+      console.log("[apifyService] Direct fetch failed (likely CORS), falling back to search peek.");
+    }
+
+    // Fallback to Google Search Peek (Apify)
+    let query = url;
+    if (url.includes('linkedin.com/jobs/view/')) {
+      const id = url.split('/view/')[1]?.split('/')[0]?.split('?')[0];
+      if (id) query = `site:linkedin.com/jobs/view/ ${id}`;
+    }
+
     const actorId = 'apify~google-search-scraper';
-    const input = { queries: url, maxPagesPerQuery: 1, resultsPerPage: 1 };
+    const input = { queries: query, maxPagesPerQuery: 1, resultsPerPage: 1 };
 
     try {
       const results = await this.runActorAndGetResults(actorId, input, token);
       if (results && results[0]?.organicResults?.[0]) {
         const fullTitle = results[0].organicResults[0].title || "";
-        console.log(`[apifyService] Peek result: ${fullTitle}`);
-
-        // Pattern 1: "Job Title at Company | LinkedIn"
-        if (fullTitle.includes(' at ') && fullTitle.includes('|')) {
-          const mainPart = fullTitle.split('|')[0];
-          const [title, company] = mainPart.split(' at ');
-          return { title: title.trim(), company: company.trim() };
-        }
-
-        // Pattern 2: "Company hiring Job Title in Location..."
-        if (fullTitle.toLowerCase().includes(' hiring ')) {
-          const parts = fullTitle.split(/ hiring /i);
-          const company = parts[0].trim();
-          const title = parts[1].split(' in ')[0].split('|')[0].trim();
-          return { title, company };
-        }
-
-        // Pattern 3: Generic Split "Title - Company"
-        const parts = fullTitle.split(' | ')[0].split(' - ');
-        return {
-          title: parts[0]?.trim(),
-          company: parts[1]?.trim() || "Unknown Company"
-        };
+        return this.parseTitleFromSnippet(fullTitle);
       }
     } catch (e) {
       console.warn("Web peek failed", e);
     }
     return {};
+  },
+
+  async directFetchMetadata(url: string): Promise<{ title?: string, company?: string }> {
+    // Note: This will only work if the target has no CORS or we are in a permissive environment
+    // In a browser, this is limited, but we try anyway.
+    try {
+      const res = await fetch(url, { method: 'GET', mode: 'no-cors' });
+      // With no-cors, we can't read the body. So this is mostly for future-proofing or proxy use.
+      // For now, we return empty to trigger the search peek.
+      return {};
+    } catch (e) {
+      return {};
+    }
+  },
+
+  parseTitleFromSnippet(fullTitle: string): { title?: string, company?: string } {
+    console.log(`[apifyService] Parsing snippet: ${fullTitle}`);
+
+    // Pattern 1: "Job Title at Company | LinkedIn"
+    if (fullTitle.includes(' at ') && fullTitle.includes('|')) {
+      const mainPart = fullTitle.split('|')[0];
+      const [title, company] = mainPart.split(' at ');
+      return { title: title.trim(), company: company.trim() };
+    }
+
+    // Pattern 2: "Company hiring Job Title in Location..."
+    if (fullTitle.toLowerCase().includes(' hiring ')) {
+      const parts = fullTitle.split(/ hiring /i);
+      const company = parts[0].trim();
+      const title = parts[1].split(' in ')[0].split('|')[0].trim();
+      return { title, company };
+    }
+
+    // Pattern 3: Generic Split "Title - Company"
+    const parts = fullTitle.split(' | ')[0].split(' - ');
+    return {
+      title: parts[0]?.trim(),
+      company: parts[1]?.trim() || "Unknown Company"
+    };
   },
 
   async scrapeJobUrl(url: string): Promise<DiscoveredJob> {
@@ -263,7 +294,7 @@ export const apifyService = {
 
     if (!runRes.ok) {
       const errorText = await runRes.text();
-      throw new Error(`Apify Start Failed: ${runRes.status} - ${errorText}`);
+      throw new Error(`Service Start Failed: ${runRes.status} - ${errorText}`);
     }
 
     const { data } = await runRes.json();

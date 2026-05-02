@@ -127,7 +127,7 @@ export const DiscoveryPage: React.FC = () => {
             <AlertCircle className="w-12 h-12 text-red-500 mx-auto" />
             <h3 className="text-xl font-bold text-white">Scraping Failed</h3>
             <p className="text-gray-400 max-w-md mx-auto">
-              Apify encountered an error or you ran out of credits. Check your API token or try again later.
+              The search service is currently unavailable. Please try again later or add jobs manually to your pipeline.
             </p>
           </div>
         ) : results?.length === 0 ? (

@@ -77,9 +77,9 @@ export const SupportBot: React.FC = () => {
     <div className="fixed bottom-8 right-8 z-[100] flex flex-col items-end">
       {/* Chat Window */}
       {isOpen && (
-        <div className="mb-4 w-[380px] h-[600px] bg-[#0A0A0A] border border-white/10 rounded-[32px] shadow-2xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 duration-300">
+        <div className="mb-4 w-[380px] h-[600px] bg-[#0A0A0A] border border-white/10 rounded-[32px] shadow-2xl flex flex-col animate-in slide-in-from-bottom-4 duration-300">
           {/* Header */}
-          <div className="bg-[#FC6100] p-6 flex items-center justify-between">
+          <div className="bg-[#FC6100] p-6 flex items-center justify-between rounded-t-[32px]">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
                 <Sparkles className="w-6 h-6 text-white" />
@@ -130,7 +130,7 @@ export const SupportBot: React.FC = () => {
           </div>
 
           {/* Quick Questions Footer */}
-          <div className="p-4 bg-white/[0.02] border-t border-white/5">
+          <div className="p-6 bg-white/[0.02] border-t border-white/5 rounded-b-[32px]">
             <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
               {QUICK_QUESTIONS.map((q) => (
                 <button

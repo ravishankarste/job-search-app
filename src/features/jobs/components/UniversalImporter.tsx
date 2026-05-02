@@ -20,30 +20,31 @@ export const UniversalImporter: React.FC<UniversalImporterProps> = ({ onImportSu
     setIsScraping(true);
     setError(null);
 
-    // 0. Validator: Check if it's a collection/search URL instead of a single job
+    // 1. Validator: Check if it's a collection/search URL instead of a single job
     if (url.includes('linkedin.com/jobs/search') || url.includes('linkedin.com/jobs/collections')) {
       setError("This looks like a list or search page. To import a specific job, click on the job title first, then click 'Share' ➔ 'Copy link' to get the direct job URL.");
       setIsScraping(false);
       return;
     }
 
-    // 1. Instant Parse: Extract whatever we can from the URL string itself (0ms wait)
+    // 2. Instant Parse: Extract whatever we can from the URL string itself (0ms wait)
     let parsedData = apifyService.parseJobDetailsFromUrl(url);
     
-    // 2. Web Peek Fallback: If regex failed, try a quick metadata lookup (3-5s)
+    // 3. Web Peek Fallback: If regex failed, try a quick metadata lookup (3-5s)
     if (!parsedData.title || !parsedData.company) {
       const token = import.meta.env.VITE_APIFY_API_TOKEN;
       if (token) {
         try {
           const peekResult = await apifyService.peekUrlMetadata(url, token);
           parsedData = { ...parsedData, ...peekResult };
-        } catch (e) {
+        } catch (e: any) {
           console.warn("[UniversalImporter] Web peek failed", e);
+          // Silent failure for peek - the scrape or modal will handle it
         }
       }
     }
     
-    // 2. Sprint Scrape: Try to get full details but don't wait more than 15s
+    // 4. Sprint Scrape: Try to get full details but don't wait more than 15s
     const scrapePromise = apifyService.scrapeJobUrl(url);
     const timeoutPromise = new Promise((_, reject) => 
       setTimeout(() => reject(new Error("Timeout")), 15000)
@@ -53,7 +54,7 @@ export const UniversalImporter: React.FC<UniversalImporterProps> = ({ onImportSu
       // Wait for either the scrape to finish or 15 seconds to pass
       const jobData = await Promise.race([scrapePromise, timeoutPromise]) as any;
       
-      // 3. Success: True 1-Click Import!
+      // 5. Success: True 1-Click Import!
       await createJob({
         title: jobData.title,
         company_name: jobData.company_name,
@@ -67,9 +68,11 @@ export const UniversalImporter: React.FC<UniversalImporterProps> = ({ onImportSu
       setUrl('');
       setIsScraping(false);
       
-    } catch (err) {
-      // 4. Fallback: Open modal only if scrape is slow or fails
-      console.log("[UniversalImporter] Scrape slow/failed, opening modal as fallback.");
+    } catch (err: any) {
+      // 6. Fallback: Open modal with whatever we parsed (Instant + Peek)
+      console.log("[UniversalImporter] Scrape slow/failed, opening modal with parsedData:", parsedData);
+      
+      // If we have at least a title, it's worth pre-filling
       onImportSuccess({
         title: parsedData.title || "",
         company_name: parsedData.company || "" ,
