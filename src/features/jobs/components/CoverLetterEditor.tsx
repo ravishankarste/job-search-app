@@ -1,6 +1,8 @@
+import React, { useState } from 'react';
 import { Sparkles, FileText, Save, CheckCircle2 } from 'lucide-react';
 import { coverLetterGeneratorService } from '../services/coverLetterGeneratorService';
 import type { MatchScoreResult } from '../services/matchAnalysisService';
+import { useCoverLetter } from '../hooks/useCoverLetter';
 
 interface CoverLetterEditorProps {
   applicationId: string;

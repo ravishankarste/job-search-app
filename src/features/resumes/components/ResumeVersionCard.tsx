@@ -28,14 +28,36 @@ export const ResumeVersionCard: React.FC<ResumeVersionCardProps> = ({
   const [isDownloading, setIsDownloading] = React.useState(false);
 
   const handleDownload = async (e: React.MouseEvent) => {
-    e.stopPropagation(); // Don't trigger select mode
+    e.stopPropagation();
     if (!version.file_url) return;
-
+  
     try {
       setIsDownloading(true);
-      const url = await resumeService.createSignedUrl(version.file_url);
+      
+      // Handle legacy full URLs if they exist, otherwise use as path
+      let path = version.file_url;
+      if (path.includes('http')) {
+        try {
+          const url = new URL(path);
+          const pathParts = url.pathname.split('/storage/v1/object/public/resumes/');
+          if (pathParts.length > 1) {
+            path = pathParts[1];
+          }
+        } catch (e) {
+          console.error("Failed to parse legacy URL:", e);
+        }
+      }
+  
+      const url = await resumeService.createSignedUrl(path);
       if (url) {
-        window.open(url, '_blank');
+        const link = document.createElement('a');
+        link.href = url;
+        link.target = '_blank';
+        // Give it a nice filename
+        link.download = `${label.replace(/\s+/g, '_')}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
       }
     } finally {
       setIsDownloading(false);
