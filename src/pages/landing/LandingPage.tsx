@@ -139,13 +139,6 @@ export const LandingPage: React.FC = () => {
               <p className="text-gray-400 leading-relaxed font-medium max-w-[320px] mx-auto text-center text-lg">
                 Paste any LinkedIn or Indeed URL. Our engine scrapes the data in seconds, building your pipeline with zero manual entry.
               </p>
-              <div className="pt-6">
-                <img 
-                  src="./magic_importer_demo.png" 
-                  alt="Magic Importer Demo" 
-                  className="rounded-2xl border border-white/10 shadow-xl opacity-60 group-hover:opacity-100 transition-opacity duration-500"
-                />
-              </div>
             </div>
           </div>
 
