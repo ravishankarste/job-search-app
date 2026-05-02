@@ -2,7 +2,7 @@
 
 **Step 0: Join the Path (Sign Up)** 🔐
 
-1. **Visit**: [upanita.com](https://upanita.com/)
+1. **Visit**: [upanita.com/jobs](https://upanita.com/jobs)
 2. **Create Account**: Click on **"Join Alpha"** (or "Sign Up").
 3. **Go**: Enter your email and password to enter the dashboard immediately.
 
