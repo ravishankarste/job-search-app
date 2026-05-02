@@ -1,9 +1,6 @@
 import React from 'react';
 import { Target, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import { useMatchScore } from '../hooks/useMatchScore';
-import { useResumes } from '../../resumes/hooks/useResumes';
-import { useQuery } from '@tanstack/react-query';
-import { resumeService } from '../../resumes/services/resumeService';
 
 interface MatchScoreWidgetProps {
   jobId: string;

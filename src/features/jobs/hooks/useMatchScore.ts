@@ -3,7 +3,6 @@ import { useQuery } from '@tanstack/react-query';
 import { useResumes } from '../../resumes/hooks/useResumes';
 import { resumeService } from '../../resumes/services/resumeService';
 import { matchAnalysisService } from '../services/matchAnalysisService';
-import type { MatchScoreResult } from '../services/matchAnalysisService';
 
 export function useMatchScore(jobTitle: string, jobDescription: string | null) {
   // 1. Fetch resumes using the SHARED hook

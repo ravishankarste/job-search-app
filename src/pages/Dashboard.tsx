@@ -9,7 +9,6 @@ import {
   BarChart3,
   LayoutDashboard,
   Calendar,
-  Circle,
   Clock
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';

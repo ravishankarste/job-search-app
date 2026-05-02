@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mic, ChevronRight, HelpCircle, Lightbulb, Sparkles } from 'lucide-react';
+import { Mic, HelpCircle, Lightbulb, Sparkles } from 'lucide-react';
 import { interviewPrepService } from '../services/interviewPrepService';
 import type { InterviewQuestion } from '../services/interviewPrepService';
 import type { MatchScoreResult } from '../services/matchAnalysisService';
