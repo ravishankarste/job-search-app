@@ -17,29 +17,12 @@ export const MatchScoreWidget: React.FC<MatchScoreWidgetProps> = ({
   jobDescription, 
   linkedResumeId 
 }) => {
-  const { data: resumes } = useResumes();
-  
-  // 1. Determine which resume to use for analysis
-  // Priority: Linked Resume > Primary Resume
-  const activeResumeId = linkedResumeId || resumes?.[0]?.id;
-
-  // 2. Fetch the text content for the active resume
-  const { data: resumeVersion, isLoading: isLoadingVersion } = useQuery({
-    queryKey: ['resume-version', activeResumeId],
-    enabled: !!activeResumeId,
-    queryFn: () => resumeService.getLatestVersion(activeResumeId!),
-  });
-
-  const resumeText = (resumeVersion?.content as any)?.extractedText || "";
-  const fallbackText = resumes?.find(r => r.id === activeResumeId)?.target_role || "";
-
   // 3. Run the match analysis
-  const { score, matchingSkills, missingSkills, isLoading: isAnalyzing } = useMatchScore(
+  const { score, matchingSkills, missingSkills, isLoading } = useMatchScore(
     jobTitle,
     jobDescription || ""
   );
 
-  const isLoading = isLoadingVersion || isAnalyzing;
 
   return (
     <div className="bg-[#121212] border border-white/5 rounded-[32px] p-8 shadow-2xl space-y-8 relative overflow-hidden">

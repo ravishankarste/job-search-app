@@ -1,6 +1,6 @@
 import React from 'react';
 import { useResumes } from '../../resumes/hooks/useResumes';
-import { FileText, Check, Loader2, Link2Off, Trash2 } from 'lucide-react';
+import { FileText, Loader2, Link2Off } from 'lucide-react';
 
 interface ResumeSelectorProps {
   currentResumeId: string | null;

@@ -11,12 +11,7 @@ import {
   ArrowLeft, 
   ExternalLink, 
   Building2, 
-  MapPin, 
-  Briefcase, 
-  Calendar,
-  Trash2,
-  Clock,
-  CheckCircle2
+  Trash2
 } from 'lucide-react';
 import { useMatchScore } from '../hooks/useMatchScore';
 import { useResumes } from '../../resumes/hooks/useResumes';

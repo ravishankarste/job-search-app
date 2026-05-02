@@ -179,6 +179,7 @@ export const Dashboard: React.FC = () => {
         isOpen={!!followUpCompany}
         onClose={() => setFollowUpCompany(null)}
         companyName={followUpCompany || ''}
+        jobTitle=""
       />
     </div>
   );

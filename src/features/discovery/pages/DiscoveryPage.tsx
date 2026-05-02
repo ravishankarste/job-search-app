@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useDiscovery } from '../hooks/useDiscovery';
 import { DiscoveryCard } from '../components/DiscoveryCard';
-import { Search, MapPin, Calendar, Briefcase, ExternalLink, Plus, Loader2, Compass, AlertCircle, ChevronDown } from 'lucide-react';
+import { Search, Briefcase, Loader2, AlertCircle, ChevronDown } from 'lucide-react';
 
 export const DiscoveryPage: React.FC = () => {
   const [query, setQuery] = useState(() => localStorage.getItem('discovery_q') || '');

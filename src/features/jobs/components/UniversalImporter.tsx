@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Search, Loader2, Sparkles, AlertCircle } from 'lucide-react';
+import { Loader2, Sparkles, AlertCircle } from 'lucide-react';
 import { apifyService } from '../../discovery/services/apifyService';
-import { jobService } from '../services/jobService';
 import { useJobActions } from '../hooks/useJobActions';
 
 interface UniversalImporterProps {
