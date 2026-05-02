@@ -120,7 +120,7 @@ export const Dashboard: React.FC = () => {
                   </div>
                   <h3 className="text-base font-bold text-white mb-2 leading-tight group-hover:text-[#FC6100] transition-colors">{task.notes}</h3>
                   <div className="flex flex-col gap-2 mt-4">
-                    <Link to={`/jobs/${task.job?.id}`} className="text-sm text-gray-500 hover:text-white transition-colors flex items-center font-bold">
+                    <Link to={`/pipeline/${task.job?.id}`} className="text-sm text-gray-500 hover:text-white transition-colors flex items-center font-bold">
                       <Briefcase className="w-4 h-4 mr-2 text-[#FC6100]/60" /> 
                       {task.job?.company_name}
                     </Link>

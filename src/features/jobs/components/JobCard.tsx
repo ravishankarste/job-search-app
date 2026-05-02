@@ -23,7 +23,7 @@ export const JobCard: React.FC<JobCardProps> = ({ job, onFollowUpClick }) => {
 
   return (
     <div 
-      onClick={() => navigate(`/jobs/${job.id}`)}
+      onClick={() => navigate(`/pipeline/${job.id}`)}
       className={`clean-card p-5 group relative bg-white/[0.02] border-white/5 hover:border-[#FC6100]/30 cursor-pointer transition-all ${
         ghosted ? 'border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.05)]' : 'shadow-[0_4px_20px_rgba(0,0,0,0.3)]'
       }`}

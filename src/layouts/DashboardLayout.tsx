@@ -2,11 +2,11 @@ import React from 'react';
 import { Outlet, Navigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { authService } from '../services/authService';
-import { 
-  LayoutDashboard, 
-  Briefcase, 
-  FileText, 
-  BarChart3, 
+import {
+  LayoutDashboard,
+  Briefcase,
+  FileText,
+  BarChart3,
   LogOut,
   Layers,
   Search,
@@ -18,17 +18,32 @@ import {
   X
 } from 'lucide-react';
 import { SupportBot } from '../components/common/SupportBot';
+import { useJobs } from '../features/jobs/hooks/useJobs';
+import { useNotifications } from '../features/notifications/hooks/useNotifications';
 
 export const DashboardLayout: React.FC = () => {
-  const { session, isLoading } = useAuth();
+  const { session, isLoading: authLoading } = useAuth();
+  const { data: jobs = [] } = useJobs();
+  const { notifications, unreadCount, sendTest, markAsRead } = useNotifications();
+  
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [isNotificationsOpen, setIsNotificationsOpen] = React.useState(false);
   const location = useLocation();
+
+  const filteredJobs = React.useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    return jobs.filter(job => 
+      job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      job.company_name.toLowerCase().includes(searchQuery.toLowerCase())
+    ).slice(0, 5);
+  }, [jobs, searchQuery]);
 
   React.useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
 
-  if (isLoading) {
+  if (authLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-black">
         <div className="w-10 h-10 border-4 border-[#FC6100] border-t-transparent rounded-full animate-spin"></div>
@@ -53,8 +68,8 @@ export const DashboardLayout: React.FC = () => {
     { name: 'Settings', path: '/settings', icon: Settings },
   ];
 
-  const firstName = session.user.user_metadata?.full_name?.split(' ')[0] || 
-                    (session.user.email?.split('@')[0].includes('ravishankar') ? 'Ravishankar' : session.user.email?.split('@')[0].split(/[._]/)[0]);
+  const firstName = session.user.user_metadata?.full_name?.split(' ')[0] ||
+    (session.user.email?.split('@')[0].includes('ravishankar') ? 'Ravishankar' : session.user.email?.split('@')[0].split(/[._]/)[0]);
 
   const SidebarContent = () => (
     <>
@@ -64,7 +79,7 @@ export const DashboardLayout: React.FC = () => {
             <Layers className="text-white w-6 h-6" />
           </div>
           <h2 className="text-xl font-bold text-white tracking-tight">Udyog Marg</h2>
-          <button 
+          <button
             className="lg:hidden ml-auto text-gray-400"
             onClick={() => setIsMobileMenuOpen(false)}
           >
@@ -81,11 +96,10 @@ export const DashboardLayout: React.FC = () => {
             <Link
               key={item.name}
               to={item.path}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold transition-all ${
-                isActive
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold transition-all ${isActive
                   ? 'bg-white/10 text-[#FC6100]'
                   : 'text-gray-400 hover:bg-white/5 hover:text-white'
-              }`}
+                }`}
             >
               <Icon className={`w-5 h-5 ${isActive ? 'text-[#FC6100]' : 'text-gray-500'}`} />
               {item.name}
@@ -135,42 +149,130 @@ export const DashboardLayout: React.FC = () => {
       <main className="flex-1 flex flex-col min-w-0">
         {/* Navbar */}
         <header className="h-20 bg-black border-b border-white/10 flex items-center justify-between sticky top-0 z-30 px-6 md:px-10">
-           <div className="flex items-center gap-6">
+          <div className="flex items-center gap-6">
+            <button
+              className="lg:hidden p-2 text-gray-400 hover:text-white"
+              onClick={() => setIsMobileMenuOpen(true)}
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+            <div className="hidden sm:flex items-center gap-3 text-xs font-black uppercase tracking-widest text-white/40">
+              <Link to="/dashboard" className="hover:text-white transition-colors">Home</Link>
+              <ChevronRight className="w-3.5 h-3.5 opacity-30" />
+              <span className="text-[#FC6100]">
+                {location.pathname === '/pipeline' ? 'Job Pipeline' : (location.pathname.substring(1) || 'Dashboard')}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="relative hidden md:block group">
+              <input
+                type="text"
+                placeholder="Search pipeline..."
+                className="pl-4 pr-10 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-white/20 focus:border-[#FC6100] focus:ring-1 focus:ring-[#FC6100] outline-none transition-all w-48 lg:w-72 shadow-2xl group-hover:bg-white/10"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 pointer-events-none group-focus-within:text-[#FC6100] transition-colors" />
+              
+              {/* Quick Search Results */}
+              {searchQuery.trim() && (
+                <div className="absolute top-full right-0 mt-3 w-80 bg-[#111] border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                  <div className="p-3 border-b border-white/5 bg-white/[0.02]">
+                    <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Global Pipeline Search</span>
+                  </div>
+                  <div className="max-h-64 overflow-y-auto">
+                    {filteredJobs.length > 0 ? (
+                      filteredJobs.map(job => (
+                        <Link 
+                          key={job.id} 
+                          to={`/pipeline/${job.id}`}
+                          onClick={() => setSearchQuery('')}
+                          className="flex items-center justify-between p-4 hover:bg-white/5 transition-colors group"
+                        >
+                          <div>
+                            <p className="text-xs font-bold text-white group-hover:text-[#FC6100] transition-colors">{job.title}</p>
+                            <p className="text-[10px] text-gray-500 font-medium">{job.company_name}</p>
+                          </div>
+                          <ChevronRight className="w-3.5 h-3.5 text-gray-700" />
+                        </Link>
+                      ))
+                    ) : (
+                      <div className="p-8 text-center">
+                        <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest">No matching jobs</p>
+                      </div>
+                    )}
+                  </div>
+                  {filteredJobs.length > 0 && (
+                    <Link 
+                      to="/pipeline" 
+                      onClick={() => setSearchQuery('')}
+                      className="block p-3 text-center bg-white/5 hover:bg-white/10 text-[10px] font-black text-[#FC6100] uppercase tracking-widest transition-colors border-t border-white/5"
+                    >
+                      View All Results
+                    </Link>
+                  )}
+                </div>
+              )}
+            </div>
+            <div className="relative">
               <button 
-                className="lg:hidden p-2 text-gray-400 hover:text-white"
-                onClick={() => setIsMobileMenuOpen(true)}
+                onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+                className={`p-2.5 rounded-xl transition-all relative group ${isNotificationsOpen ? 'bg-[#FC6100] text-white' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
               >
-                <Menu className="w-6 h-6" />
+                <Bell className={`w-5 h-5 ${unreadCount > 0 ? 'group-hover:animate-shake' : ''}`} />
+                {unreadCount > 0 && (
+                  <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-[#FC6100] rounded-full border-2 border-black"></span>
+                )}
               </button>
-              <div className="hidden sm:flex items-center gap-3 text-xs font-black uppercase tracking-widest text-white/40">
-                <Link to="/dashboard" className="hover:text-white transition-colors">Home</Link>
-                <ChevronRight className="w-3.5 h-3.5 opacity-30" />
-                <span className="text-[#FC6100]">
-                  {location.pathname === '/pipeline' ? 'Job Pipeline' : (location.pathname.substring(1) || 'Dashboard')}
-                </span>
-              </div>
-           </div>
-           
-           <div className="flex items-center gap-4">
-              <div className="relative hidden md:block group">
-                <input 
-                  type="text" 
-                  placeholder="Quick search..." 
-                  className="pl-4 pr-10 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-white/20 focus:border-[#FC6100] focus:ring-1 focus:ring-[#FC6100] outline-none transition-all w-48 lg:w-72 shadow-2xl group-hover:bg-white/10"
-                />
-                <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 pointer-events-none group-focus-within:text-[#FC6100] transition-colors" />
-              </div>
-              <button className="p-2.5 text-white/40 hover:text-white hover:bg-white/5 rounded-xl transition-all relative">
-                <Bell className="w-5 h-5" />
-                <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-[#FC6100] rounded-full border-2 border-black"></span>
-              </button>
-           </div>
+
+              {/* Notifications Dropdown */}
+              {isNotificationsOpen && (
+                <div className="absolute top-full right-0 mt-3 w-80 bg-[#111] border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                  <div className="p-4 border-b border-white/5 bg-white/[0.02] flex items-center justify-between">
+                    <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Momentum Feed</span>
+                    <button 
+                      onClick={() => sendTest(`Momentum Boost: ${new Date().toLocaleTimeString()}`)}
+                      className="text-[8px] font-black text-[#FC6100] uppercase tracking-tighter hover:underline"
+                    >
+                      Test Alert
+                    </button>
+                  </div>
+                  <div className="max-h-80 overflow-y-auto">
+                    {notifications.length > 0 ? (
+                      notifications.map(n => (
+                        <div 
+                          key={n.id} 
+                          onClick={() => !n.read_at && markAsRead(n.id)}
+                          className={`p-4 border-b border-white/5 hover:bg-white/5 transition-colors cursor-pointer relative ${!n.read_at ? 'bg-[#FC6100]/5' : ''}`}
+                        >
+                          {!n.read_at && <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#FC6100]"></div>}
+                          <p className="text-xs text-white leading-relaxed">{n.message}</p>
+                          <p className="text-[8px] text-gray-500 font-bold uppercase mt-2">
+                            {new Date(n.created_at || '').toLocaleTimeString()}
+                          </p>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="p-10 text-center space-y-4">
+                        <Bell className="w-10 h-10 text-gray-800 mx-auto opacity-20" />
+                        <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest leading-loose">
+                          Silence is golden.<br />Stay focused on the hunt.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </header>
 
         <div className="layout-spacing flex-1 overflow-x-hidden bg-black">
           <Outlet />
         </div>
-        
+
         {/* Help & Support Bot */}
         <SupportBot />
       </main>

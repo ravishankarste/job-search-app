@@ -17,9 +17,12 @@ import { useMatchScore } from '../hooks/useMatchScore';
 import { useResumes } from '../../resumes/hooks/useResumes';
 import type { ApplicationStatus } from '../services/jobService';
 
+import { DeleteConfirmModal } from '../components/DeleteConfirmModal';
+
 export const JobDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
   const { data: job, isLoading, error } = useJobDetail(id || '');
   const { updateStatus, linkResume, deleteJob, isUpdatingStatus, isLinkingResume, isDeleting } = useJobActions();
   
@@ -30,7 +33,7 @@ export const JobDetailPage: React.FC = () => {
   if (error || !job) return (
     <div className="text-center py-24 bg-[#121212] border border-white/10 rounded-3xl">
       <h2 className="text-2xl font-bold text-white mb-2">Job Not Found</h2>
-      <Link to="/jobs" className="text-[#FC6100] font-bold hover:underline mt-4 inline-block">
+      <Link to="/pipeline" className="text-[#FC6100] font-bold hover:underline mt-4 inline-block">
         <ArrowLeft className="w-4 h-4 mr-2 inline" /> Back to Pipeline
       </Link>
     </div>
@@ -51,18 +54,27 @@ export const JobDetailPage: React.FC = () => {
   };
 
   const handleDelete = async () => {
-    if (window.confirm('Are you sure you want to delete this job entry?')) {
-      await deleteJob(job.id);
-      navigate('/jobs');
-    }
+    await deleteJob({ 
+      jobId: job.id, 
+      message: `Pipeline Cleaned: Removed ${job.title} @ ${job.company_name}.` 
+    });
+    navigate('/pipeline');
   };
 
   const statuses: ApplicationStatus[] = ['saved', 'applied', 'interviewing', 'offered', 'rejected'];
 
   return (
     <div className="max-w-5xl mx-auto space-y-12 fade-in-up pb-12">
+      <DeleteConfirmModal 
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDelete}
+        title={job.title}
+        isDeleting={isDeleting}
+      />
+
       <div className="flex items-center justify-between">
-        <Link to="/jobs" className="inline-flex items-center text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-white transition-colors">
+        <Link to="/pipeline" className="inline-flex items-center text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-white transition-colors">
           <ArrowLeft className="w-4 h-4 mr-2" /> Back to Pipeline
         </Link>
       </div>
@@ -98,7 +110,7 @@ export const JobDetailPage: React.FC = () => {
                   </a>
                 )}
                 <button 
-                  onClick={handleDelete}
+                  onClick={() => setIsDeleteModalOpen(true)}
                   disabled={isDeleting}
                   className="w-12 h-12 bg-white/5 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-2xl flex items-center justify-center transition-all border border-white/10 group/btn shadow-lg"
                   title="Delete Job"

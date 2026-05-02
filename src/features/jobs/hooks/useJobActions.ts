@@ -3,6 +3,8 @@ import { jobService } from '../services/jobService';
 import type { Application, ApplicationStatus } from '../services/jobService';
 import { JOBS_QUERY_KEY } from './useJobs';
 import type { Database } from '../../../types/supabase';
+import { notificationService } from '../../notifications/services/notificationService';
+import { NOTIFICATIONS_KEY } from '../../notifications/hooks/useNotifications';
 
 export const JOB_DETAIL_QUERY_KEY = (id: string) => ['jobs', id];
 
@@ -13,8 +15,10 @@ export function useJobActions() {
   const createJobMutation = useMutation({
     mutationFn: (jobData: Omit<Database['public']['Tables']['jobs']['Insert'], 'profile_id'>) =>
       jobService.createJob(jobData),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: JOBS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_KEY });
+      notificationService.sendNotification(`New Opportunity: Added ${data.title} to your pipeline.`);
     },
   });
 
@@ -29,6 +33,8 @@ export function useJobActions() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: JOBS_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: JOB_DETAIL_QUERY_KEY(variables.jobId) });
+      queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_KEY });
+      notificationService.sendNotification(`Status Update: A job moved to ${variables.status}.`);
     },
   });
 
@@ -48,9 +54,11 @@ export function useJobActions() {
 
   // Delete Job Mutation
   const deleteJobMutation = useMutation({
-    mutationFn: (jobId: string) => jobService.deleteJob(jobId),
-    onSuccess: () => {
+    mutationFn: ({ jobId }: { jobId: string; message?: string }) => jobService.deleteJob(jobId),
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: JOBS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_KEY });
+      notificationService.sendNotification(variables.message || `Pipeline Cleaned: A job entry has been removed.`);
     },
   });
 
