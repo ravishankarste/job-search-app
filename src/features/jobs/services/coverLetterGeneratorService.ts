@@ -1,4 +1,4 @@
-import { MatchScoreResult } from './matchAnalysisService';
+// No imports needed for now as we use CoverLetterParams interface below
 
 export interface CoverLetterParams {
   jobTitle: string;

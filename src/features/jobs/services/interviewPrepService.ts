@@ -1,4 +1,4 @@
-import { MatchScoreResult } from './matchAnalysisService';
+import type { MatchScoreResult } from './matchAnalysisService';
 
 export interface InterviewQuestion {
   question: string;

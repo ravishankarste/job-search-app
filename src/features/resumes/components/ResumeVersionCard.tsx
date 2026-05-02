@@ -1,6 +1,7 @@
 import React from 'react';
 import type { ResumeVersion } from '../services/resumeService';
 import { FileDown, Clock } from 'lucide-react';
+import { resumeService } from '../services/resumeService';
 
 interface ResumeVersionCardProps {
   version: ResumeVersion;
@@ -24,6 +25,22 @@ export const ResumeVersionCard: React.FC<ResumeVersionCardProps> = ({
     ? (version.content as Record<string, any>) 
     : {};
   const label = content.label || `Version ${version.version_number}`;
+  const [isDownloading, setIsDownloading] = React.useState(false);
+
+  const handleDownload = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // Don't trigger select mode
+    if (!version.file_url) return;
+
+    try {
+      setIsDownloading(true);
+      const url = await resumeService.createSignedUrl(version.file_url);
+      if (url) {
+        window.open(url, '_blank');
+      }
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   return (
     <div 
@@ -60,15 +77,14 @@ export const ResumeVersionCard: React.FC<ResumeVersionCardProps> = ({
         </div>
         
         {version.file_url && (
-          <a
-            href={version.file_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-2.5 text-gray-500 bg-white/5 border border-white/10 rounded-xl hover:bg-[#FC6100] hover:text-white hover:border-[#FC6100] transition-all"
+          <button
+            onClick={handleDownload}
+            disabled={isDownloading}
+            className="p-2.5 text-gray-500 bg-white/5 border border-white/10 rounded-xl hover:bg-[#FC6100] hover:text-white hover:border-[#FC6100] transition-all disabled:opacity-50"
             title="Download/View PDF"
           >
-            <FileDown className="w-4 h-4" />
-          </a>
+            <FileDown className={`w-4 h-4 ${isDownloading ? 'animate-pulse' : ''}`} />
+          </button>
         )}
       </div>
     </div>
