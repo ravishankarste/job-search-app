@@ -37,7 +37,7 @@ export const DiscoveryCard: React.FC<DiscoveryCardProps> = ({ job }) => {
   };
 
   return (
-    <div className="bg-[#121212] border border-white/10 rounded-3xl p-6 hover:-translate-y-1 hover:border-[#FC6100]/50 transition-all duration-300 group shadow-sm">
+    <div className="clean-card group bg-[#1A1A1A] tactile-press">
       <div className="flex justify-between items-start mb-4">
         <div>
           <h3 className="font-bold text-lg text-white group-hover:text-[#FC6100] transition-colors">{job.title}</h3>
@@ -50,7 +50,7 @@ export const DiscoveryCard: React.FC<DiscoveryCardProps> = ({ job }) => {
           href={job.url} 
           target="_blank" 
           rel="noopener noreferrer"
-          className="p-2 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white rounded-xl transition-colors"
+          className="p-2 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white rounded-lg transition-colors tactile-press border border-white/10"
           title={`View on ${job.source}`}
         >
           <ExternalLink className="w-4 h-4" />
@@ -72,14 +72,14 @@ export const DiscoveryCard: React.FC<DiscoveryCardProps> = ({ job }) => {
 
       <div className="pt-4 border-t border-white/5">
         {isAdded ? (
-          <button disabled className="w-full py-3 flex justify-center items-center rounded-xl bg-emerald-500/10 text-emerald-500 font-bold text-sm transition-all">
+          <button disabled className="w-full py-3 flex justify-center items-center rounded-lg bg-emerald-500/10 text-emerald-500 font-bold text-sm transition-all border border-emerald-500/20">
             <CheckCircle2 className="w-4 h-4 mr-2" /> In Pipeline
           </button>
         ) : (
           <button 
             onClick={handleAdd}
             disabled={isCreating}
-            className="w-full py-3 flex justify-center items-center rounded-xl bg-[#FC6100]/10 text-[#FC6100] hover:bg-[#FC6100] hover:text-white font-bold text-sm transition-all disabled:opacity-50"
+            className="w-full py-3 flex justify-center items-center rounded-lg bg-[#FC6100]/10 text-[#FC6100] hover:bg-[#FC6100] hover:text-white font-bold text-sm transition-all disabled:opacity-50 tactile-press border border-[#FC6100]/20"
           >
             {isCreating ? 'Adding...' : <><Plus className="w-4 h-4 mr-2" /> Add to Pipeline</>}
           </button>

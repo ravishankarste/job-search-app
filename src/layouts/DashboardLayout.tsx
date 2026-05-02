@@ -75,10 +75,10 @@ export const DashboardLayout: React.FC = () => {
     <>
       <div className="p-6 border-b border-white/10">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-[#FC6100] rounded-xl flex items-center justify-center shadow-lg">
+          <div className="w-10 h-10 bg-[#FC6100] rounded-lg flex items-center justify-center border border-white/10">
             <Layers className="text-white w-6 h-6" />
           </div>
-          <h2 className="text-xl font-bold text-white tracking-tight">Udyog Marg</h2>
+          <h2 className="text-xl font-bold text-white tracking-tight font-display">Udyog Marg</h2>
           <button
             className="lg:hidden ml-auto text-gray-400"
             onClick={() => setIsMobileMenuOpen(false)}
@@ -96,7 +96,7 @@ export const DashboardLayout: React.FC = () => {
             <Link
               key={item.name}
               to={item.path}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold transition-all ${isActive
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold transition-all tactile-press ${isActive
                   ? 'bg-white/10 text-[#FC6100]'
                   : 'text-gray-400 hover:bg-white/5 hover:text-white'
                 }`}
@@ -109,19 +109,19 @@ export const DashboardLayout: React.FC = () => {
       </nav>
 
       <div className="p-4 border-t border-white/10">
-        <div className="flex items-center gap-3 px-4 py-3 mb-4 rounded-xl bg-white/5 border border-white/10">
-          <div className="w-10 h-10 rounded-lg bg-[#FC6100] flex items-center justify-center text-white font-bold text-lg">
+        <div className="flex items-center gap-3 px-4 py-3 mb-4 rounded-lg bg-white/5 border border-white/10 tactile-press">
+          <div className="w-10 h-10 rounded-md bg-[#FC6100] flex items-center justify-center text-white font-bold text-lg">
             {firstName?.[0].toUpperCase() || 'U'}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-bold text-white truncate capitalize">{firstName}</p>
-            <p className="text-[10px] font-bold text-[#FC6100] uppercase tracking-wider">Premium Account</p>
+            <p className="text-[10px] font-bold text-[#FC6100] uppercase tracking-wider font-display">Premium Account</p>
           </div>
         </div>
 
         <button
           onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-bold text-gray-500 hover:text-red-500 hover:bg-red-500/10 transition-all"
+          className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-bold text-gray-500 hover:text-red-500 hover:bg-red-500/10 transition-all tactile-press"
         >
           <LogOut className="w-4 h-4" />
           Logout
@@ -131,9 +131,9 @@ export const DashboardLayout: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen flex w-full bg-black">
+    <div className="min-h-screen flex w-full bg-[#0D0D0D]">
       {/* Sidebar - Desktop */}
-      <aside className="hidden lg:flex w-[280px] bg-black border-r border-white/10 flex-col h-screen sticky top-0 z-40 shrink-0">
+      <aside className="hidden lg:flex w-[280px] bg-[#0D0D0D] border-r border-white/10 flex-col h-screen sticky top-0 z-40 shrink-0">
         <SidebarContent />
       </aside>
 
@@ -148,7 +148,7 @@ export const DashboardLayout: React.FC = () => {
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col min-w-0">
         {/* Navbar */}
-        <header className="h-20 bg-black border-b border-white/10 flex items-center justify-between sticky top-0 z-30 px-6 md:px-10">
+        <header className="h-20 bg-[#0D0D0D] border-b border-white/10 flex items-center justify-between sticky top-0 z-30 px-6 md:px-10">
           <div className="flex items-center gap-6">
             <button
               className="lg:hidden p-2 text-gray-400 hover:text-white"
@@ -166,15 +166,14 @@ export const DashboardLayout: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="relative hidden md:block group">
+            <div className="absolute left-1/2 -translate-x-1/2 hidden md:block group">
               <input
                 type="text"
                 placeholder="Search pipeline..."
-                className="pl-4 pr-10 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-white/20 focus:border-[#FC6100] focus:ring-1 focus:ring-[#FC6100] outline-none transition-all w-48 lg:w-72 shadow-2xl group-hover:bg-white/10"
+                className="px-4 py-2.5 bg-white/10 border border-white/20 rounded-lg text-sm text-white placeholder-white/40 focus:border-[#FC6100] focus:ring-1 focus:ring-[#FC6100] outline-none transition-all w-64 lg:w-[400px] group-hover:bg-white/15 group-hover:border-white/30 text-center"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-              <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 pointer-events-none group-focus-within:text-[#FC6100] transition-colors" />
               
               {/* Quick Search Results */}
               {searchQuery.trim() && (
@@ -269,7 +268,7 @@ export const DashboardLayout: React.FC = () => {
           </div>
         </header>
 
-        <div className="layout-spacing flex-1 overflow-x-hidden bg-black">
+        <div className="layout-spacing flex-1 overflow-x-hidden bg-[#0D0D0D]">
           <Outlet />
         </div>
 

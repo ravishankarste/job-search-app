@@ -56,10 +56,13 @@ export const authService = {
 
   async signInWithGoogle(): Promise<void> {
     try {
+      const isProduction = import.meta.env.PROD;
+      const baseUrl = window.location.origin + (isProduction ? '/jobs' : '');
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/dashboard`
+          redirectTo: `${baseUrl}/dashboard`
         }
       });
       if (error) throw error;

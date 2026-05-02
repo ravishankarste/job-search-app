@@ -5,7 +5,11 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './contexts/AuthContext';
 import { queryClient } from './lib/reactQueryClient';
 import { router } from './router';
+import { initAnalytics } from './lib/analytics';
 import './index.css';
+
+// Initialize Analytics Engine
+initAnalytics();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

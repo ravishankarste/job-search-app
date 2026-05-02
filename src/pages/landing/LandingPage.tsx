@@ -9,6 +9,7 @@ import {
   Cpu, 
   Globe
 } from 'lucide-react';
+import { trackEvent } from '../../lib/analytics';
 
 export const LandingPage: React.FC = () => {
   const { session, isLoading } = useAuth();
@@ -19,20 +20,21 @@ export const LandingPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white selection:bg-[#FC6100]/30 selection:text-[#FC6100]">
+    <div className="min-h-screen bg-[#0D0D0D] text-white selection:bg-[#FC6100]/30 selection:text-[#FC6100]">
       {/* Navbar */}
-      <nav className="h-24 flex items-center justify-between px-6 md:px-12 border-b border-white/5 sticky top-0 bg-black/80 backdrop-blur-md z-50">
+      <nav className="h-24 flex items-center justify-between px-6 md:px-12 border-b border-white/5 sticky top-0 bg-[#0D0D0D]/80 backdrop-blur-md z-50">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-[#FC6100] rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(252,97,0,0.3)]">
+          <div className="w-10 h-10 bg-[#FC6100] rounded-lg flex items-center justify-center border border-white/10">
             <Layers className="text-white w-6 h-6" />
           </div>
-          <span className="text-xl font-bold tracking-tight">Udyog Marg</span>
+          <span className="text-xl font-bold tracking-tight font-display">Udyog Marg</span>
         </div>
         <div className="flex items-center gap-6">
           <Link to="/login" className="text-sm font-bold text-gray-400 hover:text-white transition-colors">Login</Link>
           <Link 
             to="/signup" 
-            className="px-6 py-2.5 bg-[#FC6100] text-white text-xs font-black uppercase tracking-widest rounded-xl hover:bg-[#E35205] transition-all shadow-lg shadow-[#FC6100]/20"
+            onClick={() => trackEvent('cta_click', { location: 'navbar' })}
+            className="px-6 py-2.5 bg-[#FC6100] text-white text-xs font-black uppercase tracking-widest rounded-lg hover:bg-[#E35205] transition-all tactile-press border border-white/10"
           >
             Join Alpha
           </Link>
@@ -65,13 +67,14 @@ export const LandingPage: React.FC = () => {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6 animate-in fade-in slide-in-from-bottom-16 duration-700 delay-300 w-full sm:w-auto">
             <Link 
               to="/signup" 
-              className="w-full sm:w-auto px-10 py-5 bg-[#FC6100] text-white text-sm font-black uppercase tracking-[0.2em] rounded-[20px] hover:scale-105 transition-all shadow-2xl shadow-[#FC6100]/30 flex items-center justify-center gap-2"
+              onClick={() => trackEvent('cta_click', { location: 'hero' })}
+              className="w-full sm:w-auto px-10 py-5 bg-[#FC6100] text-white text-sm font-black uppercase tracking-[0.2em] rounded-lg hover:bg-[#E35205] transition-all tactile-press border border-white/10 flex items-center justify-center gap-2"
             >
               Start Your Journey <ArrowRight className="w-5 h-5" />
             </Link>
             <button 
               onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
-              className="w-full sm:w-auto px-10 py-5 bg-white/5 border border-white/10 text-white text-sm font-black uppercase tracking-[0.2em] rounded-[20px] hover:bg-white/10 transition-all flex items-center justify-center"
+              className="w-full sm:w-auto px-10 py-5 bg-white/5 border border-white/10 text-white text-sm font-black uppercase tracking-[0.2em] rounded-lg hover:bg-white/10 transition-all tactile-press flex items-center justify-center"
             >
               Learn More
             </button>

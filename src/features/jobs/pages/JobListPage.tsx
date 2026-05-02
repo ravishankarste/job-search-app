@@ -77,15 +77,15 @@ export const JobListPage: React.FC = () => {
             <input
               type="text"
               placeholder="Filter by title or company..."
-              className="pl-4 pr-10 py-3 bg-white/5 border border-white/10 rounded-xl text-xs text-white placeholder-white/20 focus:border-[#FC6100] outline-none transition-all w-64 shadow-sm font-bold"
+              className="pl-4 pr-10 py-3 bg-white/10 border border-white/20 rounded-lg text-xs text-white placeholder-white/40 focus:border-[#FC6100] outline-none transition-all w-64 font-bold"
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
             />
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 pointer-events-none" />
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-none" />
           </div>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="px-8 py-3 bg-[#FC6100] text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-[#E35205] transition-all flex items-center gap-2 shadow-xl shadow-[#FC6100]/20"
+            className="px-8 py-3 bg-[#FC6100] text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-[#E35205] transition-all flex items-center gap-2 border border-white/10 tactile-press"
           >
             <Plus className="w-4 h-4" />
             Add Application
@@ -118,10 +118,10 @@ export const JobListPage: React.FC = () => {
                   board.scrollTo({ left: targetScroll, behavior: 'smooth' });
                 }
               }}
-              className={`flex items-center gap-3 px-4 py-2 rounded-xl transition-all group shrink-0 ${
+              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all group shrink-0 tactile-press ${
                 isRejected 
                   ? 'bg-red-500/10 border border-red-500/30 hover:border-red-500/50 hover:bg-red-500/20' 
-                  : 'bg-white/5 border border-white/10 hover:border-[#FC6100]/50'
+                  : 'bg-[#1A1A1A] border border-white/10 hover:border-[#FC6100]/50'
               }`}
             >
               {isRejected && <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />}
@@ -155,7 +155,7 @@ export const JobListPage: React.FC = () => {
           return (
             <div key={status} id={`column-${status}`} className="min-w-[320px] w-[320px] flex flex-col gap-4">
               <div className={`p-4 rounded-t-xl border-b-4 ${
-                isRejected ? 'bg-red-500/10 border-red-500 rejected-glow' : 'bg-white/5 border-[#FC6100]'
+                isRejected ? 'bg-red-500/10 border-red-500 rejected-glow' : 'bg-[#1A1A1A] border-[#FC6100]'
               }`}>
                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -178,7 +178,7 @@ export const JobListPage: React.FC = () => {
 
               <div className="space-y-4 flex-1 min-h-[500px]">
                  {groupedJobs[status]?.length === 0 ? (
-                   <div className="h-32 border-2 border-dashed border-white/5 rounded-2xl flex flex-col items-center justify-center bg-white/[0.01] transition-colors hover:bg-white/[0.03] p-6 text-center">
+                   <div className="h-32 border-2 border-dashed border-white/5 rounded-xl flex flex-col items-center justify-center bg-white/[0.01] transition-colors hover:bg-white/[0.03] p-6 text-center">
                       <Search className="w-6 h-6 text-gray-700 mb-2 opacity-50" />
                       <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest">No Applications</p>
                       <p className="text-[9px] text-gray-700 font-medium mt-1">Ready for a new role?</p>

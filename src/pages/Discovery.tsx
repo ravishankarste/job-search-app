@@ -37,13 +37,13 @@ export const Discovery: React.FC = () => {
         <p className="text-gray-500 text-sm mt-2">Discover ultra-fresh jobs from LinkedIn and Indeed tailored to your criteria.</p>
       </div>
 
-      <div className="bg-[#121212] border border-white/10 rounded-3xl p-6 shadow-sm">
+      <div className="bg-[#1A1A1A] border border-white/10 rounded-xl p-6 shadow-sm">
         <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4">
           <div className="flex-1">
             <input 
               type="text" 
               placeholder="Job Title or Keywords" 
-              className="w-full px-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:border-[#FC6100] focus:ring-1 focus:ring-[#FC6100] transition-all"
+              className="w-full px-4 py-4 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#FC6100] focus:ring-1 focus:ring-[#FC6100] transition-all"
               value={queryInput}
               onChange={(e) => setQueryInput(e.target.value)}
               required
@@ -53,27 +53,27 @@ export const Discovery: React.FC = () => {
             <input 
               type="text" 
               placeholder="Location (e.g. Remote, NY)" 
-              className="w-full px-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:border-[#FC6100] focus:ring-1 focus:ring-[#FC6100] transition-all"
+              className="w-full px-4 py-4 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#FC6100] focus:ring-1 focus:ring-[#FC6100] transition-all"
               value={locationInput}
               onChange={(e) => setLocationInput(e.target.value)}
             />
           </div>
           <div className="md:w-48 relative">
             <select
-              className="w-full pl-4 pr-10 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:border-[#FC6100] focus:ring-1 focus:ring-[#FC6100] transition-all appearance-none cursor-pointer"
+              className="w-full pl-4 pr-10 py-4 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#FC6100] focus:ring-1 focus:ring-[#FC6100] transition-all appearance-none cursor-pointer"
               value={daysAgo}
               onChange={(e) => setDaysAgo(Number(e.target.value))}
             >
-              <option value={1} className="bg-[#121212]">Past 24 Hours</option>
-              <option value={3} className="bg-[#121212]">Past 3 Days</option>
-              <option value={7} className="bg-[#121212]">Past 7 Days</option>
+              <option value={1} className="bg-[#1A1A1A]">Past 24 Hours</option>
+              <option value={3} className="bg-[#1A1A1A]">Past 3 Days</option>
+              <option value={7} className="bg-[#1A1A1A]">Past 7 Days</option>
             </select>
             <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" />
           </div>
           <button 
             type="submit"
             disabled={isFetching}
-            className="px-8 py-4 bg-[#FC6100] text-white font-bold rounded-2xl hover:bg-[#E35205] transition-all shadow-lg shadow-[#FC6100]/10 whitespace-nowrap disabled:opacity-70 disabled:cursor-wait flex items-center justify-center min-w-[140px]"
+            className="px-8 py-4 bg-[#FC6100] text-white font-bold rounded-lg hover:bg-[#E35205] transition-all tactile-press border border-white/10 whitespace-nowrap disabled:opacity-70 disabled:cursor-wait flex items-center justify-center min-w-[140px]"
           >
             {isFetching ? (
               <div className="flex items-center">
@@ -101,7 +101,7 @@ export const Discovery: React.FC = () => {
           {isFetching && !isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3].map(i => (
-                <div key={i} className="h-64 bg-white/5 border border-white/10 rounded-3xl animate-pulse"></div>
+                <div key={i} className="h-64 bg-white/5 border border-white/10 rounded-xl animate-pulse"></div>
               ))}
             </div>
           ) : isLoading ? (
@@ -123,7 +123,7 @@ export const Discovery: React.FC = () => {
               ))}
             </div>
           ) : (
-            <div className="bg-[#121212] border border-white/10 rounded-3xl p-12 text-center">
+            <div className="bg-[#1A1A1A] border border-white/10 rounded-xl p-12 text-center">
               <p className="text-gray-500 font-bold">No fresh jobs found matching your criteria.</p>
               <p className="text-gray-600 text-sm mt-2">Try expanding your search or changing the freshness filter.</p>
             </div>
@@ -132,7 +132,7 @@ export const Discovery: React.FC = () => {
       )}
 
       {!activeQuery && (
-        <div className="bg-[#121212] border border-white/10 border-dashed rounded-3xl p-16 text-center">
+        <div className="bg-[#1A1A1A] border border-white/10 border-dashed rounded-xl p-16 text-center">
           <Search className="w-12 h-12 text-gray-600 mx-auto mb-4" />
           <h3 className="text-xl font-bold text-gray-400">Ready to find your next role?</h3>
           <p className="text-gray-500 text-sm mt-2 max-w-md mx-auto">

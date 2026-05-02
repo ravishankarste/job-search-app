@@ -3,14 +3,15 @@
 @theme {
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-display: 'Outfit', sans-serif;
-  --color-brand-primary: #FC6100; /* Strava Orange */
+  --color-brand-primary: #FC6100;
   --color-brand-dark: #E35205;
-  --color-brand-black: #000000;
-  --color-brand-surface: #121212;
+  --color-brand-black: #0D0D0D;
+  --color-brand-surface: #1A1A1A;
 }
 
 :root {
   --sidebar-width: 280px;
+  --stroke-architectural: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 * {
@@ -30,7 +31,8 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
-  letter-spacing: -0.03em;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
   font-weight: 700;
 }
 
@@ -44,19 +46,30 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+/* Precision Engineering Utilities */
+.tactile-press {
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
-/* Strava Style Cards */
+.tactile-press:active {
+  transform: scale(0.98);
+}
+
+/* Hybrid Performance Cards - The "Elite" Middle Ground */
 .clean-card {
   background-color: var(--color-brand-surface);
-  border-radius: 12px;
+  border-radius: 12px; /* The "Golden" Radius */
   padding: 24px;
-  transition: transform 0.3s ease, border-color 0.3s ease;
-  border: 1px solid #333;
+  border: var(--stroke-architectural);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 10px 30px -15px rgba(0, 0, 0, 0.5); /* Subtle Ghost Shadow */
 }
 
 .clean-card:hover {
-  transform: translateY(-5px);
-  border-color: var(--color-brand-primary);
+  transform: translateY(-2px); /* Momentum Lift */
+  border-color: rgba(252, 97, 0, 0.4);
+  background-color: rgba(255, 255, 255, 0.03);
+  box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.7), 0 0 15px rgba(252, 97, 0, 0.05);
 }
 
 /* Custom Scrollbar */
