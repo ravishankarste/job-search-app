@@ -13,11 +13,16 @@ import { Analytics } from '../pages/Analytics';
 import { Settings } from '../pages/Settings';
 
 import { LandingPage } from '../pages/landing/LandingPage';
+import { LegalPage } from '../pages/legal/LegalPage';
 
 export const router = createBrowserRouter([
   {
     path: '/',
     element: <LandingPage />,
+  },
+  {
+    path: '/legal',
+    element: <LegalPage />,
   },
   {
     element: <AuthLayout />,
