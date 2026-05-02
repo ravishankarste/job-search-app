@@ -66,6 +66,19 @@ export function useJobActions() {
     },
   });
 
+  // Update Job Details Mutation
+  const updateJobDetailsMutation = useMutation<
+    void,
+    Error,
+    { jobId: string; details: Partial<Database['public']['Tables']['jobs']['Row']> }
+  >({
+    mutationFn: ({ jobId, details }) => jobService.updateJobDetails(jobId, details),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: JOBS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: JOB_DETAIL_QUERY_KEY(variables.jobId) });
+    },
+  });
+
   return {
     createJob: createJobMutation.mutateAsync,
     isCreating: createJobMutation.isPending,
@@ -81,5 +94,8 @@ export function useJobActions() {
 
     updateJobDescription: updateJobDescriptionMutation.mutateAsync,
     isUpdatingJobDescription: updateJobDescriptionMutation.isPending,
+
+    updateJobDetails: updateJobDetailsMutation.mutateAsync,
+    isUpdatingJobDetails: updateJobDetailsMutation.isPending,
   };
 }

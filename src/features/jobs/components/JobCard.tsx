@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { Building2, MapPin, ChevronRight, ExternalLink, Ghost } from 'lucide-react';
 import type { JobWithApplication } from '../services/jobService';
 
+import { useMatchScore } from '../hooks/useMatchScore';
+import { MatchScoreBadge } from './MatchScoreBadge';
+
 interface JobCardProps {
   job: JobWithApplication;
   onFollowUpClick?: (companyName: string) => void;
@@ -10,6 +13,7 @@ interface JobCardProps {
 
 export const JobCard: React.FC<JobCardProps> = ({ job, onFollowUpClick }) => {
   const navigate = useNavigate();
+  const { score, isLoading } = useMatchScore(job.title, job.description);
 
   // Ghost Detection Logic: > 14 days without update on active applications
   const isGhosted = () => {
@@ -32,25 +36,31 @@ export const JobCard: React.FC<JobCardProps> = ({ job, onFollowUpClick }) => {
   return (
     <div 
       onClick={() => navigate(`/jobs/${job.id}`)}
-      className={`clean-card p-5 group relative bg-[#121212] border-white/10 hover:border-[#FC6100]/50 cursor-pointer transition-all ${ghosted ? 'border-red-500/30' : ''}`}
+      className={`clean-card p-5 group relative bg-white/[0.02] border-white/5 hover:border-[#FC6100]/30 cursor-pointer transition-all ${
+        ghosted ? 'border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.05)]' : 'shadow-[0_4px_20px_rgba(0,0,0,0.3)]'
+      }`}
     >
+
       <div className="flex items-start justify-between mb-4">
         <div className="w-12 h-12 bg-[#FC6100]/10 border border-[#FC6100]/20 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-[#FC6100] transition-colors">
           <Building2 className="w-6 h-6 text-[#FC6100] group-hover:text-white transition-colors" />
         </div>
         
-        {job.url && (
-          <a
-            href={job.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            title="Open Original Job Posting"
-            className="p-1.5 text-gray-500 hover:text-[#FC6100] hover:bg-[#FC6100]/10 rounded-lg transition-all"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <ExternalLink className="w-4 h-4" />
-          </a>
-        )}
+        <div className="flex items-center gap-2">
+          <MatchScoreBadge score={score} isLoading={isLoading} size="sm" showLabel={false} />
+          {job.url && (
+            <a
+              href={job.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Open Original Job Posting"
+              className="p-1.5 text-gray-500 hover:text-[#FC6100] hover:bg-[#FC6100]/10 rounded-lg transition-all"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ExternalLink className="w-4 h-4" />
+            </a>
+          )}
+        </div>
       </div>
 
       <div className="space-y-1 mb-6">

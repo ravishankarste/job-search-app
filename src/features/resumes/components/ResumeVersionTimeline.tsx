@@ -5,11 +5,17 @@ import { ResumeVersionCard } from './ResumeVersionCard';
 interface ResumeVersionTimelineProps {
   versions: ResumeVersion[];
   isLoading: boolean;
+  isSelectionMode?: boolean;
+  selectedIds?: string[];
+  onToggleSelection?: (id: string) => void;
 }
 
 export const ResumeVersionTimeline: React.FC<ResumeVersionTimelineProps> = ({
   versions,
   isLoading,
+  isSelectionMode = false,
+  selectedIds = [],
+  onToggleSelection,
 }) => {
   if (isLoading) {
     return (
@@ -34,8 +40,13 @@ export const ResumeVersionTimeline: React.FC<ResumeVersionTimelineProps> = ({
     <div className="relative border-l-2 border-white/10 ml-3 space-y-6 pb-4">
       {versions.map((version) => (
         <div key={version.id} className="relative pl-6">
-          <span className="absolute -left-[5px] top-5 w-2.5 h-2.5 bg-[#FC6100] rounded-full ring-4 ring-[#121212]"></span>
-          <ResumeVersionCard version={version} />
+          <span className={`absolute -left-[5px] top-5 w-2.5 h-2.5 rounded-full ring-4 ring-[#121212] transition-colors ${selectedIds.includes(version.id) ? 'bg-[#FC6100]' : 'bg-white/20'}`}></span>
+          <ResumeVersionCard 
+            version={version} 
+            isSelectionMode={isSelectionMode}
+            isSelected={selectedIds.includes(version.id)}
+            onSelect={() => onToggleSelection?.(version.id)}
+          />
         </div>
       ))}
     </div>

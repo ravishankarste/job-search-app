@@ -1,139 +1,121 @@
-import React, { useState, useMemo } from 'react';
-import { Target, AlertCircle, CheckCircle2, Save } from 'lucide-react';
-import { matchScoringEngine } from '../services/matchScoringEngine';
-import { useJobActions } from '../hooks/useJobActions';
+import React from 'react';
+import { Target, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import { useMatchScore } from '../hooks/useMatchScore';
+import { useResumes } from '../../resumes/hooks/useResumes';
+import { useQuery } from '@tanstack/react-query';
+import { resumeService } from '../../resumes/services/resumeService';
 
 interface MatchScoreWidgetProps {
   jobId: string;
+  jobTitle: string;
   jobDescription?: string | null;
+  linkedResumeId?: string | null;
 }
 
-export const MatchScoreWidget: React.FC<MatchScoreWidgetProps> = ({ jobId, jobDescription }) => {
-  const [resumeText, setResumeText] = useState('');
-  const [newJobDescription, setNewJobDescription] = useState('');
-  const [isExpanded, setIsExpanded] = useState(false);
-  const { updateJobDescription, isUpdatingJobDescription } = useJobActions();
+export const MatchScoreWidget: React.FC<MatchScoreWidgetProps> = ({ 
+  jobTitle, 
+  jobDescription, 
+  linkedResumeId 
+}) => {
+  const { data: resumes } = useResumes();
+  
+  // 1. Determine which resume to use for analysis
+  // Priority: Linked Resume > Primary Resume
+  const activeResumeId = linkedResumeId || resumes?.[0]?.id;
 
-  const result = useMemo(() => {
-    if (!jobDescription || !resumeText) return null;
-    return matchScoringEngine.computeMatchScore(jobDescription, resumeText);
-  }, [jobDescription, resumeText]);
+  // 2. Fetch the text content for the active resume
+  const { data: resumeVersion, isLoading: isLoadingVersion } = useQuery({
+    queryKey: ['resume-version', activeResumeId],
+    enabled: !!activeResumeId,
+    queryFn: () => resumeService.getLatestVersion(activeResumeId!),
+  });
 
-  const handleSaveDescription = async () => {
-    if (!newJobDescription.trim()) return;
-    await updateJobDescription({ jobId, description: newJobDescription });
-  };
+  const resumeText = (resumeVersion?.content as any)?.extractedText || "";
+  const fallbackText = resumes?.find(r => r.id === activeResumeId)?.target_role || "";
 
-  if (!jobDescription) {
-    return (
-      <div className="bg-[#121212] border border-white/10 rounded-3xl p-8 shadow-sm space-y-6">
-        <div>
-          <h3 className="font-black text-xl text-white uppercase tracking-tighter flex items-center">
-            <Target className="w-5 h-5 mr-2 text-[#FC6100]" /> ATS Match Score
-          </h3>
-          <p className="text-xs text-gray-500 font-bold mt-1 uppercase tracking-wider">Hybrid Rules-Based Engine</p>
-        </div>
+  // 3. Run the match analysis
+  const { score, matchingSkills, missingSkills, isLoading: isAnalyzing } = useMatchScore(
+    jobTitle,
+    jobDescription || ""
+  );
 
-        <div className="bg-white/5 border border-white/10 border-dashed rounded-2xl p-6 space-y-4">
-          <div className="flex items-center text-gray-400">
-            <AlertCircle className="w-5 h-5 mr-3 text-[#FC6100]" />
-            <p className="text-sm font-bold">Add the job description to unlock Match Scoring.</p>
-          </div>
-          <textarea
-            value={newJobDescription}
-            onChange={(e) => setNewJobDescription(e.target.value)}
-            placeholder="Paste the full job description here..."
-            className="w-full h-32 px-5 py-4 bg-black/40 border border-white/10 rounded-2xl text-white text-sm placeholder-gray-600 focus:outline-none focus:border-[#FC6100] focus:ring-1 focus:ring-[#FC6100] resize-y"
-          />
-          <div className="flex justify-end">
-            <button
-              onClick={handleSaveDescription}
-              disabled={isUpdatingJobDescription || !newJobDescription.trim()}
-              className="px-6 py-3 bg-[#FC6100] text-white text-sm font-bold rounded-xl hover:bg-[#E35205] transition-all disabled:opacity-50 flex items-center"
-            >
-              {isUpdatingJobDescription ? 'Saving...' : <><Save className="w-4 h-4 mr-2" /> Save Description</>}
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const isLoading = isLoadingVersion || isAnalyzing;
 
   return (
-    <div className="bg-[#121212] border border-white/10 rounded-3xl p-8 shadow-sm space-y-6">
-      <div className="flex justify-between items-start">
-        <div>
+    <div className="bg-[#121212] border border-white/5 rounded-[32px] p-8 shadow-2xl space-y-8 relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-32 h-32 bg-[#FC6100]/5 blur-[60px] -mr-16 -mt-16"></div>
+      
+      <div className="flex justify-between items-start relative z-10">
+        <div className="space-y-1">
           <h3 className="font-black text-xl text-white uppercase tracking-tighter flex items-center">
             <Target className="w-5 h-5 mr-2 text-[#FC6100]" /> ATS Match Score
           </h3>
-          <p className="text-xs text-gray-500 font-bold mt-1 uppercase tracking-wider">Hybrid Rules-Based Engine</p>
+          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em]">
+            Analysis based on {linkedResumeId ? "linked resume" : "primary resume"}
+          </p>
         </div>
-        {result && (
-          <div className="flex items-center space-x-4">
-            <div className="text-right">
-              <div className="text-3xl font-black text-[#FC6100]">{result.score}%</div>
-              <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Match Rate</div>
+        
+        {isLoading ? (
+          <div className="flex items-center gap-3">
+             <Loader2 className="w-6 h-6 animate-spin text-[#FC6100]" />
+             <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Analyzing...</span>
+          </div>
+        ) : (
+          <div className="text-right">
+            <div className={`text-4xl font-black ${score >= 80 ? 'text-emerald-500' : score >= 50 ? 'text-yellow-500' : 'text-[#FC6100]'}`}>
+              {score}%
             </div>
+            <div className="text-[9px] text-gray-500 font-black uppercase tracking-widest mt-1">Overall Compatibility</div>
           </div>
         )}
       </div>
 
-      {!result && !isExpanded ? (
-        <button 
-          onClick={() => setIsExpanded(true)}
-          className="w-full py-4 border border-dashed border-white/20 rounded-2xl text-gray-400 font-bold text-sm hover:border-[#FC6100] hover:text-[#FC6100] transition-colors flex justify-center items-center"
-        >
-          Paste your Resume text to scan keywords
-        </button>
-      ) : null}
-
-      {(isExpanded || result) && (
-        <div className="space-y-4 animate-in fade-in slide-in-from-top-4">
-          <div className="relative">
-            <textarea
-              value={resumeText}
-              onChange={(e) => setResumeText(e.target.value)}
-              placeholder="Paste the raw text of your resume here..."
-              className="w-full h-32 px-5 py-4 bg-black/40 border border-white/10 rounded-2xl text-white text-sm placeholder-gray-600 focus:outline-none focus:border-[#FC6100] focus:ring-1 focus:ring-[#FC6100] resize-y"
-            />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
+        {/* Matching Skills */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+            <h4 className="text-[10px] font-black text-white uppercase tracking-widest">Matched Keywords</h4>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {matchingSkills.length > 0 ? (
+              matchingSkills.map(skill => (
+                <span key={skill} className="px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-bold rounded-lg uppercase tracking-wider">
+                  {skill}
+                </span>
+              ))
+            ) : (
+              <span className="text-xs text-gray-600 font-bold italic">No technical matches found yet.</span>
+            )}
           </div>
         </div>
-      )}
 
-      {result && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-white/10">
-          <div>
-            <h4 className="text-xs font-black text-emerald-500 uppercase tracking-widest mb-3 flex items-center">
-              <CheckCircle2 className="w-4 h-4 mr-1.5" /> Matched Keywords ({result.matchedKeywords.length})
-            </h4>
-            <div className="flex flex-wrap gap-2">
-              {result.matchedKeywords.length === 0 ? (
-                <span className="text-xs text-gray-600">None found</span>
-              ) : (
-                result.matchedKeywords.map(kw => (
-                  <span key={kw} className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold rounded-lg">
-                    {kw}
-                  </span>
-                ))
-              )}
-            </div>
+        {/* Missing Skills */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-[#FC6100]" />
+            <h4 className="text-[10px] font-black text-white uppercase tracking-widest">Missing Requirements</h4>
           </div>
-          <div>
-            <h4 className="text-xs font-black text-red-500 uppercase tracking-widest mb-3 flex items-center">
-              <AlertCircle className="w-4 h-4 mr-1.5" /> Missing Keywords ({result.missingKeywords.length})
-            </h4>
-            <div className="flex flex-wrap gap-2">
-              {result.missingKeywords.length === 0 ? (
-                <span className="text-xs text-gray-600">Perfect match!</span>
-              ) : (
-                result.missingKeywords.map(kw => (
-                  <span key={kw} className="px-3 py-1 bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-bold rounded-lg">
-                    {kw}
-                  </span>
-                ))
-              )}
-            </div>
+          <div className="flex flex-wrap gap-2">
+            {missingSkills.length > 0 ? (
+              missingSkills.map(skill => (
+                <span key={skill} className="px-3 py-1.5 bg-[#FC6100]/10 border border-[#FC6100]/20 text-[#FC6100] text-[11px] font-bold rounded-lg uppercase tracking-wider">
+                  {skill}
+                </span>
+              ))
+            ) : (
+              <span className="text-xs text-emerald-600 font-bold italic">You have all the required keywords!</span>
+            )}
           </div>
+        </div>
+      </div>
+
+      {!jobDescription && (
+        <div className="p-4 bg-red-500/5 border border-red-500/10 rounded-2xl flex items-center gap-3">
+          <AlertCircle className="w-4 h-4 text-red-500" />
+          <p className="text-[10px] text-red-400 font-bold uppercase tracking-widest leading-relaxed">
+            Note: Job description is missing. Score is based on title only.
+          </p>
         </div>
       )}
     </div>

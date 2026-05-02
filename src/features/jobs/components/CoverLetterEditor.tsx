@@ -1,16 +1,35 @@
-import React, { useState } from 'react';
-import { useCoverLetter } from '../hooks/useCoverLetter';
-import { FileText, Save, CheckCircle2 } from 'lucide-react';
+import { Sparkles, FileText, Save, CheckCircle2 } from 'lucide-react';
+import { coverLetterGeneratorService } from '../services/coverLetterGeneratorService';
+import type { MatchScoreResult } from '../services/matchAnalysisService';
 
 interface CoverLetterEditorProps {
   applicationId: string;
+  job: { title: string; company_name: string };
+  matchResult: MatchScoreResult;
+  targetRole?: string;
 }
 
-export const CoverLetterEditor: React.FC<CoverLetterEditorProps> = ({ applicationId }) => {
+export const CoverLetterEditor: React.FC<CoverLetterEditorProps> = ({ 
+  applicationId, 
+  job, 
+  matchResult,
+  targetRole 
+}) => {
   const { coverLetter, isLoading, saveCoverLetter, isSaving } = useCoverLetter(applicationId);
   const [content, setContent] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+
+  const handleMagicDraft = () => {
+    const draft = coverLetterGeneratorService.generateDraft({
+      jobTitle: job.title,
+      companyName: job.company_name,
+      matchingSkills: matchResult.matchingSkills,
+      targetRole: targetRole || ""
+    });
+    setContent(draft);
+    setIsEditing(true);
+  };
 
   const handleSave = async () => {
     await saveCoverLetter(content);
@@ -38,17 +57,25 @@ export const CoverLetterEditor: React.FC<CoverLetterEditorProps> = ({ applicatio
       </div>
 
       {!coverLetter && !isEditing ? (
-        <div className="text-center py-8 bg-white/5 rounded-2xl border border-white/5 border-dashed">
-          <p className="text-gray-400 font-medium text-sm mb-4">You haven't written a cover letter for this application yet.</p>
-          <button
-            onClick={() => {
-              setContent('');
-              setIsEditing(true);
-            }}
-            className="px-6 py-2 bg-[#FC6100] text-white text-sm font-bold rounded-xl hover:bg-[#E35205] transition-all"
-          >
-            Draft Cover Letter
-          </button>
+        <div className="text-center py-8 bg-white/5 rounded-2xl border border-white/5 border-dashed space-y-4">
+          <p className="text-gray-400 font-medium text-sm">You haven't written a cover letter for this application yet.</p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center px-6">
+            <button
+              onClick={handleMagicDraft}
+              className="px-6 py-2.5 bg-gradient-to-r from-[#FC6100] to-[#E35205] text-white text-sm font-bold rounded-xl hover:shadow-[0_0_20px_rgba(252,97,0,0.3)] transition-all flex items-center justify-center"
+            >
+              <Sparkles className="w-4 h-4 mr-2" /> Magic Draft (AI)
+            </button>
+            <button
+              onClick={() => {
+                setContent('');
+                setIsEditing(true);
+              }}
+              className="px-6 py-2.5 bg-white/5 text-gray-300 hover:text-white text-sm font-bold rounded-xl border border-white/10 hover:border-white/20 transition-all"
+            >
+              Manual Draft
+            </button>
+          </div>
         </div>
       ) : isEditing ? (
         <div className="space-y-4">

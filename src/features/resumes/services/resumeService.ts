@@ -1,6 +1,7 @@
 import { supabase } from '../../../lib/supabaseClient';
 import type { Database, Json } from '../../../types/supabase';
 import { handleApiError } from '../../../services/apiClient';
+import { pdfExtractionService } from './pdfExtractionService';
 
 export type Resume = Database['public']['Tables']['resumes']['Row'];
 export type ResumeVersion = Database['public']['Tables']['resume_versions']['Row'];
@@ -80,6 +81,11 @@ export const resumeService = {
   ): Promise<ResumeVersion> {
     try {
       console.log("[resumeService] Starting createResumeVersion...");
+      
+      // 1. Extract text from PDF before uploading
+      console.log("[resumeService] Scanning PDF for text...");
+      const extractedText = await pdfExtractionService.extractText(file);
+      
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError || !user) throw new Error('User not authenticated');
 
@@ -101,27 +107,24 @@ export const resumeService = {
         throw uploadError;
       }
 
-      console.log("[resumeService] Upload successful. Getting public URL...");
-      const { data: publicUrlData } = supabase.storage
-        .from('resumes')
-        .getPublicUrl(filePath);
-
-      if (!publicUrlData?.publicUrl) {
-        throw new Error("Failed to generate public URL for uploaded file.");
-      }
-
+      // 2. Merge extracted text into metadata
       const enrichedContent: Json =
         typeof content === 'object' && content !== null && !Array.isArray(content)
-          ? { ...content, label: label || `Version ${versionNumber}` }
-          : content;
+          ? { 
+              ...content, 
+              label: label || `Version ${versionNumber}`,
+              extractedText: extractedText 
+            }
+          : { extractedText };
 
+      // 3. Store the path, NOT a public URL
       console.log("[resumeService] Inserting version record into DB...");
       const { data, error } = await supabase
         .from('resume_versions')
         .insert({
           resume_id: resumeId,
           version_number: versionNumber,
-          file_url: publicUrlData.publicUrl,
+          file_url: filePath, // STORE THE PATH, NOT PUBLIC URL
           content: enrichedContent,
         })
         .select()
@@ -129,16 +132,10 @@ export const resumeService = {
 
       if (error) {
         console.error("[resumeService] DB Insert failed:", error);
-        // Rollback upload on DB failure (best-effort)
         await supabase.storage.from('resumes').remove([filePath]);
         throw error;
       }
 
-      if (!data) {
-        throw new Error('No data returned from resume version insert');
-      }
-
-      console.log("[resumeService] Success:", data);
       return data;
     } catch (error) {
       console.error("[resumeService] Global Catch:", error);
@@ -147,10 +144,23 @@ export const resumeService = {
   },
 
   /**
-   * 5. getResumeVersions
+   * 5. getResumeVersions (Hardened with ownership check)
    */
   async getResumeVersions(resumeId: string): Promise<ResumeVersion[]> {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Unauthenticated');
+
+      // First verify the resume belongs to the user
+      const { data: resume } = await supabase
+        .from('resumes')
+        .select('id')
+        .eq('id', resumeId)
+        .eq('profile_id', user.id)
+        .single();
+
+      if (!resume) throw new Error('Unauthorized');
+
       const { data, error } = await supabase
         .from('resume_versions')
         .select('*')
@@ -161,6 +171,23 @@ export const resumeService = {
       return data || [];
     } catch (error) {
       return handleApiError(error);
+    }
+  },
+
+  /**
+   * 8. createSignedUrl (NEW: For secure, temporary access)
+   */
+  async createSignedUrl(filePath: string): Promise<string> {
+    try {
+      const { data, error } = await supabase.storage
+        .from('resumes')
+        .createSignedUrl(filePath, 3600); // URL valid for 1 hour
+
+      if (error) throw error;
+      return data.signedUrl;
+    } catch (error) {
+      console.error("[resumeService] createSignedUrl failed:", error);
+      return "";
     }
   },
 
@@ -177,6 +204,27 @@ export const resumeService = {
       if (error) throw error;
     } catch (error) {
       handleApiError(error);
+    }
+  },
+
+  /**
+   * 7. getLatestVersion
+   */
+  async getLatestVersion(resumeId: string): Promise<ResumeVersion | null> {
+    try {
+      const { data, error } = await supabase
+        .from('resume_versions')
+        .select('*')
+        .eq('resume_id', resumeId)
+        .order('version_number', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error("[resumeService] getLatestVersion failed:", error);
+      return null;
     }
   },
 };

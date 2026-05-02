@@ -173,5 +173,21 @@ export const jobService = {
     } catch (error) {
       handleApiError(error);
     }
+  },
+
+  /**
+   * Update job details (used for background scraping)
+   */
+  async updateJobDetails(jobId: string, details: Partial<Job>): Promise<void> {
+    try {
+      const { error } = await supabase
+        .from('jobs')
+        .update({ ...details, updated_at: new Date().toISOString() })
+        .eq('id', jobId);
+
+      if (error) throw error;
+    } catch (error) {
+      handleApiError(error);
+    }
   }
 };

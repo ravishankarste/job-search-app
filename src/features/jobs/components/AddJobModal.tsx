@@ -7,6 +7,14 @@ interface AddJobModalProps {
   onClose: () => void;
   onSubmit: (data: any) => Promise<void>;
   isSubmitting: boolean;
+  initialData?: Partial<{
+    company_name: string;
+    title: string;
+    url: string;
+    description: string;
+    location: string;
+    employment_type: string;
+  }>;
 }
 
 export const AddJobModal: React.FC<AddJobModalProps> = ({
@@ -14,6 +22,7 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({
   onClose,
   onSubmit,
   isSubmitting,
+  initialData,
 }) => {
   const [formData, setFormData] = useState({
     company_name: '',
@@ -23,6 +32,20 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({
     location: '',
     employment_type: 'full-time',
   });
+
+  // Reset form with initialData when modal opens
+  React.useEffect(() => {
+    if (isOpen) {
+      setFormData({
+        company_name: initialData?.company_name || '',
+        title: initialData?.title || '',
+        url: initialData?.url || '',
+        description: initialData?.description || '',
+        location: initialData?.location || '',
+        employment_type: initialData?.employment_type || 'full-time',
+      });
+    }
+  }, [isOpen, initialData]);
 
   if (!isOpen) return null;
 
