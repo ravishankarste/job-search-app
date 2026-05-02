@@ -46,7 +46,7 @@ export const DashboardLayout: React.FC = () => {
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Discovery', path: '/discovery', icon: Compass },
-    { name: 'Job Pipeline', path: '/jobs', icon: Briefcase },
+    { name: 'Job Pipeline', path: '/pipeline', icon: Briefcase },
     { name: 'Resumes', path: '/resumes', icon: FileText },
     { name: 'Analytics', path: '/analytics', icon: BarChart3 },
     { name: 'Settings', path: '/settings', icon: Settings },
@@ -144,7 +144,9 @@ export const DashboardLayout: React.FC = () => {
               <div className="hidden sm:flex items-center gap-3 text-xs font-black uppercase tracking-widest text-white/40">
                 <Link to="/dashboard" className="hover:text-white transition-colors">Home</Link>
                 <ChevronRight className="w-3.5 h-3.5 opacity-30" />
-                <span className="text-[#FC6100]">{location.pathname.substring(1) || 'Dashboard'}</span>
+                <span className="text-[#FC6100]">
+                  {location.pathname === '/pipeline' ? 'Job Pipeline' : (location.pathname.substring(1) || 'Dashboard')}
+                </span>
               </div>
            </div>
            

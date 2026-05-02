@@ -42,11 +42,11 @@ export const router = createBrowserRouter([
         element: <Discovery />,
       },
       {
-        path: '/jobs',
+        path: '/pipeline',
         element: <JobListPage />,
       },
       {
-        path: '/jobs/:id',
+        path: '/pipeline/:id',
         element: <JobDetailPage />,
       },
       {
