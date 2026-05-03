@@ -180,27 +180,27 @@ export const LandingPage: React.FC = () => {
             </button>
 
             {result && (
-              <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-top-4 duration-500">
-                <div className="bg-[#FC6100]/10 border border-[#FC6100]/20 rounded-2xl p-6 text-center space-y-2">
-                  <p className="text-4xl font-bold text-[#FC6100]">{result.score}%</p>
-                  <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">Match Score</p>
+              <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-8 animate-in fade-in slide-in-from-top-4 duration-500">
+                <div className="bg-white/5 border border-white/10 rounded-[24px] p-8 text-center flex flex-col items-center justify-center space-y-2">
+                  <p className="text-6xl font-bold text-[#FC6100] tracking-tighter">{result.score}%</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500">Match Accuracy</p>
                 </div>
                 
-                <div className="bg-green-500/5 border border-green-500/10 rounded-2xl p-6 space-y-3">
-                  <p className="text-[9px] font-black uppercase tracking-widest text-green-500">Matching Skills</p>
+                <div className="bg-white/5 border border-white/10 rounded-[24px] p-8 space-y-4">
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#00FF00]">Matching Skills</p>
                   <div className="flex flex-wrap gap-2">
                     {result.matchingSkills.length > 0 ? result.matchingSkills.map(s => (
-                      <span key={s} className="px-2 py-1 bg-green-500/10 text-green-500 text-[9px] font-bold rounded uppercase">{s}</span>
-                    )) : <span className="text-[9px] text-gray-600">No matches found.</span>}
+                      <span key={s} className="px-3 py-1.5 bg-[#00FF00]/10 text-[#00FF00] border border-[#00FF00]/30 text-[10px] font-black uppercase tracking-wider rounded-lg">{s}</span>
+                    )) : <span className="text-xs text-gray-600 italic">No matches detected.</span>}
                   </div>
                 </div>
 
-                <div className="bg-red-500/5 border border-red-500/10 rounded-2xl p-6 space-y-3">
-                  <p className="text-[9px] font-black uppercase tracking-widest text-red-500">Missing Keywords</p>
+                <div className="bg-white/5 border border-white/10 rounded-[24px] p-8 space-y-4">
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white">Critical Gaps</p>
                   <div className="flex flex-wrap gap-2">
                     {result.missingSkills.length > 0 ? result.missingSkills.map(s => (
-                      <span key={s} className="px-2 py-1 bg-red-500/10 text-red-500 text-[9px] font-bold rounded uppercase">{s}</span>
-                    )) : <span className="text-[9px] text-gray-600">None! You're solid.</span>}
+                      <span key={s} className="px-3 py-1.5 bg-white/10 text-white border border-white/20 text-[10px] font-black uppercase tracking-wider rounded-lg">{s}</span>
+                    )) : <span className="text-xs text-gray-600 italic">None! Ready to apply.</span>}
                   </div>
                 </div>
 
