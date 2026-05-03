@@ -118,7 +118,7 @@ export const LegalPage: React.FC = () => {
               <p className="text-sm text-gray-600 font-medium tracking-wide uppercase tracking-[0.2em]">Our engineering team is ready to assist.</p>
             </div>
             <a 
-              href="mailto:mypassincuk@gmail.com" 
+              href="mailto:hopeitmadesense@gmail.com" 
               className="px-16 py-8 bg-white/5 border border-white/10 text-white text-sm font-black uppercase tracking-[0.3em] rounded-[32px] hover:bg-white/10 hover:border-white/20 transition-all flex items-center justify-center gap-4 shadow-2xl shadow-black/40"
             >
               Contact Engineering Support

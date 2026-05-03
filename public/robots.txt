@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /pipeline
+Disallow: /resumes
+Disallow: /settings
+Disallow: /analytics
+
+Sitemap: https://upanita.com/sitemap.xml
