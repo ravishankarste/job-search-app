@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
-import { Layers, Shield, FileText, Lock, ArrowLeft } from 'lucide-react';
+import { Layers, Shield, FileText, Lock, ArrowLeft, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const LegalPage: React.FC = () => {
+export const LegalPage: React.FC = () => {
   useEffect(() => {
-    // Handle hash scrolling if user comes from a specific link
+    // Handle hash scrolling
     const hash = window.location.hash;
     if (hash) {
       const element = document.getElementById(hash.substring(1));
@@ -13,125 +13,140 @@ const LegalPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-black text-gray-300 font-sans selection:bg-[#FC6100]/30">
-      {/* Premium Header */}
-      <nav className="fixed top-0 w-full z-50 px-6 py-8 border-b border-white/5 bg-black/80 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 bg-[#FC6100] rounded-xl flex items-center justify-center shadow-lg shadow-[#FC6100]/20 group-hover:scale-110 transition-transform">
-              <Layers className="text-white w-6 h-6" />
-            </div>
-            <span className="text-xl font-bold tracking-tight text-white">Udyog Marg</span>
-          </Link>
-          <Link to="/" className="text-sm font-bold text-gray-500 hover:text-white transition-colors flex items-center gap-2">
-            <ArrowLeft className="w-4 h-4" /> Back to Home
-          </Link>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-black text-gray-300 font-sans selection:bg-[#FC6100]/30 overflow-x-hidden">
+      {/* Background Ambience */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#FC6100]/5 blur-[120px] rounded-full"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#FC6100]/5 blur-[120px] rounded-full"></div>
+      </div>
 
-      <main className="max-w-4xl mx-auto pt-48 pb-32 px-6">
-        <div className="space-y-24">
+      <main className="relative z-10 w-full flex flex-col items-center">
+        {/* Header and Hero Zone */}
+        <div className="w-full max-w-7xl mx-auto pt-32 pb-48 px-6 flex flex-col items-center gap-20">
+          <Link to="/" className="flex items-center gap-3 group">
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform text-[#FC6100]" /> 
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white transition-colors">Back to Home</span>
+          </Link>
           
-          {/* Header Section */}
-          <div className="space-y-6">
-            <h1 className="text-5xl md:text-7xl font-bold text-white tracking-tighter">Legal Hub</h1>
-            <p className="text-xl text-gray-500 max-w-2xl leading-relaxed">
-              Engineered for transparency. We protect your data as rigorously as you build your career.
+          <div className="space-y-6 flex flex-col items-center">
+            <div className="inline-flex items-center gap-3 px-4 py-2 bg-[#FC6100]/10 border border-[#FC6100]/20 rounded-full mx-auto text-center">
+               <Shield className="w-3 h-3 text-[#FC6100]" />
+               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#FC6100]">Alpha Transparency Protocol</span>
+            </div>
+            <h1 className="text-6xl md:text-8xl font-bold tracking-tighter text-center leading-tight text-white">Legal & Security</h1>
+            <p className="text-2xl text-gray-400 font-medium max-w-2xl mx-auto text-center leading-relaxed">
+              Udyog Marg is built on trust, transparency, and high-performance security. 
+              We are currently in Private Alpha as we finalize our full regulatory framework.
             </p>
           </div>
+        </div>
 
-          {/* Privacy Policy Section */}
-          <section id="privacy" className="space-y-12 pt-12 border-t border-white/5">
-            <div className="flex items-center gap-4 text-white">
-              <Shield className="w-8 h-8 text-[#FC6100]" />
-              <h2 className="text-3xl font-bold tracking-tight">Privacy Policy</h2>
+        {/* Sections */}
+        <div className="w-full max-w-4xl mx-auto flex flex-col items-center gap-32 px-6">
+          {/* Privacy */}
+          <section id="privacy" className="w-full p-16 md:p-24 bg-white/[0.02] border border-white/10 rounded-[64px] space-y-12 flex flex-col items-center text-center">
+            <div className="flex flex-col items-center gap-8 text-[#FC6100]">
+              <div className="w-24 h-24 bg-[#FC6100]/10 rounded-3xl flex items-center justify-center shadow-2xl shadow-[#FC6100]/10">
+                <Lock className="w-12 h-12" />
+              </div>
+              <h2 className="text-4xl md:text-5xl font-bold tracking-tight" style={{ color: '#FC6100' }}>Privacy Policy</h2>
             </div>
-            
-            <div className="space-y-8 text-lg leading-relaxed text-gray-400">
+            <div className="space-y-8 text-gray-400 leading-loose font-medium max-w-2xl mx-auto text-xl text-center">
               <p>
-                At Udyog Marg, we respect your privacy. This policy outlines how we handle your data within the Alpha phase of our platform.
+                Your data is your leverage. Udyog Marg does not sell your job search history, resumes, or personal information to third-party recruiters or advertisers. 
               </p>
-              
-              <div className="space-y-4">
-                <h3 className="text-xl font-bold text-white">1. Data Collection</h3>
-                <p>
-                  We collect professional information you provide, including resume data, job descriptions, and application statuses, solely to provide match intelligence and tracking services.
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <h3 className="text-xl font-bold text-white">2. Third-Party Services</h3>
-                <p>
-                  We use Supabase for secure data storage and Google for authentication. Your data is never sold to third parties. We use Apify for public job data extraction only.
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <h3 className="text-xl font-bold text-white">3. Your Rights</h3>
-                <p>
-                  You have full control over your data. You may delete your account and all associated job tracking data at any time via the dashboard settings.
-                </p>
-              </div>
-            </div>
-          </section>
-
-          {/* Terms of Service Section */}
-          <section id="terms" className="space-y-12 pt-12 border-t border-white/5">
-            <div className="flex items-center gap-4 text-white">
-              <FileText className="w-8 h-8 text-[#FC6100]" />
-              <h2 className="text-3xl font-bold tracking-tight">Terms of Service</h2>
-            </div>
-
-            <div className="space-y-8 text-lg leading-relaxed text-gray-400">
               <p>
-                By using Udyog Marg, you agree to the following terms designed to protect the integrity of our Alpha community.
+                During the Alpha phase, we collect essential telemetry to improve the "Match Intelligence" engine. All resume data processed is encrypted at rest and in transit.
               </p>
-
-              <div className="space-y-4">
-                <h3 className="text-xl font-bold text-white">1. Alpha Usage</h3>
-                <p>
-                  Udyog Marg is currently in an Alpha stage. While we strive for 100% uptime, services are provided "as-is" during this testing phase.
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <h3 className="text-xl font-bold text-white">2. Acceptable Use</h3>
-                <p>
-                  Users agree not to use the automated discovery tools for any purpose other than personal career advancement. Mass scraping or botting of our internal platform is strictly prohibited.
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <h3 className="text-xl font-bold text-white">3. Intellectual Property</h3>
-                <p>
-                  The "Udyog Marg" name, logo, and the proprietary Match Intelligence algorithms are the exclusive property of our platform developers.
-                </p>
+              <div className="pt-12 flex flex-col items-center gap-4">
+                <p className="text-[10px] font-black uppercase tracking-[0.6em] text-white/20">Last Updated</p>
+                <p className="text-sm font-bold text-[#FC6100]">May 2, 2026</p>
               </div>
             </div>
           </section>
 
-          {/* Security Section */}
-          <section id="security" className="space-y-12 pt-12 border-t border-white/5">
-            <div className="flex items-center gap-4 text-white">
-              <Lock className="w-8 h-8 text-[#FC6100]" />
-              <h2 className="text-3xl font-bold tracking-tight">Security Standards</h2>
+          {/* Terms */}
+          <section id="terms" className="w-full p-16 md:p-24 bg-white/[0.02] border border-white/10 rounded-[64px] space-y-12 flex flex-col items-center text-center">
+            <div className="flex flex-col items-center gap-8 text-[#FC6100]">
+              <div className="w-24 h-24 bg-[#FC6100]/10 rounded-3xl flex items-center justify-center shadow-2xl shadow-[#FC6100]/10">
+                <FileText className="w-12 h-12" />
+              </div>
+              <h2 className="text-4xl md:text-5xl font-bold tracking-tight" style={{ color: '#FC6100' }}>Terms of Service</h2>
             </div>
-            <p className="text-lg leading-relaxed text-gray-400">
-              All communications between your browser and our servers are encrypted via SSL. We leverage Supabase's enterprise-grade security protocols to ensure your job hunt remains confidential.
-            </p>
+            <div className="space-y-8 text-gray-400 leading-loose font-medium max-w-2xl mx-auto text-xl">
+              <p>
+                Udyog Marg is a high-performance tool for career engineering. By using the Alpha, you agree to use our automated scraping and match intelligence features responsibly.
+              </p>
+              <p>
+                As an Alpha user, you acknowledge that features (like the Universal Importer) are under active development and may be subject to API limits or maintenance windows.
+              </p>
+              <div className="pt-12 flex flex-col items-center gap-4">
+                <p className="text-[10px] font-black uppercase tracking-[0.6em] text-white/20">Protocol Version</p>
+                <p className="text-sm font-bold text-[#FC6100]">Alpha v1.0 Agreement</p>
+              </div>
+            </div>
           </section>
 
+          {/* Security */}
+          <section id="security" className="w-full p-16 md:p-24 bg-white/[0.02] border border-white/10 rounded-[64px] space-y-12 flex flex-col items-center text-center">
+            <div className="flex flex-col items-center gap-8 text-[#FC6100]">
+              <div className="w-24 h-24 bg-[#FC6100]/10 rounded-3xl flex items-center justify-center shadow-2xl shadow-[#FC6100]/10">
+                <Shield className="w-12 h-12" />
+              </div>
+              <h2 className="text-4xl md:text-5xl font-bold tracking-tight" style={{ color: '#FC6100' }}>Security Audit</h2>
+            </div>
+            <div className="space-y-8 text-gray-400 leading-loose font-medium max-w-2xl mx-auto text-xl">
+              <p>
+                We are currently undergoing a comprehensive security audit to ensure our "Job Search OS" meets enterprise-grade standards. 
+              </p>
+              <p>
+                Our infrastructure is built on Supabase (PostgreSQL) with Row Level Security (RLS) enforced across all tables. Full audit results will be published on May 16th, 2026.
+              </p>
+              <div className="pt-12 flex flex-col items-center gap-4">
+                <p className="text-[10px] font-black uppercase tracking-[0.6em] text-white/20">Current Status</p>
+                <p className="text-sm font-bold text-[#FC6100]">In Progress (Target: May 16)</p>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        {/* CTA and Final Return */}
+        <div className="pt-32 pb-48 text-center border-t border-white/5 w-full max-w-4xl flex flex-col items-center space-y-32">
+          <div className="space-y-16 flex flex-col items-center">
+            <div className="space-y-6">
+              <p className="text-2xl text-gray-500 font-medium">Have questions about our Alpha protocol?</p>
+              <p className="text-sm text-gray-600 font-medium tracking-wide uppercase tracking-[0.2em]">Our engineering team is ready to assist.</p>
+            </div>
+            <a 
+              href="mailto:mypassincuk@gmail.com" 
+              className="px-16 py-8 bg-white/5 border border-white/10 text-white text-sm font-black uppercase tracking-[0.3em] rounded-[32px] hover:bg-white/10 hover:border-white/20 transition-all flex items-center justify-center gap-4 shadow-2xl shadow-black/40"
+            >
+              Contact Engineering Support
+            </a>
+          </div>
+
+          <div className="space-y-16 flex flex-col items-center pt-32 w-full border-t border-white/5">
+            <div className="space-y-6">
+              <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-white">Ready to return?</h2>
+              <p className="text-xl text-gray-500 font-medium">Your job search engine is waiting.</p>
+            </div>
+            <Link 
+              to="/" 
+              className="px-20 py-10 bg-[#FC6100] text-white text-xl font-black uppercase tracking-[0.4em] rounded-[40px] hover:scale-105 transition-all shadow-[0_40px_100px_rgba(252,97,0,0.5)] flex items-center justify-center gap-6 group"
+            >
+              <ArrowLeft className="w-8 h-8 group-hover:-translate-x-3 transition-transform" /> 
+              Back to Home
+            </Link>
+          </div>
         </div>
       </main>
 
-      {/* Simplified Footer */}
-      <footer className="py-20 px-6 border-t border-white/5 bg-black/50 text-center">
-        <p className="text-xs font-black uppercase tracking-[0.4em] text-gray-700">
-          Udyog Marg &copy; 2026. Build Legacy. Dominate the Hunt.
+      {/* Footer Copy */}
+      <footer className="py-20 px-6 border-t border-white/5 text-center w-full bg-black">
+        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-600">
+          Udyog Marg &copy; 2026. Built in London.
         </p>
       </footer>
     </div>
   );
 };
-
-export default LegalPage;
