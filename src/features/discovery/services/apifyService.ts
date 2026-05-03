@@ -1,3 +1,5 @@
+import { supabase } from '../../../lib/supabaseClient';
+
 export interface DiscoveredJob {
   id: string;
   title: string;
@@ -14,21 +16,14 @@ export const apifyService = {
    * Search jobs using Apify (Real Implementation)
    */
   async searchJobs(query: string, location: string, daysAgo: number): Promise<DiscoveredJob[]> {
-    console.log(`[apifyService] Real search for "${query}" in "${location}" (past ${daysAgo} days)`);
-    
-    const token = import.meta.env.VITE_APIFY_API_TOKEN;
-    
-      throw new Error("Search service configuration missing. Please contact support.");
 
     try {
-      console.log("[apifyService] Attempting LinkedIn scraping...");
-      return await this.fetchLinkedIn(query, location, daysAgo, token);
+      return await this.fetchLinkedIn(query, location, daysAgo);
     } catch (err: any) {
       console.warn("[apifyService] LinkedIn scraper failed, falling back to Indeed...", err.message);
       
       try {
-        console.log("[apifyService] Attempting Indeed scraping...");
-        return await this.fetchIndeed(query, location, daysAgo, token);
+        return await this.fetchIndeed(query, location, daysAgo);
       } catch (fallbackErr: any) {
         console.error("[apifyService] Both sources failed.");
         throw new Error("The discovery service is currently unavailable. Please try again later or add jobs manually to your pipeline.");
@@ -39,29 +34,28 @@ export const apifyService = {
   /**
    * Primary Source: LinkedIn Scraper
    */
-  async fetchLinkedIn(query: string, location: string, daysAgo: number, token: string): Promise<DiscoveredJob[]> {
+  async fetchLinkedIn(query: string, location: string, daysAgo: number): Promise<DiscoveredJob[]> {
     const actorId = import.meta.env.VITE_APIFY_ACTOR_ID || 'get-leads/linkedin-scraper';
     const seconds = daysAgo * 24 * 60 * 60;
     const timeFilter = `r${seconds}`;
-    const formattedActorId = actorId.replace('/', '~');
-    const url = `https://api.apify.com/v2/acts/${formattedActorId}/run-sync-get-dataset-items?token=${token}`;
 
     const input = actorId.includes('get-leads') 
       ? { mode: "jobs", searchQuery: query, location: location, limit: 10, f_TPR: timeFilter }
       : { keyword: query, location: location, f_TPR: timeFilter, limit: 10 };
 
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(input),
+    const { data, error } = await supabase.functions.invoke('apify-proxy', {
+      body: { 
+        action: 'run-sync', 
+        actorId, 
+        input 
+      }
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`LinkedIn API Error: ${response.status} - ${errorText}`);
+    if (error || !data) {
+      throw new Error(`LinkedIn Proxy Error: ${error?.message || 'No data returned'}`);
     }
 
-    const items = await response.json();
+    const items = data;
 
     return items.map((item: any, index: number) => ({
       id: item.id || item.url || `linkedin-${index}`,
@@ -78,10 +72,9 @@ export const apifyService = {
   /**
    * Fallback Source: Indeed Scraper
    */
-  async fetchIndeed(query: string, location: string, daysAgo: number, token: string): Promise<DiscoveredJob[]> {
+  async fetchIndeed(query: string, location: string, daysAgo: number): Promise<DiscoveredJob[]> {
     // We use a popular Indeed scraper on Apify as the fallback
     const actorId = 'mishtr~indeed-scraper'; 
-    const url = `https://api.apify.com/v2/acts/${actorId}/run-sync-get-dataset-items?token=${token}`;
 
     // mishtr/indeed-scraper schema maps dates differently
     let postedAtFilter = "last_7_days";
@@ -97,18 +90,19 @@ export const apifyService = {
       postedAt: postedAtFilter
     };
 
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(input),
+    const { data, error } = await supabase.functions.invoke('apify-proxy', {
+      body: { 
+        action: 'run-sync', 
+        actorId, 
+        input 
+      }
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Indeed API Error: ${response.status} - ${errorText}`);
+    if (error || !data) {
+      throw new Error(`Indeed Proxy Error: ${error?.message || 'No data returned'}`);
     }
 
-    const items = await response.json();
+    const items = data;
     return items.map((item: any, index: number) => this.mapIndeedItem(item, index));
   },
 
@@ -177,15 +171,13 @@ export const apifyService = {
   /**
    * Search the web for a URL to peek at its title/metadata
    */
-  async peekUrlMetadata(url: string, token: string): Promise<{ title?: string, company?: string }> {
-    console.log(`[apifyService] Peeking web for: ${url}`);
+  async peekUrlMetadata(url: string): Promise<{ title?: string, company?: string }> {
     
     // First, try a Zero-Cost Direct Fetch (if allowed by CORS/Target)
     try {
       const direct = await this.directFetchMetadata(url);
       if (direct.title) return direct;
     } catch (e) {
-      console.log("[apifyService] Direct fetch failed (likely CORS), falling back to search peek.");
     }
 
     // Fallback to Google Search Peek (Apify)
@@ -199,7 +191,7 @@ export const apifyService = {
     const input = { queries: query, maxPagesPerQuery: 1, resultsPerPage: 1 };
 
     try {
-      const results = await this.runActorAndGetResults(actorId, input, token);
+      const results = await this.runActorAndGetResults(actorId, input);
       if (results && results[0]?.organicResults?.[0]) {
         const fullTitle = results[0].organicResults[0].title || "";
         return this.parseTitleFromSnippet(fullTitle);
@@ -224,7 +216,6 @@ export const apifyService = {
   },
 
   parseTitleFromSnippet(fullTitle: string): { title?: string, company?: string } {
-    console.log(`[apifyService] Parsing snippet: ${fullTitle}`);
 
     // Pattern 1: "Job Title at Company | LinkedIn"
     if (fullTitle.includes(' at ') && fullTitle.includes('|')) {
@@ -251,14 +242,12 @@ export const apifyService = {
 
   async scrapeJobUrl(url: string): Promise<DiscoveredJob> {
     const cleanUrl = this.normalizeJobUrl(url);
-    const token = import.meta.env.VITE_APIFY_API_TOKEN;
-    if (!token) throw new Error("Missing VITE_APIFY_API_TOKEN");
 
     try {
       if (cleanUrl.includes('linkedin.com')) {
-        return await this.scrapeSingleLinkedIn(cleanUrl, token);
+        return await this.scrapeSingleLinkedIn(cleanUrl);
       } else if (cleanUrl.includes('indeed.com')) {
-        return await this.scrapeSingleIndeed(cleanUrl, token);
+        return await this.scrapeSingleIndeed(cleanUrl);
       }
     } catch (err) {
       console.warn("[apifyService] Direct scrape failed/timed out. Falling back to modal.", err);
@@ -267,51 +256,66 @@ export const apifyService = {
     throw new Error("Unsupported URL");
   },
 
-  async scrapeSingleLinkedIn(url: string, token: string): Promise<DiscoveredJob> {
+  async scrapeSingleLinkedIn(url: string): Promise<DiscoveredJob> {
     const actorId = 'curious_coder~linkedin-jobs-scraper';
     const input = { urls: [url], maxItems: 1 };
-    const items = await this.runActorAndGetResults(actorId, input, token);
+    const items = await this.runActorAndGetResults(actorId, input);
     if (!items || !items.length) throw new Error("Could not find job details.");
     return this.mapLinkedInItem(items[0], 0);
   },
 
-  async scrapeSingleIndeed(url: string, token: string): Promise<DiscoveredJob> {
+  async scrapeSingleIndeed(url: string): Promise<DiscoveredJob> {
     const actorId = 'mishtr~indeed-scraper';
     const input = { startUrls: [{ url }], maxItems: 1 };
-    const items = await this.runActorAndGetResults(actorId, input, token);
+    const items = await this.runActorAndGetResults(actorId, input);
     if (!items || !items.length) throw new Error("Could not find job details.");
     return this.mapIndeedItem(items[0], 0);
   },
 
-  async runActorAndGetResults(actorId: string, input: any, token: string): Promise<any[]> {
-    const formattedId = actorId.replace('/', '~');
-    const runUrl = `https://api.apify.com/v2/acts/${formattedId}/runs?token=${token}`;
-    const runRes = await fetch(runUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(input),
+  async runActorAndGetResults(actorId: string, input: any): Promise<any[]> {
+    const { data: runData, error: runError } = await supabase.functions.invoke('apify-proxy', {
+      body: { 
+        action: 'run-actor', 
+        actorId, 
+        input 
+      }
     });
 
-    if (!runRes.ok) {
-      const errorText = await runRes.text();
-      throw new Error(`Service Start Failed: ${runRes.status} - ${errorText}`);
+    if (runError || !runData) {
+      throw new Error(`Actor Start Failed: ${runError?.message || 'No data'}`);
     }
 
-    const { data } = await runRes.json();
+    const runId = runData.data.id;
+    const defaultDatasetId = runData.data.defaultDatasetId;
     
     // Poll for results (max 3 minutes)
     const startTime = Date.now();
     const timeout = 180000; 
     while (Date.now() - startTime < timeout) {
-      const statusRes = await fetch(`https://api.apify.com/v2/actor-runs/${data.id}?token=${token}`);
-      const { data: statusData } = await statusRes.json();
-      if (statusData.status === 'SUCCEEDED') break;
-      if (['FAILED', 'ABORTED', 'TIMED-OUT'].includes(statusData.status)) throw new Error(`Scraper ${statusData.status}`);
+      const { data: statusData, error: statusError } = await supabase.functions.invoke('apify-proxy', {
+        body: { 
+          action: 'get-run', 
+          input: { runId } 
+        }
+      });
+
+      if (statusError || !statusData) throw new Error(`Poll Failed: ${statusError?.message}`);
+      
+      const status = statusData.data.status;
+      if (status === 'SUCCEEDED') break;
+      if (['FAILED', 'ABORTED', 'TIMED-OUT'].includes(status)) throw new Error(`Scraper ${status}`);
       await new Promise(r => setTimeout(r, 3000));
     }
 
-    const itemsRes = await fetch(`https://api.apify.com/v2/datasets/${data.defaultDatasetId}/items?token=${token}`);
-    return await itemsRes.json();
+    const { data: itemsData, error: itemsError } = await supabase.functions.invoke('apify-proxy', {
+      body: { 
+        action: 'get-dataset', 
+        input: { datasetId: defaultDatasetId } 
+      }
+    });
+
+    if (itemsError || !itemsData) throw new Error(`Fetch Dataset Failed: ${itemsError?.message}`);
+    return itemsData;
   },
 
   mapLinkedInItem(item: any, index: number): DiscoveredJob {

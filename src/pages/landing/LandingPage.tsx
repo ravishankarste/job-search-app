@@ -10,9 +10,50 @@ import {
   Globe
 } from 'lucide-react';
 import { trackEvent } from '../../lib/analytics';
+import { matchAnalysisService } from '../../features/jobs/services/matchAnalysisService';
+import { pdfExtractionService } from '../../features/resumes/services/pdfExtractionService';
 
 export const LandingPage: React.FC = () => {
   const { session, isLoading } = useAuth();
+  
+  // Widget State
+  const [jobText, setJobText] = React.useState('');
+  const [resumeText, setResumeText] = React.useState('');
+  const [resumeFileName, setResumeFileName] = React.useState<string | null>(null);
+  const [result, setResult] = React.useState<{ score: number, matchingSkills: string[], missingSkills: string[] } | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = React.useState(false);
+  const [isExtracting, setIsExtracting] = React.useState(false);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsExtracting(true);
+    setResumeFileName(file.name);
+    
+    try {
+      const text = await pdfExtractionService.extractText(file);
+      setResumeText(text);
+      trackEvent('resume_upload_landing', { fileName: file.name });
+    } catch (err) {
+      console.error("Extraction failed", err);
+    } finally {
+      setIsExtracting(false);
+    }
+  };
+
+  const handleAnalyze = () => {
+    if (!jobText || !resumeText) return;
+    setIsAnalyzing(true);
+    
+    // Simulate a brief "processing" for effect
+    setTimeout(() => {
+      const analysis = matchAnalysisService.calculateMatchScore(jobText, resumeText);
+      setResult(analysis);
+      setIsAnalyzing(false);
+      trackEvent('landing_page_analysis', { score: analysis.score });
+    }, 800);
+  };
 
   // Smart Redirect: If already logged in, skip the landing page
   if (!isLoading && session) {
@@ -65,19 +106,118 @@ export const LandingPage: React.FC = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6 animate-in fade-in slide-in-from-bottom-16 duration-700 delay-300 w-full sm:w-auto">
-            <Link 
-              to="/signup" 
-              onClick={() => trackEvent('cta_click', { location: 'hero' })}
+            <button 
+              onClick={() => document.getElementById('demo-widget')?.scrollIntoView({ behavior: 'smooth' })}
               className="w-full sm:w-auto px-10 py-5 bg-[#FC6100] text-white text-sm font-black uppercase tracking-[0.2em] rounded-lg hover:bg-[#E35205] transition-all tactile-press border border-white/10 flex items-center justify-center gap-2"
             >
-              Start Your Journey <ArrowRight className="w-5 h-5" />
-            </Link>
-            <button 
-              onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
-              className="w-full sm:w-auto px-10 py-5 bg-white/5 border border-white/10 text-white text-sm font-black uppercase tracking-[0.2em] rounded-lg hover:bg-white/10 transition-all tactile-press flex items-center justify-center"
-            >
-              Learn More
+              Try the Live Demo <ArrowRight className="w-5 h-5" />
             </button>
+          </div>
+        </div>
+
+        {/* The Match Widget - Radical Value */}
+        <div id="demo-widget" className="mt-24 w-full max-w-4xl mx-auto bg-white/[0.03] border border-white/10 rounded-[32px] p-8 md:p-12 backdrop-blur-xl relative z-10 animate-in fade-in zoom-in duration-1000 delay-500">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-4">
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Paste Job Description</label>
+              <textarea 
+                value={jobText}
+                onChange={(e) => setJobText(e.target.value)}
+                placeholder="Paste the requirements section here..."
+                className="w-full h-48 bg-black/40 border border-white/5 rounded-2xl p-4 text-sm focus:border-[#FC6100]/50 transition-colors resize-none placeholder:text-gray-700"
+              />
+            </div>
+            <div className="space-y-4">
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Upload Your Resume (PDF)</label>
+              <div className="relative group/upload h-48 bg-black/40 border-2 border-dashed border-white/5 rounded-2xl flex flex-col items-center justify-center gap-4 transition-all hover:border-[#FC6100]/30 overflow-hidden">
+                <input 
+                  type="file" 
+                  accept=".pdf"
+                  onChange={handleFileUpload}
+                  className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                />
+                
+                {isExtracting ? (
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-8 h-8 border-2 border-[#FC6100] border-t-transparent rounded-full animate-spin"></div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Extracting Data...</p>
+                  </div>
+                ) : resumeFileName ? (
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="p-3 bg-green-500/10 rounded-xl">
+                      <Target className="w-6 h-6 text-green-500" />
+                    </div>
+                    <p className="text-xs font-bold text-white truncate max-w-[200px]">{resumeFileName}</p>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); setResumeFileName(null); setResumeText(''); }}
+                      className="text-[9px] font-black uppercase tracking-widest text-red-500/60 hover:text-red-500"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="p-3 bg-white/5 rounded-xl group-hover/upload:bg-[#FC6100]/10 transition-colors">
+                      <Layers className="w-6 h-6 text-gray-500 group-hover/upload:text-[#FC6100] transition-colors" />
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xs font-bold text-white">Drag or Click to Upload</p>
+                      <p className="text-[9px] font-medium text-gray-600 uppercase tracking-widest mt-1">PDF Resumes Only</p>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-8 flex flex-col items-center gap-8">
+            <button 
+              onClick={handleAnalyze}
+              disabled={!jobText || !resumeText || isAnalyzing}
+              className={`px-12 py-4 bg-white text-black text-xs font-black uppercase tracking-[0.3em] rounded-full hover:bg-gray-200 transition-all tactile-press disabled:opacity-30 disabled:cursor-not-allowed`}
+            >
+              {isAnalyzing ? 'Analyzing Algorithm...' : 'Calculate ATS Match'}
+            </button>
+
+            {result && (
+              <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-top-4 duration-500">
+                <div className="bg-[#FC6100]/10 border border-[#FC6100]/20 rounded-2xl p-6 text-center space-y-2">
+                  <p className="text-4xl font-bold text-[#FC6100]">{result.score}%</p>
+                  <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">Match Score</p>
+                </div>
+                
+                <div className="bg-green-500/5 border border-green-500/10 rounded-2xl p-6 space-y-3">
+                  <p className="text-[9px] font-black uppercase tracking-widest text-green-500">Matching Skills</p>
+                  <div className="flex flex-wrap gap-2">
+                    {result.matchingSkills.length > 0 ? result.matchingSkills.map(s => (
+                      <span key={s} className="px-2 py-1 bg-green-500/10 text-green-500 text-[9px] font-bold rounded uppercase">{s}</span>
+                    )) : <span className="text-[9px] text-gray-600">No matches found.</span>}
+                  </div>
+                </div>
+
+                <div className="bg-red-500/5 border border-red-500/10 rounded-2xl p-6 space-y-3">
+                  <p className="text-[9px] font-black uppercase tracking-widest text-red-500">Missing Keywords</p>
+                  <div className="flex flex-wrap gap-2">
+                    {result.missingSkills.length > 0 ? result.missingSkills.map(s => (
+                      <span key={s} className="px-2 py-1 bg-red-500/10 text-red-500 text-[9px] font-bold rounded uppercase">{s}</span>
+                    )) : <span className="text-[9px] text-gray-600">None! You're solid.</span>}
+                  </div>
+                </div>
+
+                {/* The Conversion Hook */}
+                <div className="md:col-span-3 pt-6 text-center space-y-6 border-t border-white/5 mt-4">
+                   <p className="text-sm text-gray-400 italic font-medium">
+                     "Now that you know what's missing, want to track this application and generate a tailored cover letter?"
+                   </p>
+                   <Link 
+                    to="/signup"
+                    className="inline-flex items-center gap-2 text-[#FC6100] text-xs font-black uppercase tracking-widest hover:gap-4 transition-all"
+                   >
+                     Join the Alpha to Automate Your Search <ArrowRight className="w-4 h-4" />
+                   </Link>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>

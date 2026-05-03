@@ -26,3 +26,5 @@ dist-ssr
 # Environment variables
 .env
 .env.*
+*.json
+client_secret_*.json

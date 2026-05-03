@@ -32,15 +32,12 @@ export const UniversalImporter: React.FC<UniversalImporterProps> = ({ onImportSu
     
     // 3. Web Peek Fallback: If regex failed, try a quick metadata lookup (3-5s)
     if (!parsedData.title || !parsedData.company) {
-      const token = import.meta.env.VITE_APIFY_API_TOKEN;
-      if (token) {
-        try {
-          const peekResult = await apifyService.peekUrlMetadata(url, token);
-          parsedData = { ...parsedData, ...peekResult };
-        } catch (e: any) {
-          console.warn("[UniversalImporter] Web peek failed", e);
-          // Silent failure for peek - the scrape or modal will handle it
-        }
+      try {
+        const peekResult = await apifyService.peekUrlMetadata(url);
+        parsedData = { ...parsedData, ...peekResult };
+      } catch (e: any) {
+        console.warn("[UniversalImporter] Web peek failed", e);
+        // Silent failure for peek - the scrape or modal will handle it
       }
     }
     

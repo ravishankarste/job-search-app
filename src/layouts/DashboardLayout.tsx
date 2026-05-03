@@ -20,6 +20,80 @@ import { SupportBot } from '../components/common/SupportBot';
 import { useJobs } from '../features/jobs/hooks/useJobs';
 import { useNotifications } from '../features/notifications/hooks/useNotifications';
 
+
+interface SidebarContentProps {
+  navItems: { name: string; path: string; icon: any }[];
+  location: { pathname: string };
+  firstName: string;
+  setIsMobileMenuOpen: (open: boolean) => void;
+  handleLogout: () => Promise<void>;
+}
+
+const SidebarContent: React.FC<SidebarContentProps> = ({ 
+  navItems, 
+  location, 
+  firstName, 
+  setIsMobileMenuOpen, 
+  handleLogout 
+}) => (
+  <>
+    <div className="p-6 border-b border-white/10">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 bg-[#FC6100] rounded-lg flex items-center justify-center border border-white/10">
+          <Layers className="text-white w-6 h-6" />
+        </div>
+        <h2 className="text-xl font-bold text-white tracking-tight font-display">Udyog Marg</h2>
+        <button
+          className="lg:hidden ml-auto text-gray-400"
+          onClick={() => setIsMobileMenuOpen(false)}
+        >
+          <X className="w-6 h-6" />
+        </button>
+      </div>
+    </div>
+
+    <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+      {navItems.map((item) => {
+        const isActive = location.pathname === item.path;
+        const Icon = item.icon;
+        return (
+          <Link
+            key={item.name}
+            to={item.path}
+            className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold transition-all tactile-press ${isActive
+              ? 'bg-white/10 text-[#FC6100]'
+              : 'text-gray-400 hover:bg-white/5 hover:text-white'
+              }`}
+          >
+            <Icon className={`w-5 h-5 ${isActive ? 'text-[#FC6100]' : 'text-gray-500'}`} />
+            {item.name}
+          </Link>
+        );
+      })}
+    </nav>
+
+    <div className="p-4 border-t border-white/10">
+      <div className="flex items-center gap-3 px-4 py-3 mb-4 rounded-lg bg-white/5 border border-white/10 tactile-press">
+        <div className="w-10 h-10 rounded-md bg-[#FC6100] flex items-center justify-center text-white font-bold text-lg">
+          {firstName?.[0].toUpperCase() || 'U'}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-bold text-white truncate capitalize">{firstName}</p>
+          <p className="text-[10px] font-bold text-[#FC6100] uppercase tracking-wider font-display">Premium Account</p>
+        </div>
+      </div>
+
+      <button
+        onClick={handleLogout}
+        className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-bold text-gray-500 hover:text-red-500 hover:bg-red-500/10 transition-all tactile-press"
+      >
+        <LogOut className="w-4 h-4" />
+        Logout
+      </button>
+    </div>
+  </>
+);
+
 export const DashboardLayout: React.FC = () => {
   const { session, isLoading: authLoading } = useAuth();
   const { data: jobs = [] } = useJobs();
@@ -70,77 +144,26 @@ export const DashboardLayout: React.FC = () => {
   const firstName = session.user.user_metadata?.full_name?.split(' ')[0] ||
     (session.user.email?.split('@')[0].includes('ravishankar') ? 'Ravishankar' : session.user.email?.split('@')[0].split(/[._]/)[0]);
 
-  const SidebarContent = () => (
-    <>
-      <div className="p-6 border-b border-white/10">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-[#FC6100] rounded-lg flex items-center justify-center border border-white/10">
-            <Layers className="text-white w-6 h-6" />
-          </div>
-          <h2 className="text-xl font-bold text-white tracking-tight font-display">Udyog Marg</h2>
-          <button
-            className="lg:hidden ml-auto text-gray-400"
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            <X className="w-6 h-6" />
-          </button>
-        </div>
-      </div>
-
-      <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-        {navItems.map((item) => {
-          const isActive = location.pathname === item.path;
-          const Icon = item.icon;
-          return (
-            <Link
-              key={item.name}
-              to={item.path}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold transition-all tactile-press ${isActive
-                  ? 'bg-white/10 text-[#FC6100]'
-                  : 'text-gray-400 hover:bg-white/5 hover:text-white'
-                }`}
-            >
-              <Icon className={`w-5 h-5 ${isActive ? 'text-[#FC6100]' : 'text-gray-500'}`} />
-              {item.name}
-            </Link>
-          );
-        })}
-      </nav>
-
-      <div className="p-4 border-t border-white/10">
-        <div className="flex items-center gap-3 px-4 py-3 mb-4 rounded-lg bg-white/5 border border-white/10 tactile-press">
-          <div className="w-10 h-10 rounded-md bg-[#FC6100] flex items-center justify-center text-white font-bold text-lg">
-            {firstName?.[0].toUpperCase() || 'U'}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold text-white truncate capitalize">{firstName}</p>
-            <p className="text-[10px] font-bold text-[#FC6100] uppercase tracking-wider font-display">Premium Account</p>
-          </div>
-        </div>
-
-        <button
-          onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-bold text-gray-500 hover:text-red-500 hover:bg-red-500/10 transition-all tactile-press"
-        >
-          <LogOut className="w-4 h-4" />
-          Logout
-        </button>
-      </div>
-    </>
-  );
+  const sidebarProps = {
+    navItems,
+    location,
+    firstName,
+    setIsMobileMenuOpen,
+    handleLogout
+  };
 
   return (
     <div className="min-h-screen flex w-full bg-[#0D0D0D]">
       {/* Sidebar - Desktop */}
       <aside className="hidden lg:flex w-[280px] bg-[#0D0D0D] border-r border-white/10 flex-col h-screen sticky top-0 z-40 shrink-0">
-        <SidebarContent />
+        <SidebarContent {...sidebarProps} />
       </aside>
 
       {/* Sidebar - Mobile Drawer */}
       <div className={`fixed inset-0 z-50 lg:hidden transition-opacity duration-300 ${isMobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
         <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} />
         <aside className={`absolute top-0 left-0 bottom-0 w-[280px] bg-black border-r border-white/10 flex flex-col transition-transform duration-300 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-          <SidebarContent />
+          <SidebarContent {...sidebarProps} />
         </aside>
       </div>
 

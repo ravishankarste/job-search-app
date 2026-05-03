@@ -4,7 +4,9 @@
  */
 
 // A comprehensive list of tech keywords to look for
+// A Universal, Multi-Industry Keyword Library for the ATS Engine
 const TECH_KEYWORDS = [
+  // 💻 TECHNOLOGY & ENGINEERING
   'react', 'typescript', 'javascript', 'next.js', 'node.js', 'python', 'java', 'go', 'golang',
   'aws', 'azure', 'gcp', 'docker', 'kubernetes', 'sql', 'nosql', 'mongodb', 'postgresql',
   'graphql', 'rest', 'api', 'microservices', 'devops', 'ci/cd', 'git', 'agile', 'scrum',
@@ -12,7 +14,46 @@ const TECH_KEYWORDS = [
   'machine learning', 'ai', 'data science', 'security', 'cybersecurity', 'cloud', 'serverless',
   'testing', 'jest', 'cypress', 'terraform', 'ansible', 'prometheus', 'grafana', 'redis',
   'kafka', 'rabbitmq', 'elasticsearch', 'rust', 'c++', 'c#', 'dotnet', 'django', 'flask',
-  'engineer', 'developer', 'senior', 'junior', 'lead', 'manager', 'automation', 'qa', 'architect'
+  'engineer', 'developer', 'automation', 'qa', 'architect', 'full-stack', 'system design',
+
+  // 📈 MARKETING & GROWTH
+  'seo', 'sem', 'content marketing', 'digital marketing', 'social media', 'email marketing',
+  'crm', 'hubspot', 'salesforce', 'google analytics', 'copywriting', 'growth hacking',
+  'performance marketing', 'branding', 'market research', 'e-commerce', 'conversion rate',
+  'ppc', 'advertising', 'public relations', 'pr', 'influencer marketing', 'b2b', 'b2c',
+
+  // 💰 SALES & REVENUE
+  'sales', 'account management', 'business development', 'pipeline', 'cold calling',
+  'lead generation', 'negotiation', 'closing', 'revenue', 'saas sales', 'enterprise sales',
+  'customer success', 'crm management', 'forecasting', 'quota', 'prospecting',
+
+  // 🏥 HEALTHCARE & ADMINISTRATION
+  'healthcare', 'clinical', 'patient care', 'medical', 'hipaa', 'electronic health records',
+  'ehr', 'emr', 'nursing', 'pharmaceutical', 'hospital administration', 'public health',
+  'medical billing', 'compliance', 'regulatory', 'healthcare operations', 'telehealth',
+
+  // ⚖️ LEGAL, FINANCE & COMPLIANCE
+  'audit', 'finance', 'accounting', 'p&l', 'budgeting', 'financial analysis', 'tax',
+  'legal', 'contracts', 'risk management', 'governance', 'regulatory compliance',
+  'sox', 'ifrs', 'gaap', 'investment', 'portfolio management', 'banking',
+
+  // 🎨 DESIGN & CREATIVE
+  'ux', 'ui', 'user experience', 'user interface', 'figma', 'adobe creative suite',
+  'photoshop', 'illustrator', 'product design', 'graphic design', 'prototyping',
+  'wireframing', 'visual design', 'typography', 'motion design', 'user research',
+
+  // 👔 LEADERSHIP & OPERATIONS
+  'senior', 'junior', 'lead', 'manager', 'director', 'vp', 'cto', 'ceo', 'coo', 'cfo',
+  'head of', 'principal', 'staff', 'management', 'leadership', 'strategy', 'operations',
+  'project management', 'product management', 'mentoring', 'team building', 'stakeholder',
+  'process improvement', 'workflow', 'documentation', 'audit', 'administrative',
+  'coordination', 'planning', 'resource allocation', 'international standards',
+  'european standards', 'procedures', 'verification', 'validation', 'six sigma', 'lean',
+
+  // 🤝 HUMAN RESOURCES & TALENT
+  'recruiting', 'talent acquisition', 'hr', 'human resources', 'onboarding', 'hris',
+  'employee relations', 'performance management', 'compensation', 'benefits',
+  'diversity', 'inclusion', 'culture', 'training', 'development'
 ];
 
 export interface MatchScoreResult {
