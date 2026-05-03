@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Layers, Shield, FileText, Lock, ArrowLeft, Globe } from 'lucide-react';
+import { Shield, FileText, Lock, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const LegalPage: React.FC = () => {
