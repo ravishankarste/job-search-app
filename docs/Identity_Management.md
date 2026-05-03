@@ -22,11 +22,11 @@ This document is the "Single Source of Truth" for which email addresses and iden
 | **GitHub** | `ravishankarste` | Development |
 | **Hostinger cPanel** | `sunitapatrochannel@gmail.com` | Infrastructure |
 | **Hostinger Webmail** | `hello@thekonese.com` | **Legacy** (Domain Expired) |
-| **Supabase** | [Pending] | Infrastructure |
-| **Apify** | [Pending] | Automation |
-| **Google Cloud** | [Pending] | OAuth / APIs |
-| **PostHog** | [Pending] | Analytics |
-| **Zoho Vault** | [Pending] | Security |
+| **Supabase** | `sunitapatrochannel@gmail.com` | Infrastructure |
+| **Apify** | `ravishankarpatro@gmail.com` | Automation |
+| **Google Cloud** | `ravishankarpatro@gmail.com` | OAuth / APIs |
+| **PostHog** | `ravishankarste@gmail.com` | Analytics |
+| **Zoho Vault** | `ravishankarpatro@gmail.com` | Security |
 | **Twilio** | `hello@thekonese.com` | **Legacy** (Domain Expired) |
 | **Shopify** | `sunitapatrochannel@gmail.com` | E-commerce |
 | **Trading 212** | `mypassincuk@gmail.com` | Personal Finance |
@@ -71,6 +71,8 @@ These are accounts that currently violate our **Usage Protocol** and need to be 
 | :--- | :--- | :--- | :--- |
 | **Twilio** | `hello@thekonese` | `ravishankarste` | Move infrastructure away from expired domain. |
 | **Facebook** | `hello@thekonese` | `hopeitmadesense` | Move legacy brand account to active brand email. |
+| **Google Cloud** | `ravishankarpatro` | `ravishankarste` | Move dev infrastructure away from Private Core email. |
+| **Apify** | `ravishankarpatro` | `ravishankarste` | Move bot/scraper infrastructure away from Private Core email. |
 
 ---
 

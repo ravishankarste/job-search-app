@@ -60,53 +60,142 @@ export interface MatchScoreResult {
   score: number; // 0-100
   matchingSkills: string[];
   missingSkills: string[];
+  weightedDetails?: {
+    coreMatches: string[];
+    secondaryMatches: string[];
+  };
 }
+
+// Keyword Weighting Configuration
+const KEYWORD_WEIGHTS: Record<string, number> = {
+  // Hard Skills / Tech (High Impact)
+  'react': 2, 'typescript': 2, 'javascript': 2, 'next.js': 2, 'python': 2, 'java': 2,
+  'aws': 2, 'azure': 2, 'gcp': 2, 'kubernetes': 2, 'sql': 2, 'postgresql': 2,
+  'compliance': 2, 'regulatory': 2, 'clinical': 2, 'finance': 2, 'audit': 2,
+
+  // Leadership & Seniority (Medium Impact)
+  'senior': 1.5, 'manager': 1.5, 'lead': 1.5, 'director': 1.5, 'strategy': 1.5,
+  'operations': 1.5, 'project management': 1.5,
+
+  // Tools & Methodologies (Base Impact)
+  'agile': 1, 'scrum': 1, 'jira': 1, 'slack': 1, 'git': 1, 'documentation': 1
+};
+
+// Synonym Mapping to handle "Literal vs Meaning" gap (Multi-Industry)
+export const SYNONYMS: Record<string, string[]> = {
+  // TECHNICAL & DEVOPS
+  'CI/CD': ['continuous integration', 'continuous delivery', 'deployment pipeline', 'automated deployment'],
+  'AWS': ['amazon web services', 'ec2', 's3', 'lambda'],
+  'GCP': ['google cloud platform', 'bigquery', 'cloud run'],
+  'Azure': ['microsoft azure', 'azure devops'],
+  'SQL': ['database management', 'relational database', 'postgresql', 'mysql', 'querying'],
+  'Agile': ['scrum master', 'kanban', 'software development lifecycle', 'sdlc', 'sprints'],
+  'Frontend': ['ui engineering', 'client-side', 'user interface'],
+  'Backend': ['server-side', 'api development', 'infrastructure engineering'],
+  'Cybersecurity': ['information security', 'infosec', 'penetration testing', 'threat detection'],
+
+  // PROJECT & OPERATIONS
+  'Project Management': ['managing projects', 'project coordination', 'pm', 'pmo', 'delivery management'],
+  'Operations': ['ops', 'process improvement', 'operational excellence', 'efficiency'],
+  'Leadership': ['management', 'team lead', 'mentoring', 'head of'],
+  'Stakeholder Management': ['client relations', 'business communication', 'managing expectations'],
+
+  // FINANCE & LEGAL
+  'Compliance': ['regulatory standards', 'audit', 'risk management', 'governance'],
+  'Finance': ['accounting', 'financial analysis', 'budgeting', 'p&l'],
+  'Data Analysis': ['business intelligence', 'bi', 'data visualization', 'analytics'],
+
+  // HEALTHCARE & CLINICAL
+  'Clinical': ['patient care', 'medical records', 'healthcare administration', 'hospital'],
+  'Research': ['clinical trials', 'data collection', 'laboratory', 'scientific method'],
+
+  // MARKETING & SALES
+  'Digital Marketing': ['seo', 'sem', 'content strategy', 'social media management'],
+  'Sales': ['business development', 'account management', 'lead generation', 'revenue growth'],
+  'UI/UX': ['user experience', 'user interface design', 'product design', 'wireframing']
+};
 
 export const matchAnalysisService = {
   /**
-   * Calculate a match score between a job description and a resume text
+   * Calculate a weighted match score between a job description and a resume text
    */
   calculateMatchScore(jobDescription: string, resumeText: string): MatchScoreResult {
     if (!jobDescription || !resumeText) {
-      return { score: 0, matchingSkills: [], missingSkills: [] };
+      return { score: 0, matchingSkills: [], missingSkills: [], weightedDetails: { coreMatches: [], secondaryMatches: [] } };
     }
 
     const jobText = jobDescription.toLowerCase();
     const resText = resumeText.toLowerCase();
 
-    // Helper to escape special regex characters (like C++)
+    // Helper to escape special regex characters
     const escapeRegExp = (string: string) => {
       return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     };
 
-    // 1. Identify which tech keywords are present in the job description
+    // 1. Identify keywords present in the Job Description (including synonyms)
     const foundKeywords = TECH_KEYWORDS.filter(skill => {
       const escapedSkill = escapeRegExp(skill);
-      const regex = new RegExp(`\\b${escapedSkill}\\b`, 'i');
-      return regex.test(jobText);
+      const skillRegex = new RegExp(`\\b${escapedSkill}\\b`, 'i');
+      const hasSkill = skillRegex.test(jobText);
+      
+      // Check synonyms if primary word not found
+      const synonyms = SYNONYMS[skill] || [];
+      const hasSynonym = synonyms.some(syn => {
+        const synRegex = new RegExp(`\\b${escapeRegExp(syn)}\\b`, 'i');
+        return synRegex.test(jobText);
+      });
+
+      return hasSkill || hasSynonym;
     });
 
     if (foundKeywords.length === 0) {
-      return { score: 0, matchingSkills: [], missingSkills: [] };
+      return { score: 0, matchingSkills: [], missingSkills: [], weightedDetails: { coreMatches: [], secondaryMatches: [] } };
     }
 
-    // 2. See which of those found keywords are in the resume
+    // 2. See which of those are in the Resume
     const matchingSkills = foundKeywords.filter(skill => {
       const escapedSkill = escapeRegExp(skill);
-      const regex = new RegExp(`\\b${escapedSkill}\\b`, 'i');
-      return regex.test(resText);
+      const skillRegex = new RegExp(`\\b${escapedSkill}\\b`, 'i');
+      const hasSkill = skillRegex.test(resText);
+
+      // Check synonyms in resume too
+      const synonyms = SYNONYMS[skill] || [];
+      const hasSynonym = synonyms.some(syn => {
+        const synRegex = new RegExp(`\\b${escapeRegExp(syn)}\\b`, 'i');
+        return synRegex.test(resText);
+      });
+
+      return hasSkill || hasSynonym;
     });
 
     const missingSkills = foundKeywords.filter(skill => !matchingSkills.includes(skill));
 
-    // 3. Calculate score based on keyword coverage
-    // We give a base score for presence and then scale it
-    const score = Math.round((matchingSkills.length / foundKeywords.length) * 100);
+    // 3. Apply Weighted Scoring
+    let totalPossibleWeight = 0;
+    let earnedWeight = 0;
+
+    foundKeywords.forEach(skill => {
+      const weight = KEYWORD_WEIGHTS[skill.toLowerCase()] || 1;
+      totalPossibleWeight += weight;
+      if (matchingSkills.includes(skill)) {
+        earnedWeight += weight;
+      }
+    });
+
+    const score = Math.round((earnedWeight / totalPossibleWeight) * 100);
+
+    // 4. Categorize for Delta UI
+    const coreMatches = matchingSkills.filter(s => (KEYWORD_WEIGHTS[s.toLowerCase()] || 1) >= 1.5);
+    const secondaryMatches = matchingSkills.filter(s => (KEYWORD_WEIGHTS[s.toLowerCase()] || 1) < 1.5);
 
     return {
       score,
       matchingSkills,
-      missingSkills
+      missingSkills,
+      weightedDetails: {
+        coreMatches,
+        secondaryMatches
+      }
     };
   }
 };

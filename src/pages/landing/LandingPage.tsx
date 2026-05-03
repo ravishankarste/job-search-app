@@ -10,7 +10,7 @@ import {
   Globe
 } from 'lucide-react';
 import { trackEvent } from '../../lib/analytics';
-import { matchAnalysisService } from '../../features/jobs/services/matchAnalysisService';
+import { matchAnalysisService, SYNONYMS } from '../../features/jobs/services/matchAnalysisService';
 import { pdfExtractionService } from '../../features/resumes/services/pdfExtractionService';
 
 export const LandingPage: React.FC = () => {
@@ -215,6 +215,48 @@ export const LandingPage: React.FC = () => {
                    >
                      Join the Alpha to Automate Your Search <ArrowRight className="w-4 h-4" />
                    </Link>
+                </div>
+
+                {/* The Delta Scanner View */}
+                <div className="md:col-span-3 pt-12 space-y-6">
+                  <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-600 text-center">Intelligence Scanner Output</p>
+                  <div className="p-8 bg-black/60 border border-white/5 rounded-3xl text-sm leading-relaxed text-gray-400 max-h-64 overflow-y-auto font-mono scrollbar-hide">
+                    {(() => {
+                      // 1. Prepare highlighting logic
+                      // 2. We need to find every keyword and synonym to highlight
+                      const allTerms = [
+                        ...result.matchingSkills,
+                        ...result.missingSkills
+                      ].flatMap(skill => {
+                        return [skill, ...(SYNONYMS[skill] || [])];
+                      });
+
+                      // Sort by length (longest first) to avoid partial matches
+                      allTerms.sort((a, b) => b.length - a.length);
+
+                      // 3. Create a combined Regex for all terms
+                      const combinedRegex = new RegExp(`(${allTerms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`, 'gi');
+
+                      // 4. Split and Map
+                      return jobText.split(combinedRegex).map((part, index) => {
+                        const lowerPart = part.toLowerCase();
+                        
+                        // Check if this part is a matching skill (or synonym)
+                        const isMatch = result.matchingSkills.some(s => {
+                          return s.toLowerCase() === lowerPart || (SYNONYMS[s] || []).some(syn => syn.toLowerCase() === lowerPart);
+                        });
+
+                        // Check if it's a missing skill
+                        const isMissing = result.missingSkills.some(s => {
+                          return s.toLowerCase() === lowerPart || (SYNONYMS[s] || []).some(syn => syn.toLowerCase() === lowerPart);
+                        });
+
+                        if (isMatch) return <span key={index} className="text-[#00FF00] bg-[#00FF00]/10 px-1 rounded font-bold">{part}</span>;
+                        if (isMissing) return <span key={index} className="text-white border-b border-white/40">{part}</span>;
+                        return part;
+                      });
+                    })()}
+                  </div>
                 </div>
               </div>
             )}
