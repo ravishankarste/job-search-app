@@ -56,8 +56,8 @@ export const authService = {
 
   async signInWithGoogle(): Promise<void> {
     try {
-      const isProduction = import.meta.env.PROD;
-      const baseUrl = window.location.origin + (isProduction ? '/jobs' : '');
+      // In the new root-level deployment, we no longer need the /jobs suffix
+      const baseUrl = window.location.origin;
       
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
