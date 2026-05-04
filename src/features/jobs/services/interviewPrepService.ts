@@ -10,7 +10,7 @@ export const interviewPrepService = {
   /**
    * Generates a custom interview preparation guide based on match data
    */
-  generateGuide(jobTitle: string, matchResult: MatchScoreResult): InterviewQuestion[] {
+  generateGuide(jobTitle: string, matchResult: MatchScoreResult, resumeText?: string): InterviewQuestion[] {
     const questions: InterviewQuestion[] = [];
 
     // 1. Strength-Based (Matching Skills)
@@ -40,12 +40,29 @@ export const interviewPrepService = {
       suggestedAngle: `Combine your top matching skills (${matchResult.matchingSkills.slice(0, 2).join(' & ')}) with your excitement for their specific industry.`
     });
 
-    // 4. Behavioral / Leadership
-    questions.push({
-      question: "Tell us about a time you had to deliver a project under a tight deadline. What was your strategy?",
-      type: 'behavioral',
-      suggestedAngle: "Focus on prioritization and communication—traits every hiring manager looks for."
-    });
+    // 4. Tenure Reframe (The "Un-learner" logic)
+    const longTenureDetected = resumeText && (
+      resumeText.includes('10 years') || 
+      resumeText.includes('14 years') || 
+      (resumeText.match(/20\d{2}/g)?.length || 0) < 5 // Few date changes suggest long stays
+    );
+
+    if (longTenureDetected) {
+      questions.push({
+        question: `You spent a significant amount of time at your last role. How have you ensured your skills stayed modern and didn't become 'institutionalized'?`,
+        type: 'behavioral',
+        suggestedAngle: `This is the 'Un-learner' challenge. Reframe your 14 years as '7 different 2-year roles' where you constantly evolved. Talk about the new technologies you introduced, not just the ones you used.`
+      });
+    }
+
+    // 5. Seniority Clash (The "Reality Check" follow-up)
+    if (matchResult.warnings?.some(w => w.includes('overqualified'))) {
+      questions.push({
+        question: `This role might seem like a step back in seniority for someone with your background. Why are you interested in it?`,
+        type: 'behavioral',
+        suggestedAngle: `Focus on your desire to get back to 'hands-on' work or your specific passion for this project. Defuse the fear that you'll leave for a higher role.`
+      });
+    }
 
     return questions;
   },

@@ -15,7 +15,7 @@ export const MatchScoreWidget: React.FC<MatchScoreWidgetProps> = ({
   linkedResumeId 
 }) => {
   // 3. Run the match analysis
-  const { score, matchingSkills, missingSkills, isLoading } = useMatchScore(
+  const { score, matchingSkills, missingSkills, warnings, isLoading } = useMatchScore(
     jobTitle,
     jobDescription || ""
   );
@@ -89,6 +89,26 @@ export const MatchScoreWidget: React.FC<MatchScoreWidgetProps> = ({
           </div>
         </div>
       </div>
+      
+      {/* Reality Check / Seniority Warnings */}
+      {warnings && warnings.length > 0 && (
+        <div className="space-y-4 pt-4 border-t border-white/5">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-orange-400" />
+            <h4 className="text-[10px] font-black text-white uppercase tracking-widest">Reality Check</h4>
+          </div>
+          <div className="flex flex-col gap-3">
+            {warnings.map((warning, idx) => (
+              <div key={idx} className="p-4 bg-orange-500/10 border border-orange-500/20 rounded-2xl flex items-center gap-3">
+                 <AlertCircle className="w-4 h-4 text-orange-400 shrink-0" />
+                 <p className="text-[11px] text-orange-200 font-bold leading-relaxed">
+                   {warning}
+                 </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {!jobDescription && (
         <div className="p-4 bg-red-500/5 border border-red-500/10 rounded-2xl flex items-center gap-3">

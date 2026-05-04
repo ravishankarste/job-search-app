@@ -60,6 +60,7 @@ export interface MatchScoreResult {
   score: number; // 0-100
   matchingSkills: string[];
   missingSkills: string[];
+  warnings?: string[]; // New: For "Reality Check" alerts
   weightedDetails?: {
     coreMatches: string[];
     secondaryMatches: string[];
@@ -188,10 +189,27 @@ export const matchAnalysisService = {
     const coreMatches = matchingSkills.filter(s => (KEYWORD_WEIGHTS[s.toLowerCase()] || 1) >= 1.5);
     const secondaryMatches = matchingSkills.filter(s => (KEYWORD_WEIGHTS[s.toLowerCase()] || 1) < 1.5);
 
+    // 5. Reality Check: Seniority Clash Detection
+    const warnings: string[] = [];
+    const seniorMarkers = ['director', 'vp', 'head of', 'principal', 'staff', 'lead', 'manager', 'senior'];
+    const juniorMarkers = ['junior', 'associate', 'intern', 'entry level', 'grad', 'trainee'];
+
+    const jobIsJunior = juniorMarkers.some(m => jobText.includes(m));
+    const resumeIsSenior = seniorMarkers.some(m => resText.includes(m));
+    const jobIsSenior = seniorMarkers.some(m => jobText.includes(m));
+    const resumeIsJunior = juniorMarkers.some(m => resText.includes(m)) && !resumeIsSenior;
+
+    if (jobIsJunior && resumeIsSenior) {
+      warnings.push("Reality Check: You appear overqualified for this role. Hiring managers may fear you'll leave for a higher-paying position.");
+    } else if (jobIsSenior && resumeIsJunior) {
+      warnings.push("Strategic Gap: This is a high-seniority role. You need to emphasize leadership and strategy, not just execution.");
+    }
+
     return {
       score,
       matchingSkills,
       missingSkills,
+      warnings,
       weightedDetails: {
         coreMatches,
         secondaryMatches
