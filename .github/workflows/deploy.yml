@@ -37,7 +37,7 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
-      - name: 🚀 Sync to Production (Dual Domain: .app + .com subdomain)
+      - name: "🚀 Sync to Production (Dual Domain: .app + .com subdomain)"
         run: |
           # 1. Sync to upanita.app (Primary)
           ssh -p 65002 -o ConnectTimeout=60 -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "rm -rf domains/upanita.app/public_html/*"
