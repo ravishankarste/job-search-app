@@ -54,8 +54,9 @@ Successfully migrated from Hostinger subdirectory `/jobs/` to the root of `upani
 *   **Router Basename**: Verified `src/router/index.tsx` uses `import.meta.env.BASE_URL`, which now correctly resolves to `/`.
 
 ### 🚀 2. Deployment Pipeline Update
-*   **Workflow**: Updated `.github/workflows/deploy.yml` to target `domains/upanita.app/public_html/`.
-*   **Automated Redirect**: Added a 301 redirect step to the pipeline. It automatically configures an `.htaccess` on the old `upanita.com/jobs/` path to point all traffic to the new domain, ensuring zero link breakage.
+*   **Dual Domain Sync**: Updated `.github/workflows/deploy.yml` to sync the production build to both `upanita.app` and the new `jobs.upanita.com` subdomain.
+*   **Smart Redirect**: Implemented conditional logic in `public/.htaccess`. It detects if a user is accessing via the old `upanita.com/jobs/` subdirectory and redirects them to the new home, while allowing `jobs.upanita.com` and `upanita.app` to serve the app directly from the same folder.
 
 ### 🔐 3. Infrastructure & Identity
 *   **SSH**: User confirmed Hostinger SSH and Git keys are re-established for the new environment.
+*   **Google Auth**: Updated `authService.ts` and Supabase dashboard to allow root-level redirects from both domains.

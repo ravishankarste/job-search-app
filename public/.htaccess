@@ -1,6 +1,13 @@
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
+
+  # SMART REDIRECT: 
+  # If accessed via the old subdirectory (upanita.com/jobs), redirect to the new home.
+  # If accessed via the new subdomain (jobs.upanita.com) or upanita.app, stay here.
+  RewriteCond %{HTTP_HOST} ^upanita\.com$ [NC]
+  RewriteRule ^(.*)$ https://upanita.app/$1 [R=301,L]
+
   RewriteRule ^index\.html$ - [L]
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d

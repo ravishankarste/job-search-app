@@ -28,3 +28,4 @@ dist-ssr
 .env.*
 *.json
 client_secret_*.json
+Promotion_material/
