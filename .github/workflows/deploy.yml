@@ -40,13 +40,23 @@ jobs:
       - name: 🚀 Force-Sync to /jobs/ (Resilient Mode)
         run: |
           # 1. Clean out any old confusion with increased timeout
-          ssh -p 65002 -o ConnectTimeout=60 -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "rm -rf domains/upanita.com/public_html/jobs/*"
+          ssh -p 65002 -o ConnectTimeout=60 -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "rm -rf domains/upanita.app/public_html/*"
           
           # 2. Sync fresh build with extra patience
           rsync -avz --delete \
             -e "ssh -p 65002 -o ConnectTimeout=120 -o StrictHostKeyChecking=no" \
             dist/ \
-            ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:domains/upanita.com/public_html/jobs/
+            ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:domains/upanita.app/public_html/
           
           # 3. Double-check: list the folder
-          ssh -p 65002 -o ConnectTimeout=60 -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "ls -la domains/upanita.com/public_html/jobs/"
+          ssh -p 65002 -o ConnectTimeout=60 -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "ls -la domains/upanita.app/public_html/"
+
+      - name: 🔄 Set up 301 Redirect on Old Domain (upanita.com/jobs)
+        run: |
+          ssh -p 65002 -o ConnectTimeout=60 -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "
+            mkdir -p domains/upanita.com/public_html/jobs/ && \
+            echo '<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^(.*)$ https://upanita.app/\$1 [R=301,L]
+</IfModule>' > domains/upanita.com/public_html/jobs/.htaccess
+          "

@@ -45,3 +45,17 @@ Complete architectural overhaul from manual tracking to an automated, intelligen
 ### 🐛 Bug Fix Log (Critical)
 *   **Followup Service Recovery**: Fixed a critical crash where the original task-tracking logic was overwritten. Merged `getUpcomingTasks` and `createFollowup` with the new `isStale` ghosting detection logic in `followupService.ts`.
 *   **Naming Standardization**: Standardized project-wide to `followupService.ts` (lowercase) to resolve case-sensitivity issues on deployment servers.
+## [2026-05-04] - Migration to Upanita.app Root
+Successfully migrated from Hostinger subdirectory `/jobs/` to the root of `upanita.app`.
+
+### 🌐 1. Domain Migration
+*   **The Move**: Updated `index.html`, `robots.txt`, and `sitemap.xml` to point to **`upanita.app`**.
+*   **Vite Config**: Changed `base` from `/jobs/` to `/` in `vite.config.ts` to support root deployment.
+*   **Router Basename**: Verified `src/router/index.tsx` uses `import.meta.env.BASE_URL`, which now correctly resolves to `/`.
+
+### 🚀 2. Deployment Pipeline Update
+*   **Workflow**: Updated `.github/workflows/deploy.yml` to target `domains/upanita.app/public_html/`.
+*   **Automated Redirect**: Added a 301 redirect step to the pipeline. It automatically configures an `.htaccess` on the old `upanita.com/jobs/` path to point all traffic to the new domain, ensuring zero link breakage.
+
+### 🔐 3. Infrastructure & Identity
+*   **SSH**: User confirmed Hostinger SSH and Git keys are re-established for the new environment.

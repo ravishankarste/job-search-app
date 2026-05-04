@@ -8,6 +8,6 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
-  // We keep the base path for production deployment to Hostinger subdirectory
-  base: process.env.NODE_ENV === 'production' ? '/jobs/' : '/',
+  // We now deploy to the root of upanita.app
+  base: '/',
 })
