@@ -52,7 +52,6 @@ This document is the "Single Source of Truth" for which email addresses and iden
 ## 🛡️ Usage Protocol (The "Golden Rules")
 
 To maintain perfect management and avoid identity confusion, follow these rules for every new signup or interaction:
-
 1.  **Building & Infrastructure**: If it costs money or stores project code/data (e.g., Supabase, Hostinger, Stripe), use **Business / Dev** (`ravishankarste`).
 2.  **Content & Brand**: If it's for marketing, video, or social engagement (e.g., YouTube, TikTok, FB), use **Hope It Made Sense** (`hopeitmadesense`).
 3.  **Networking & Outreach**: If you are talking to recruiters or professional peers, use **Professional** (`ravishankartae`).
