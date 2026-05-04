@@ -23,6 +23,7 @@ export const LandingPage: React.FC = () => {
   const [result, setResult] = React.useState<{ score: number, matchingSkills: string[], missingSkills: string[], warnings?: string[] } | null>(null);
   const [isAnalyzing, setIsAnalyzing] = React.useState(false);
   const [isExtracting, setIsExtracting] = React.useState(false);
+  const [showScanner, setShowScanner] = React.useState(false);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -180,12 +181,21 @@ export const LandingPage: React.FC = () => {
             </button>
 
             {result && (
-              <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-8 animate-in fade-in slide-in-from-top-4 duration-500">
+              <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-8 animate-in fade-in slide-in-from-top-4 duration-500">
                 <div className="bg-white/5 border border-white/10 rounded-[24px] p-8 text-center flex flex-col items-center justify-center space-y-2">
                   <p className="text-6xl font-bold text-[#FC6100] tracking-tighter">{result.score}%</p>
                   <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500">Match Accuracy</p>
                 </div>
                 
+                <div className="bg-white/5 border border-white/10 rounded-[24px] p-8 space-y-4">
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#00FF00]">Matching Skills</p>
+                  <div className="flex flex-wrap gap-2">
+                    {result.matchingSkills.length > 0 ? result.matchingSkills.map(s => (
+                      <span key={s} className="px-3 py-1.5 bg-[#00FF00]/10 text-[#00FF00] border border-[#00FF00]/30 text-[10px] font-black uppercase tracking-wider rounded-lg">{s}</span>
+                    )) : <span className="text-xs text-gray-600 italic">No matches detected.</span>}
+                  </div>
+                </div>
+
                 <div className="bg-white/5 border border-white/10 rounded-[24px] p-8 space-y-4">
                   <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white">Critical Gaps</p>
                   <div className="flex flex-wrap gap-2">
@@ -196,7 +206,7 @@ export const LandingPage: React.FC = () => {
                 </div>
 
                 {/* The Conversion Hook */}
-                <div className="md:col-span-2 pt-6 text-center space-y-6 border-t border-white/5 mt-4">
+                <div className="md:col-span-3 pt-6 text-center space-y-6 border-t border-white/5 mt-4">
                    <p className="text-sm text-gray-400 italic font-medium">
                      "Now that you know what's missing, want to track this application and generate a tailored cover letter?"
                    </p>
@@ -206,49 +216,47 @@ export const LandingPage: React.FC = () => {
                    >
                      Join the Alpha to Automate Your Search <ArrowRight className="w-4 h-4" />
                    </Link>
+                   
+                   <div className="pt-4">
+                     <button 
+                       onClick={() => setShowScanner(!showScanner)}
+                       className="text-[9px] font-black uppercase tracking-[0.3em] text-white/50 hover:text-white transition-colors flex items-center gap-2 mx-auto"
+                     >
+                       {showScanner ? 'Hide Technical Scan' : 'View Intelligence Scanner Output'}
+                     </button>
+                   </div>
                 </div>
 
-                {/* The Delta Scanner View */}
-                <div className="md:col-span-3 pt-12 space-y-6">
-                  <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-600 text-center">Intelligence Scanner Output</p>
-                  <div className="p-8 bg-black/60 border border-white/5 rounded-3xl text-sm leading-relaxed text-gray-400 max-h-64 overflow-y-auto font-mono scrollbar-hide">
-                    {(() => {
-                      // 1. Prepare highlighting logic
-                      // 2. We need to find every keyword and synonym to highlight
-                      const allTerms = [
-                        ...result.matchingSkills,
-                        ...result.missingSkills
-                      ].flatMap(skill => {
-                        return [skill, ...(SYNONYMS[skill] || [])];
-                      });
-
-                      // Sort by length (longest first) to avoid partial matches
-                      allTerms.sort((a, b) => b.length - a.length);
-
-                      // 3. Create a combined Regex for all terms
-                      const combinedRegex = new RegExp(`(${allTerms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`, 'gi');
-
-                      // 4. Split and Map
-                      return jobText.split(combinedRegex).map((part, index) => {
-                        const lowerPart = part.toLowerCase();
-                        
-                        // Check if this part is a matching skill (or synonym)
-                        const isMatch = result.matchingSkills.some(s => {
-                          return s.toLowerCase() === lowerPart || (SYNONYMS[s] || []).some(syn => syn.toLowerCase() === lowerPart);
+                {/* The Delta Scanner View (Hidden by default) */}
+                {showScanner && (
+                  <div className="md:col-span-3 pt-8 space-y-6 animate-in fade-in zoom-in duration-300">
+                    <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-600 text-center">Intelligence Scanner Output</p>
+                    <div className="p-8 bg-black/60 border border-white/5 rounded-3xl text-sm leading-relaxed text-gray-400 max-h-64 overflow-y-auto font-mono scrollbar-hide">
+                      {(() => {
+                        const allTerms = [
+                          ...result.matchingSkills,
+                          ...result.missingSkills
+                        ].flatMap(skill => {
+                          return [skill, ...(SYNONYMS[skill] || [])];
                         });
-
-                        // Check if it's a missing skill
-                        const isMissing = result.missingSkills.some(s => {
-                          return s.toLowerCase() === lowerPart || (SYNONYMS[s] || []).some(syn => syn.toLowerCase() === lowerPart);
+                        allTerms.sort((a, b) => b.length - a.length);
+                        const combinedRegex = new RegExp(`(${allTerms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`, 'gi');
+                        return jobText.split(combinedRegex).map((part, index) => {
+                          const lowerPart = part.toLowerCase();
+                          const isMatch = result.matchingSkills.some(s => {
+                            return s.toLowerCase() === lowerPart || (SYNONYMS[s] || []).some(syn => syn.toLowerCase() === lowerPart);
+                          });
+                          const isMissing = result.missingSkills.some(s => {
+                            return s.toLowerCase() === lowerPart || (SYNONYMS[s] || []).some(syn => syn.toLowerCase() === lowerPart);
+                          });
+                          if (isMatch) return <span key={index} className="text-[#00FF00] bg-[#00FF00]/10 px-1 rounded font-bold">{part}</span>;
+                          if (isMissing) return <span key={index} className="text-white border-b border-white/40">{part}</span>;
+                          return part;
                         });
-
-                        if (isMatch) return <span key={index} className="text-[#00FF00] bg-[#00FF00]/10 px-1 rounded font-bold">{part}</span>;
-                        if (isMissing) return <span key={index} className="text-white border-b border-white/40">{part}</span>;
-                        return part;
-                      });
-                    })()}
+                      })()}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             )}
           </div>
