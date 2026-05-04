@@ -56,7 +56,7 @@ jobs:
           ssh -p 65002 -o ConnectTimeout=60 -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "
             mkdir -p domains/upanita.com/public_html/jobs/ && \
             echo '<IfModule mod_rewrite.c>
-  RewriteEngine On
-  RewriteRule ^(.*)$ https://upanita.app/\$1 [R=301,L]
-</IfModule>' > domains/upanita.com/public_html/jobs/.htaccess
+              RewriteEngine On
+              RewriteRule ^(.*)$ https://upanita.app/\$1 [R=301,L]
+            </IfModule>' > domains/upanita.com/public_html/jobs/.htaccess
           "
