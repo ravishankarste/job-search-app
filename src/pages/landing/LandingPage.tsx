@@ -20,7 +20,7 @@ export const LandingPage: React.FC = () => {
   const [jobText, setJobText] = React.useState('');
   const [resumeText, setResumeText] = React.useState('');
   const [resumeFileName, setResumeFileName] = React.useState<string | null>(null);
-  const [result, setResult] = React.useState<{ score: number, matchingSkills: string[], missingSkills: string[] } | null>(null);
+  const [result, setResult] = React.useState<{ score: number, matchingSkills: string[], missingSkills: string[], warnings?: string[] } | null>(null);
   const [isAnalyzing, setIsAnalyzing] = React.useState(false);
   const [isExtracting, setIsExtracting] = React.useState(false);
 
@@ -180,21 +180,12 @@ export const LandingPage: React.FC = () => {
             </button>
 
             {result && (
-              <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-8 animate-in fade-in slide-in-from-top-4 duration-500">
+              <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-8 animate-in fade-in slide-in-from-top-4 duration-500">
                 <div className="bg-white/5 border border-white/10 rounded-[24px] p-8 text-center flex flex-col items-center justify-center space-y-2">
                   <p className="text-6xl font-bold text-[#FC6100] tracking-tighter">{result.score}%</p>
                   <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500">Match Accuracy</p>
                 </div>
                 
-                <div className="bg-white/5 border border-white/10 rounded-[24px] p-8 space-y-4">
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#00FF00]">Matching Skills</p>
-                  <div className="flex flex-wrap gap-2">
-                    {result.matchingSkills.length > 0 ? result.matchingSkills.map(s => (
-                      <span key={s} className="px-3 py-1.5 bg-[#00FF00]/10 text-[#00FF00] border border-[#00FF00]/30 text-[10px] font-black uppercase tracking-wider rounded-lg">{s}</span>
-                    )) : <span className="text-xs text-gray-600 italic">No matches detected.</span>}
-                  </div>
-                </div>
-
                 <div className="bg-white/5 border border-white/10 rounded-[24px] p-8 space-y-4">
                   <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white">Critical Gaps</p>
                   <div className="flex flex-wrap gap-2">
@@ -205,7 +196,7 @@ export const LandingPage: React.FC = () => {
                 </div>
 
                 {/* The Conversion Hook */}
-                <div className="md:col-span-3 pt-6 text-center space-y-6 border-t border-white/5 mt-4">
+                <div className="md:col-span-2 pt-6 text-center space-y-6 border-t border-white/5 mt-4">
                    <p className="text-sm text-gray-400 italic font-medium">
                      "Now that you know what's missing, want to track this application and generate a tailored cover letter?"
                    </p>
