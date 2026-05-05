@@ -37,22 +37,32 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
   handleLogout 
 }) => (
   <>
-    <div className="p-6 border-b border-white/10">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-[#FC6100] rounded-lg flex items-center justify-center border border-white/10">
-          <Layers className="text-white w-6 h-6" />
-        </div>
+    <div className="px-10 flex flex-col items-center gap-8 w-full" style={{ paddingTop: '80px', paddingBottom: '40px' }}>
+      <div className="flex items-center justify-between w-full lg:hidden">
         <h2 className="text-xl font-bold text-white tracking-tight font-display">Udyog Marg</h2>
         <button
-          className="lg:hidden ml-auto text-gray-400"
+          className="text-gray-400"
           onClick={() => setIsMobileMenuOpen(false)}
         >
           <X className="w-6 h-6" />
         </button>
       </div>
+
+      <div className="w-40 h-40 flex items-center justify-center rounded-[32px] overflow-hidden border border-white/10 bg-black shadow-2xl shadow-[#FC6100]/20 animate-in fade-in zoom-in duration-700">
+        <img 
+          src="/udyog_marg_full_brand_logo_1777806735358.png" 
+          alt="Udyog Marg" 
+          className="w-full h-full object-cover scale-[1.2] filter drop-shadow-[0_0_15px_rgba(252,97,0,0.4)]" 
+        />
+      </div>
+
+      <div className="text-center hidden lg:block">
+        <h2 className="text-3xl font-black text-white tracking-tighter font-display uppercase leading-none">Udyog Marg</h2>
+        <p className="text-[10px] font-black text-[#FC6100] uppercase tracking-[0.4em] mt-2 opacity-80">Job Search OS</p>
+      </div>
     </div>
 
-    <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+    <nav className="flex-1 space-y-1 overflow-y-auto border-t border-white/5 pt-8" style={{ paddingLeft: '85px' }}>
       {navItems.map((item) => {
         const isActive = location.pathname === item.path;
         const Icon = item.icon;

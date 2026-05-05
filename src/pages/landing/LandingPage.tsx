@@ -66,9 +66,13 @@ export const LandingPage: React.FC = () => {
       {/* Navbar */}
       <nav className="h-24 flex items-center justify-between px-6 md:px-12 border-b border-white/5 sticky top-0 bg-[#0D0D0D]/80 backdrop-blur-md z-50">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-[#FC6100] rounded-lg flex items-center justify-center border border-white/10">
-            <Layers className="text-white w-6 h-6" />
-          </div>
+        <div className="w-14 h-14 flex items-center justify-center -ml-2">
+          <img 
+            src="/logo.png" 
+            alt="Udyog Marg" 
+            className="w-full h-full object-contain filter drop-shadow-[0_0_8px_rgba(252,97,0,0.3)]" 
+          />
+        </div>
           <span className="text-xl font-bold tracking-tight font-display">Udyog Marg</span>
         </div>
         <div className="flex items-center gap-6">
@@ -373,9 +377,9 @@ export const LandingPage: React.FC = () => {
         <div className="w-full max-w-7xl mx-auto flex flex-col items-center gap-20 text-center">
           <div className="space-y-6 flex flex-col items-center">
             <div className="flex items-center justify-center gap-3">
-              <div className="w-12 h-12 bg-[#FC6100] rounded-xl flex items-center justify-center shadow-lg shadow-[#FC6100]/20">
-                <Layers className="text-white w-7 h-7" />
-              </div>
+            <div className="w-16 h-16 flex items-center justify-center mx-auto">
+              <img src="/logo.png" alt="Udyog Marg" className="w-full h-full object-contain" />
+            </div>
               <span className="text-2xl font-bold tracking-tight">Udyog Marg</span>
             </div>
             <p className="text-[10px] text-gray-600 font-black uppercase tracking-[0.4em] max-w-sm mx-auto text-center">Build your legacy. Dominate the hunt.</p>

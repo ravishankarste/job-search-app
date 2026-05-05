@@ -1,0 +1,27 @@
+# 🛡️ Antigravity Intelligence Blocklist
+# Files listed here are INVISIBLE to the AI agent.
+
+# Environment & Secrets
+.env
+.env.local
+.env.production
+.env.development
+*.pem
+*.key
+cert.json
+
+# Sensitive Documentation
+docs/Identity_Management.md
+docs/SECURITY_CONSTITUTION.md
+
+# System & Credentials
+.aws/
+.ssh/
+.config/
+credentials
+secrets.json
+
+# Private Folders
+*private*
+*personal*
+*banking*

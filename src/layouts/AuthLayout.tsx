@@ -24,8 +24,8 @@ export const AuthLayout: React.FC = () => {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#FC6100]/10 rounded-full blur-[120px] pointer-events-none"></div>
       
       <div className="w-full max-w-md text-center relative z-10">
-        <div className="w-20 h-20 bg-[#FC6100] rounded-3xl flex items-center justify-center shadow-2xl shadow-[#FC6100]/30 mx-auto mb-8 animate-pulse">
-          <Layers className="text-white w-12 h-12" />
+        <div className="w-24 h-24 flex items-center justify-center mx-auto mb-8">
+          <img src="/logo.png" alt="Udyog Marg" className="w-full h-full object-contain" />
         </div>
         <h2 className="text-5xl font-bold text-white tracking-tighter leading-tight">
           Udyog Marg
