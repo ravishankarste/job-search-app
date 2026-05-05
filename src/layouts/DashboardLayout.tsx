@@ -8,7 +8,6 @@ import {
   FileText,
   BarChart3,
   LogOut,
-  Layers,
   Bell,
   ChevronRight,
   Compass,

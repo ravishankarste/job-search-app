@@ -1,7 +1,6 @@
 import React from 'react';
 import { Outlet, Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Layers } from 'lucide-react';
 
 export const AuthLayout: React.FC = () => {
   const { session, isLoading } = useAuth();
