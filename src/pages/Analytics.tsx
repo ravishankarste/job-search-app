@@ -1,18 +1,25 @@
 import React from 'react';
 import { useAnalytics } from '../features/analytics/hooks/useAnalytics';
+import { useJobs } from '../features/jobs/hooks/useJobs';
+import { useResumes } from '../features/resumes/hooks/useResumes';
+import { useNavigate, Link } from 'react-router-dom';
 import { 
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, AreaChart, Area
 } from 'recharts';
 import { 
   TrendingUp, Users, Briefcase, Target, 
-  ArrowUpRight
+  ArrowUpRight, FileText, ArrowRight
 } from 'lucide-react';
+import { OnboardingAccelerator } from '../components/onboarding/OnboardingAccelerator';
 
 const COLORS = ['#FC6100', '#FF8B3D', '#FFA566', '#FFC094', '#FFE1CC'];
 
 export const Analytics: React.FC = () => {
   const { stats, isLoading } = useAnalytics();
+  const { data: jobs } = useJobs();
+  const { data: resumes } = useResumes();
+  const navigate = useNavigate();
 
   if (isLoading) {
     return (
@@ -25,18 +32,47 @@ export const Analytics: React.FC = () => {
     );
   }
 
+  // Zero-State Onboarding Loop
   if (!stats) {
-    return (
-      <div className="h-[60vh] flex flex-col items-center justify-center space-y-4">
-        <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center">
-          <TrendingUp className="w-10 h-10 text-gray-700" />
+    if (!resumes || resumes.length === 0) {
+      return (
+        <div className="max-w-4xl mx-auto py-20 px-4">
+          <div className="clean-card text-center py-16 border-white/10 bg-white/[0.01] relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-20 transition-opacity">
+              <FileText className="w-32 h-32 text-[#FC6100]" />
+            </div>
+            <FileText className="w-12 h-12 text-[#FC6100] mx-auto mb-4" />
+            <h3 className="text-2xl font-bold text-white mb-2 tracking-tight">Step 1: Establish Your Identity</h3>
+            <p className="text-sm text-gray-500 max-w-sm mx-auto mb-8 font-medium leading-relaxed">
+              We can't analyze your career trajectory until we know your skills. Upload your resume to unlock the analytics engine.
+            </p>
+            <Link to="/resumes" className="px-10 py-4 bg-[#FC6100] text-white rounded-lg font-black uppercase tracking-widest text-xs hover:bg-[#E35205] transition-all inline-flex items-center tactile-press border border-white/10 shadow-2xl shadow-[#FC6100]/20">
+              Open Resume Library <ArrowRight className="w-4 h-4 ml-2" />
+            </Link>
+          </div>
         </div>
-        <div className="text-center">
-          <h3 className="text-xl font-bold text-white">No data yet</h3>
-          <p className="text-gray-500">Add some jobs to your pipeline to see analytics.</p>
+      );
+    }
+
+    if (!jobs || jobs.length === 0) {
+      return (
+        <div className="max-w-4xl mx-auto py-20 px-4">
+          <div className="space-y-6">
+            <div className="text-center mb-10">
+               <h3 className="text-2xl font-bold text-white mb-2">Step 2: Start Your Pipeline</h3>
+               <p className="text-gray-500">Add your first job to see velocity and conversion analytics.</p>
+            </div>
+            <OnboardingAccelerator 
+              onManualClick={() => navigate('/pipeline')}
+              onImportClick={() => navigate('/pipeline')}
+            />
+          </div>
         </div>
-      </div>
-    );
+      );
+    }
+
+    // Safety fallback: if stats is still null but we passed onboarding checks, return null to satisfy TS
+    return null;
   }
 
   const statusData = Object.entries(stats.statusCounts).map(([name, value]) => ({
