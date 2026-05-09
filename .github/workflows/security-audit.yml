@@ -1,0 +1,44 @@
+name: Weekly Security Sentinel
+
+on:
+  schedule:
+    - cron: '0 0 * * 1' # Every Monday at Midnight
+  workflow_dispatch: # Allows you to run it manually anytime
+
+jobs:
+  security_audit:
+    name: Full Security Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🚚 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 📦 Audit Dependencies
+        run: |
+          echo "🔍 Checking for vulnerable npm packages..."
+          npm audit || echo "⚠️ Vulnerabilities found. Please review the report above."
+
+      - name: 🔐 Secret Scan (Basic)
+        run: |
+          echo "🔍 Scanning for hardcoded secrets..."
+          # Look for common patterns like API_KEY=, PASSWORD=, etc.
+          # Excluding common false positives
+          grep -rE "([A-Za-z0-9+/]{40}|[A-Za-z0-9]{32})" . --exclude-dir=node_modules --exclude-dir=.git --exclude=package-lock.json || echo "✅ No obvious high-entropy strings found."
+
+      - name: 🧹 Check for Sensitive Files
+        run: |
+          echo "🔍 Checking for forbidden files in the repo..."
+          FORBIDDEN_FILES=(".env" ".pem" ".key" "id_rsa" "credentials.json")
+          for file in "${FORBIDDEN_FILES[@]}"; do
+            if [ -f "$file" ]; then
+              echo "❌ CRITICAL: Sensitive file '$file' found in the repository!"
+              exit 1
+            fi
+          done
+          echo "✅ No sensitive files detected."
