@@ -132,14 +132,14 @@ export const UploadVersionModal: React.FC<UploadVersionModalProps> = ({
               type="button"
               onClick={onClose}
               disabled={isUploading}
-              className="px-6 py-2 text-sm font-bold text-gray-400 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all disabled:opacity-50"
+              className="px-8 py-2.5 text-sm font-bold text-gray-400 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all disabled:opacity-50 whitespace-nowrap"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={!file || isUploading}
-              className="px-6 py-2 text-sm font-bold text-white bg-[#FC6100] border border-transparent rounded-xl hover:bg-[#E35205] transition-all disabled:opacity-50 flex items-center shadow-lg shadow-[#FC6100]/10"
+              className="px-8 py-2.5 text-sm font-bold text-white bg-[#FC6100] border border-transparent rounded-xl hover:bg-[#E35205] transition-all disabled:opacity-50 flex items-center whitespace-nowrap shadow-lg shadow-[#FC6100]/10"
             >
               {isUploading ? 'Uploading...' : 'Upload File'}
             </button>

@@ -3,7 +3,7 @@ import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
-// https://vitejs.dev/config/
+// Tactical Heartbeat for Build Sync: 2026-05-09 (UI Stabilization)
 export default defineConfig({
   plugins: [
     react(),

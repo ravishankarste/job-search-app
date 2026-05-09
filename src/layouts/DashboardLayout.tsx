@@ -56,7 +56,7 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
       </div>
 
       <div className="text-center hidden lg:block">
-        <h2 className="text-3xl font-black text-white tracking-tighter font-display uppercase leading-none">Udyog Marg</h2>
+        <h2 className="text-3xl font-black text-white tracking-tight font-display uppercase leading-none">Udyog Marg</h2>
         <p className="text-[10px] font-black text-[#FC6100] uppercase tracking-[0.4em] mt-2 opacity-80">Job Search OS</p>
       </div>
     </div>

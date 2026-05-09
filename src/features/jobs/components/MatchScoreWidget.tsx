@@ -35,15 +35,15 @@ export const MatchScoreWidget: React.FC<MatchScoreWidgetProps> = ({
 
 
   return (
-    <div className="bg-[#121212] border border-white/5 rounded-[32px] p-8 shadow-2xl space-y-8 relative overflow-hidden">
+    <div className="bg-[#121212] border border-white/5 rounded-[32px] p-8 md:p-10 pb-12 shadow-2xl space-y-8 relative overflow-hidden">
       <div className="absolute top-0 right-0 w-32 h-32 bg-[#FC6100]/5 blur-[60px] -mr-16 -mt-16"></div>
       
       <div className="flex justify-between items-start relative z-10">
-        <div className="space-y-1">
-          <h3 className="font-black text-xl text-white uppercase tracking-tighter flex items-center">
+        <div className="space-y-2">
+          <h3 className="font-black text-xl text-white uppercase tracking-tight flex items-center">
             <Target className="w-5 h-5 mr-2 text-[#FC6100]" /> ATS Match Score
           </h3>
-          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em]">
+          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">
             Analysis based on {linkedResumeId ? "linked resume" : "primary resume"}
           </p>
         </div>

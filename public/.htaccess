@@ -1,16 +1,15 @@
-<IfModule mod_rewrite.c>
-  RewriteEngine On
-  RewriteBase /
+RewriteEngine On
 
-  # SMART REDIRECT: 
-  # If accessed via the old subdirectory (upanita.com/jobs), redirect to the new home.
-  # If accessed via the new subdomain (jobs.upanita.com) or upanita.app, stay here.
-  RewriteCond %{HTTP_HOST} ^upanita\.com$ [NC]
-  RewriteRule ^(.*)$ https://upanita.app/$1 [R=301,L]
+# 🚦 1. Redirect Legacy Tools to LAB Subdomain
+RewriteRule ^(calculators|ai-tools|financial-tools|date-tools|converters|health-tools|visa-tools|about-us|contact|faq|privacy-policy|terms-of-service)\.html$ https://lab.upanita.com/$1.html [R=301,L]
 
-  RewriteRule ^index\.html$ - [L]
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteCond %{REQUEST_FILENAME} !-l
-  RewriteRule . /index.html [L]
-</IfModule>
+# 🚦 2. Redirect Legacy Runner Pages to RUNNER Subdomain
+RewriteRule ^(runner-launchpad|runner-board)\.html$ https://runner.upanita.com/index.html [R=301,L]
+
+# 🚦 3. Redirect Tool Assets to LAB
+RewriteRule ^assets/(css|js|images)/(.*)$ https://lab.upanita.com/assets/$1/$2 [R=301,L]
+
+# 🚦 4. Handle Udyog Marg (SPA Routing)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.html [L]

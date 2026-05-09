@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useJobDetail } from '../hooks/useJobDetail';
 import { useJobActions } from '../hooks/useJobActions';
@@ -82,17 +82,17 @@ export const JobDetailPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-10">
-          <div className="bg-[#121212] p-10 rounded-[32px] border border-white/5 space-y-10 shadow-2xl relative overflow-hidden group">
+          <div className="bg-[#121212] p-6 md:p-10 rounded-[32px] border border-white/5 space-y-8 md:space-y-10 shadow-2xl relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-64 h-64 bg-[#FC6100]/5 blur-[100px] -mr-32 -mt-32"></div>
             
             <div className="flex justify-between items-start relative z-10">
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div className="flex items-center gap-3">
                    <div className="w-6 h-[2px] bg-[#FC6100]"></div>
-                   <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#FC6100]">Application Detail</span>
+                   <span className="text-[10px] font-black uppercase tracking-widest text-[#FC6100]">Application Detail</span>
                 </div>
-                <h1 className="text-4xl font-bold text-white leading-tight tracking-tighter">{job.title}</h1>
-                <div className="flex items-center text-gray-400 font-black text-sm uppercase tracking-widest">
+                <h1 className="text-2xl md:text-4xl font-bold text-white leading-tight break-words">{job.title}</h1>
+                <div className="flex items-center text-gray-400 font-black text-xs uppercase tracking-widest mt-3">
                   <Building2 className="w-4 h-4 mr-2 text-[#FC6100]" />
                   {job.company_name}
                 </div>
@@ -120,7 +120,7 @@ export const JobDetailPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-10 py-10 border-y border-white/5 relative z-10">
+            <div className="grid grid-cols-2 gap-6 md:gap-10 py-6 md:py-10 border-y border-white/5 relative z-10">
               <div className="space-y-2">
                 <span className="text-[9px] uppercase tracking-[0.3em] font-black text-gray-600 flex items-center">
                   Location
@@ -137,18 +137,18 @@ export const JobDetailPage: React.FC = () => {
                 <span className="text-[9px] uppercase tracking-[0.3em] font-black text-gray-600 flex items-center">
                   Saved
                 </span>
-                <p className="text-sm text-white font-bold">{job.created_at ? new Date(job.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '-'}</p>
+                <p className="text-xs md:text-sm text-white font-bold">{job.created_at ? new Date(job.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '-'}</p>
               </div>
               <div className="space-y-2">
                 <span className="text-[9px] uppercase tracking-[0.3em] font-black text-gray-600 flex items-center">
                   Last Activity
                 </span>
-                <p className="text-sm text-white font-bold">{application?.updated_at ? new Date(application.updated_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Never'}</p>
+                <p className="text-xs md:text-sm text-white font-bold">{application?.updated_at ? new Date(application.updated_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Never'}</p>
               </div>
             </div>
 
-            <div className="space-y-6 relative z-10">
-              <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em]">Pipeline Stage</h3>
+            <div className="space-y-6 relative z-10 pt-4">
+              <h3 className="text-[9px] font-black text-gray-500 uppercase tracking-wider">Pipeline Stage</h3>
               <div className="flex flex-wrap gap-2">
                 {statuses.map((status) => {
                   const isCurrent = application?.status === status;

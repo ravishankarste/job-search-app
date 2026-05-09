@@ -38,16 +38,15 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
-      - name: "🚀 Sync to Production (Dual Domain: .app + .com subdomain)"
+      - name: "🚀 Sync to Production (Primary Root: upanita.com)"
         run: |
-          # 1. Sync to upanita.app (Primary)
+          # 1. Sync to upanita.com (The New Flagship Root)
+          ssh -p 65002 -o ConnectTimeout=60 -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "rm -rf domains/upanita.com/public_html/*"
+          rsync -avz --delete -e "ssh -p 65002 -o ConnectTimeout=120" dist/ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:domains/upanita.com/public_html/
+          
+          # 2. Sync to upanita.app (Mirror/Backup)
           ssh -p 65002 -o ConnectTimeout=60 -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "rm -rf domains/upanita.app/public_html/*"
           rsync -avz --delete -e "ssh -p 65002 -o ConnectTimeout=120" dist/ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:domains/upanita.app/public_html/
           
-          # 2. Sync to jobs.upanita.com (Secondary SEO)
-          # Note: This folder also handles the 301 redirect for the old upanita.com/jobs/ path via the included .htaccess
-          ssh -p 65002 -o ConnectTimeout=60 -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "rm -rf domains/upanita.com/public_html/jobs/*"
-          rsync -avz --delete -e "ssh -p 65002 -o ConnectTimeout=120" dist/ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:domains/upanita.com/public_html/jobs/
-          
-          # 3. Double-check: list both folders
-          ssh -p 65002 -o ConnectTimeout=60 -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "ls -la domains/upanita.app/public_html/ && ls -la domains/upanita.com/public_html/jobs/"
+          # 3. Verification
+          ssh -p 65002 -o ConnectTimeout=60 -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "ls -la domains/upanita.com/public_html/"
