@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authService } from '../services/authService';
+import { env } from '../config/env';
 
 export const Signup: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -8,6 +9,48 @@ export const Signup: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const [nonce, setNonce] = useState('');
+
+  React.useEffect(() => {
+    // Generate a secure random nonce
+    const rawNonce = btoa(String.fromCharCode(...window.crypto.getRandomValues(new Uint8Array(16))));
+    setNonce(rawNonce);
+
+    // Initialize Google Identity Services
+    const initializeGoogle = () => {
+      const google = (window as any).google;
+      if (google) {
+        google.accounts.id.initialize({
+          client_id: env.VITE_GOOGLE_CLIENT_ID,
+          callback: handleGoogleResponse,
+          nonce: rawNonce,
+          auto_select: false,
+          cancel_on_tap_outside: true,
+          context: 'signup',
+          ux_mode: 'popup'
+        });
+      }
+    };
+
+    // Small delay to ensure script is loaded
+    const timer = setTimeout(initializeGoogle, 500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleGoogleResponse = async (response: any) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const { session } = await authService.signInWithIdToken(response.credential, nonce);
+      if (session) {
+        navigate('/dashboard');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Google signup failed');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,14 +69,26 @@ export const Signup: React.FC = () => {
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      await authService.signInWithGoogle();
-    } catch (err: any) {
-      setError(err.message || 'An error occurred during Google sign in');
-      setIsLoading(false);
+  const handleGoogleSignIn = () => {
+    const google = (window as any).google;
+    if (google) {
+      google.accounts.id.prompt((notification: any) => {
+        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+          console.warn('Google native prompt failed/skipped. Falling back to standard OAuth.');
+          setIsLoading(true);
+          authService.signInWithGoogle().catch(err => {
+            setError(err.message || 'Google signup failed');
+            setIsLoading(false);
+          });
+        }
+      });
+    } else {
+      // Fallback to standard OAuth if script failed
+      setIsLoading(true);
+      authService.signInWithGoogle().catch(err => {
+        setError(err.message || 'Google signup failed');
+        setIsLoading(false);
+      });
     }
   };
 

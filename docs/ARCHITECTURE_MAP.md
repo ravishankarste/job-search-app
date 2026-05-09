@@ -72,11 +72,19 @@ job-search-app/
 *   **`vercel.json`**: Production hosting and serverless configuration.
 
 ## 📁 3. The Core Engine (`src/`)
-*   **`App.tsx`**: The Central Command Center. Manages global layouts and route orchestration.
-*   **`config/` / `services/`**: Logical abstraction layers for system configuration and API calls.
-*   **`lib/`**: Direct integrations with external platforms (Supabase, PostHog).
+*   **`main.tsx`**: The entry point. Initializes React, Query Client, and Analytics.
+*   **`router/index.tsx`**: The Traffic Controller. Manages all routes and protected boundaries.
+*   **`config/`**: System-wide constants and environment variable validation (Zod).
+*   **`services/`**: Global API abstraction layers (Auth, Pipeline, Resumes).
+*   **`lib/`**: Direct integrations with external SDKs (Supabase, PostHog).
+*   **`contexts/`**: Global state distribution (Auth, UI state).
+*   **`hooks/`**: Custom React hooks for shared logic and data fetching.
+*   **`types/`**: Unified TypeScript interfaces for the entire ecosystem.
+*   **`utils/`**: Pure utility functions for formatting, validation, and math.
 
 ## 📁 4. Modular Features (`src/features/`)
+*Each feature is a self-contained module with its own `pages/`, `components/`, `hooks/`, and `services/`.*
+
 *   **`auth/`**: Identity & Session Management. Handles Google OAuth and Supabase Auth flows.
 *   **`discovery/`**: The "Smart Discovery" engine. Scraper integrations for real-time job sourcing.
 *   **`jobs/`**: The core Kanban pipeline, match scoring engine, and interview tracking.
@@ -94,8 +102,26 @@ job-search-app/
 *   **`components/common/`**: Universal UI tokens (Buttons, Cards, Modals).
 *   **`contexts/AuthContext.tsx`**: Global session distribution and security state.
 
-## 📁 6. Database & DevOps (`supabase/`, `scripts/` & `tests/`)
-*   **`supabase/migrations/`**: Versioned SQL blueprints for the database schema.
-*   **`scripts/`**: Critical DevOps scripts for environment validation (Auth, Storage, DB).
-*   **`tests/` / `playwright.config.ts`**: E2E test scripts and runner configuration.
-*   **`playwright-report/`**: Visual evidence and logs from automated test runs.
+## 📁 6. Infrastructure & Build Tooling (Root)
+*   **`package.json`**: System dependencies, scripts, and project metadata.
+*   **`vite.config.ts`**: The build engine and dev server configuration.
+*   **`playwright.config.ts`**: E2E test runner orchestration.
+*   **`supabase/`**: Versioned database migrations and edge functions.
+*   **`scripts/`**: DevOps utilities for DB validation and environment checks.
+*   **`.github/workflows/`**: Automated CI/CD pipelines (Build & SSH Deploy).
+
+---
+
+## 🛡️ Subdomain Safeguards
+To prevent "Deployment Collision," the root `job-search-app` deployment script is configured to **explicitly exclude** the following directories from its cleanup phase:
+*   `/lab/` (The Innovation Lab)
+*   `/runner/` (The Runner Launchpad)
+*   `/jobs/` (Legacy Redirect Hub)
+
+## 🧠 Lessons Learned (The Sovereign Pivot)
+1.  **Automation Safety**: `rsync --delete` requires directory exclusions when subdomains are nested within the root `public_html`.
+2.  **Secret Sovereignty**: Server-side secrets (e.g., `strava_secrets.php`) must be stored outside the `public_html` root to survive automated pushes.
+3.  **Cross-Domain Pathing**: Navigation between subdomains requires absolute URL mapping to prevent 404s.
+4.  **Database Lifecycle**: Supabase projects require active "heartbeats" to prevent 90-day inactivity pausing.
+5.  **Branding Sovereignty**: Using Google Identity Services (Native SDK) instead of standard OAuth redirects removes "Continue to Supabase" branding for a premium UX.
+6.  **OAuth Security (Nonce)**: Supabase's `signInWithIdToken` requires an exact match of the `nonce` claim extracted from the Google ID token JWT.

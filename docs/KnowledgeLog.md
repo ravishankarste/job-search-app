@@ -45,6 +45,7 @@ Complete architectural overhaul from manual tracking to an automated, intelligen
 ### 🐛 Bug Fix Log (Critical)
 *   **Followup Service Recovery**: Fixed a critical crash where the original task-tracking logic was overwritten. Merged `getUpcomingTasks` and `createFollowup` with the new `isStale` ghosting detection logic in `followupService.ts`.
 *   **Naming Standardization**: Standardized project-wide to `followupService.ts` (lowercase) to resolve case-sensitivity issues on deployment servers.
+
 ## [2026-05-04] - Migration to Upanita.app Root
 Successfully migrated from Hostinger subdirectory `/jobs/` to the root of `upanita.app`.
 
@@ -84,3 +85,20 @@ Successfully migrated from Hostinger subdirectory `/jobs/` to the root of `upani
 ### 💡 4. Strategy & UX
 *   **Activation Gap Fix**: Identified signup drop-off and implemented guided onboarding messages to walk users through the app.
 *   **Unified Intelligence**: Merged live logs and static resources into a single "Command Vault" view.
+
+## [2026-05-09] - Branding Sovereignty & Identity Hardening
+**Objective**: Eliminating third-party branding from the login experience and hardening the Auth pipeline.
+
+### 🛡️ 1. Branding Sovereignty (Google Identity Services)
+*   **The Pivot**: Migrated from standard OAuth redirects to the **Native Google Identity Services (GIS) SDK**.
+*   **Impact**: Resolved the "Continue to Supabase" branding issue. The login prompt now originates from the primary domain, showing the "Udyog Marg" app name and professional branding natively.
+*   **One-Tap**: Enabled One-Tap sign-in for zero-friction returning user activation.
+
+### 🔐 2. Auth Pipeline Hardening
+*   **The Nonce Fix**: Resolved a critical `AuthApiError` (400 Bad Request) by implementing **JWT Nonce Extraction**.
+*   **Technical Implementation**: Added logic to `authService.ts` to decode the Google ID Token (Base64Url) and extract the `nonce` claim, which is now passed back to Supabase for cryptographic validation.
+*   **Import Resilience**: Restored missing React/Hook imports in `Login.tsx` and `Signup.tsx` after a tactical refactor.
+
+### ⚙️ 3. Environment Integrity
+*   **Newline Guard**: Fixed a critical `.env` corruption issue where keys were merged due to missing trailing newlines.
+*   **Schema Update**: Updated `env.ts` (Zod validation) and `.env.example` to require `VITE_GOOGLE_CLIENT_ID`, ensuring system-wide stability.
