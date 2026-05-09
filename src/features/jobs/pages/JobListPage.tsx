@@ -6,6 +6,7 @@ import { AddJobModal } from '../components/AddJobModal';
 import { FollowUpModal } from '../components/FollowUpModal';
 import { Plus, Search, ArrowRight } from 'lucide-react';
 import { UniversalImporter } from '../components/UniversalImporter';
+import { OnboardingAccelerator } from '../../../components/onboarding/OnboardingAccelerator';
 
 export const JobListPage: React.FC = () => {
   const { data: jobs, isLoading } = useJobs();
@@ -16,6 +17,7 @@ export const JobListPage: React.FC = () => {
   const [followUpData, setFollowUpData] = useState<{ title: string; company: string } | null>(null);
   const [prefilledData, setPrefilledData] = useState<any>(null);
   const boardRef = React.useRef<HTMLDivElement>(null);
+  const importerRef = React.useRef<HTMLDivElement>(null);
 
   const handleCreate = async (data: any) => {
     await createJob(data);
@@ -94,12 +96,14 @@ export const JobListPage: React.FC = () => {
       </div>
 
       {/* Universal Importer */}
-      <UniversalImporter 
-        onImportSuccess={(data) => {
-          setPrefilledData(data);
-          setIsModalOpen(true);
-        }}
-      />
+      <div ref={importerRef}>
+        <UniversalImporter 
+          onImportSuccess={(data) => {
+            setPrefilledData(data);
+            setIsModalOpen(true);
+          }}
+        />
+      </div>
 
       {/* Status Quick Navigator */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
@@ -145,68 +149,78 @@ export const JobListPage: React.FC = () => {
         })}
       </div>
 
-      {/* Kanban Board */}
-      <div 
-        ref={boardRef}
-        className="flex gap-6 overflow-x-auto pb-8 custom-scrollbar relative"
-      >
-        {['saved', 'applied', 'interviewing', 'offered', 'rejected'].map(status => {
-          const isRejected = status === 'rejected';
-          return (
-            <div key={status} id={`column-${status}`} className="min-w-[320px] w-[320px] flex flex-col gap-4">
-              <div className={`p-4 rounded-t-xl border-b-4 ${
-                isRejected ? 'bg-red-500/10 border-red-500 rejected-glow' : 'bg-[#1A1A1A] border-[#FC6100]'
-              }`}>
-                 <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      {isRejected && <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />}
-                      <h3 className={`text-sm font-bold uppercase tracking-wider capitalize ${
-                        isRejected ? 'text-white' : 'text-[#FC6100]'
+      {/* Kanban Board or Accelerator */}
+      {jobs && jobs.length > 0 ? (
+        <div 
+          ref={boardRef}
+          className="flex gap-6 overflow-x-auto pb-8 custom-scrollbar relative"
+        >
+          {['saved', 'applied', 'interviewing', 'offered', 'rejected'].map(status => {
+            const isRejected = status === 'rejected';
+            return (
+              <div key={status} id={`column-${status}`} className="min-w-[320px] w-[320px] flex flex-col gap-4">
+                <div className={`p-4 rounded-t-xl border-b-4 ${
+                  isRejected ? 'bg-red-500/10 border-red-500 rejected-glow' : 'bg-[#1A1A1A] border-[#FC6100]'
+                }`}>
+                   <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {isRejected && <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />}
+                        <h3 className={`text-sm font-bold uppercase tracking-wider capitalize ${
+                          isRejected ? 'text-white' : 'text-[#FC6100]'
+                        }`}>
+                          {status}
+                        </h3>
+                      </div>
+                      <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${
+                        isRejected 
+                          ? 'bg-red-500/20 text-red-500 border-red-500/30' 
+                          : 'bg-[#FC6100]/20 text-[#FC6100] border-[#FC6100]/30'
                       }`}>
-                        {status}
-                      </h3>
-                    </div>
-                    <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${
-                      isRejected 
-                        ? 'bg-red-500/20 text-red-500 border-red-500/30' 
-                        : 'bg-[#FC6100]/20 text-[#FC6100] border-[#FC6100]/30'
-                    }`}>
-                      {groupedJobs[status]?.length || 0}
-                    </span>
-                 </div>
-              </div>
-
-              <div className="space-y-4 flex-1 min-h-[500px]">
-                 {groupedJobs[status]?.length === 0 ? (
-                   <div className="h-32 border-2 border-dashed border-white/5 rounded-xl flex flex-col items-center justify-center bg-white/[0.01] transition-colors hover:bg-white/[0.03] p-6 text-center">
-                      <Search className="w-6 h-6 text-gray-700 mb-2 opacity-50" />
-                      <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest">No Applications</p>
-                      <p className="text-[9px] text-gray-700 font-medium mt-1">Ready for a new role?</p>
+                        {groupedJobs[status]?.length || 0}
+                      </span>
                    </div>
-                 ) : (
-                   groupedJobs[status]?.map(job => (
-                     <JobCard 
-                       key={job.id} 
-                       job={job} 
-                       onFollowUpClick={(company) => setFollowUpData({ title: job.title, company })} 
-                     />
-                   ))
-                 )}
+                </div>
+
+                <div className="space-y-4 flex-1 min-h-[500px]">
+                   {groupedJobs[status]?.length === 0 ? (
+                     <div className="h-32 border-2 border-dashed border-white/5 rounded-xl flex flex-col items-center justify-center bg-white/[0.01] transition-colors hover:bg-white/[0.03] p-6 text-center">
+                        <Search className="w-6 h-6 text-gray-700 mb-2 opacity-50" />
+                        <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest">No Applications</p>
+                        <p className="text-[9px] text-gray-700 font-medium mt-1">Ready for a new role?</p>
+                     </div>
+                   ) : (
+                     groupedJobs[status]?.map(job => (
+                       <JobCard 
+                         key={job.id} 
+                         job={job} 
+                         onFollowUpClick={(company) => setFollowUpData({ title: job.title, company })} 
+                       />
+                     ))
+                   )}
+                </div>
               </div>
-            </div>
-          );
-        })}
-        
-        {/* End of Pipeline Indicator */}
-        <div className="min-w-[100px] flex items-center justify-center opacity-20 hover:opacity-100 transition-opacity pr-12">
-           <div className="flex flex-col items-center gap-2">
-              <div className="w-12 h-12 rounded-full border-2 border-dashed border-red-500/30 flex items-center justify-center">
-                <ArrowRight className="w-6 h-6 text-red-500/50" />
-              </div>
-              <span className="text-[8px] font-black text-red-500/40 uppercase tracking-[0.2em] [writing-mode:vertical-lr]">End of Pipeline</span>
-           </div>
+            );
+          })}
+          
+          {/* End of Pipeline Indicator */}
+          <div className="min-w-[100px] flex items-center justify-center opacity-20 hover:opacity-100 transition-opacity pr-12">
+             <div className="flex flex-col items-center gap-2">
+                <div className="w-12 h-12 rounded-full border-2 border-dashed border-red-500/30 flex items-center justify-center">
+                  <ArrowRight className="w-6 h-6 text-red-500/50" />
+                </div>
+                <span className="text-[8px] font-black text-red-500/40 uppercase tracking-[0.2em] [writing-mode:vertical-lr]">End of Pipeline</span>
+             </div>
+          </div>
         </div>
-      </div>
+      ) : (
+        <OnboardingAccelerator 
+          onManualClick={() => setIsModalOpen(true)}
+          onImportClick={() => {
+            importerRef.current?.scrollIntoView({ behavior: 'smooth' });
+            importerRef.current?.querySelector('input')?.focus();
+          }}
+        />
+      )}
 
       <AddJobModal
         isOpen={isModalOpen}

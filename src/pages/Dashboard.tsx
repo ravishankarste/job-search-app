@@ -13,14 +13,19 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useJobs } from '../features/jobs/hooks/useJobs';
+import { useResumes } from '../features/resumes/hooks/useResumes';
 import { useActionPlan } from '../features/jobs/hooks/useActionPlan';
 import { FollowUpModal } from '../features/jobs/components/FollowUpModal';
 import { Ghost } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { OnboardingAccelerator } from '../components/onboarding/OnboardingAccelerator';
 
 export const Dashboard: React.FC = () => {
   const { session } = useAuth();
   const { data: jobs } = useJobs();
+  const { data: resumes } = useResumes();
   const { tasks, toggleFollowup, isLoading: isTasksLoading } = useActionPlan();
+  const navigate = useNavigate();
   
   const [followUpCompany, setFollowUpCompany] = React.useState<string | null>(null);
 
@@ -35,7 +40,7 @@ export const Dashboard: React.FC = () => {
   ];
 
   const tools = [
-    { name: 'Job Pipeline', path: '/jobs', icon: LayoutDashboard, description: 'Track your applications through every stage of the hiring process.' },
+    { name: 'Job Pipeline', path: '/pipeline', icon: LayoutDashboard, description: 'Track your applications through every stage of the hiring process.' },
     { name: 'Resume Library', path: '/resumes', icon: FileText, description: 'Store and manage multiple versions of your professional resume.' },
     { name: 'Career Analytics', path: '/analytics', icon: BarChart3, description: 'Get detailed insights into your job search performance.' },
   ];
@@ -60,7 +65,11 @@ export const Dashboard: React.FC = () => {
       {/* Stats Cards - Strava Dark Style */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {stats.map((stat) => (
-          <div key={stat.label} className="clean-card group border-white/10 bg-white/[0.02] tactile-press">
+          <Link 
+            key={stat.label} 
+            to={stat.label === 'Total Applications' ? '/pipeline' : '/pipeline'} // Ensure stats lead somewhere useful
+            className="clean-card group border-white/10 bg-white/[0.02] tactile-press no-underline block"
+          >
             <div className="flex items-center justify-between mb-6">
               <div className="w-14 h-14 bg-[#FC6100]/10 rounded-lg flex items-center justify-center group-hover:bg-[#FC6100] transition-all duration-500">
                 <stat.icon className="w-7 h-7 text-[#FC6100] group-hover:text-white transition-colors" />
@@ -69,7 +78,7 @@ export const Dashboard: React.FC = () => {
             </div>
             <h2 className="text-[11px] font-black text-gray-500 uppercase tracking-widest mb-2 font-display">{stat.label}</h2>
             <p className="text-[11px] text-gray-500 leading-relaxed font-medium">{stat.description}</p>
-          </div>
+          </Link>
         ))}
       </div>
 
@@ -79,7 +88,7 @@ export const Dashboard: React.FC = () => {
           <h2 className="text-xl font-bold text-white flex items-center">
             <Clock className="w-6 h-6 mr-3 text-[#FC6100]" /> Today's Action Plan
           </h2>
-          <Link to="/jobs" className="text-[11px] font-black uppercase tracking-widest text-gray-500 hover:text-[#FC6100] transition-colors">
+          <Link to="/pipeline" className="text-[11px] font-black uppercase tracking-widest text-gray-500 hover:text-[#FC6100] transition-colors">
             View Full Pipeline
           </Link>
         </div>
@@ -88,14 +97,37 @@ export const Dashboard: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[1, 2, 3].map(i => <div key={i} className="clean-card h-40 animate-pulse bg-white/5" />)}
           </div>
-        ) : tasks.length === 0 ? (
-          <div className="clean-card text-center py-16 border-dashed border-white/10 bg-transparent">
-            <Calendar className="w-12 h-12 text-gray-700 mx-auto mb-4 opacity-50" />
-            <h3 className="text-xl font-bold text-white mb-2">You're all caught up!</h3>
-            <p className="text-sm text-gray-500 max-w-sm mx-auto mb-8 font-medium">No pending follow-ups or interview prep tasks today. Time to refine your resume or explore new roles.</p>
-            <Link to="/jobs" className="px-8 py-3 bg-[#FC6100] text-white rounded-lg font-black uppercase tracking-widest text-[11px] hover:bg-[#E35205] transition-all inline-flex items-center tactile-press border border-white/10">
-              Go to Pipeline <ArrowRight className="w-4 h-4 ml-2" />
+        ) : (!resumes || resumes.length === 0) ? (
+          <div className="clean-card text-center py-16 border-white/10 bg-white/[0.01] relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-20 transition-opacity">
+              <FileText className="w-32 h-32 text-[#FC6100]" />
+            </div>
+            <FileText className="w-12 h-12 text-[#FC6100] mx-auto mb-4" />
+            <h3 className="text-2xl font-bold text-white mb-2 tracking-tight">Step 1: Upload Your Resume</h3>
+            <p className="text-sm text-gray-500 max-w-sm mx-auto mb-8 font-medium leading-relaxed">
+              To activate the <strong>Match Engine</strong> and see your compatibility scores, we first need to know your skills.
+            </p>
+            <Link to="/resumes" className="px-10 py-4 bg-[#FC6100] text-white rounded-lg font-black uppercase tracking-widest text-xs hover:bg-[#E35205] transition-all inline-flex items-center tactile-press border border-white/10 shadow-2xl shadow-[#FC6100]/20">
+              Open Resume Library <ArrowRight className="w-4 h-4 ml-2" />
             </Link>
+          </div>
+        ) : tasks.length === 0 ? (
+          <div className="space-y-4">
+            {(!jobs || jobs.length === 0) ? (
+              <OnboardingAccelerator 
+                onManualClick={() => navigate('/pipeline')}
+                onImportClick={() => navigate('/pipeline')}
+              />
+            ) : (
+              <div className="clean-card text-center py-16 border-dashed border-white/10 bg-transparent">
+                <Calendar className="w-12 h-12 text-gray-700 mx-auto mb-4 opacity-50" />
+                <h3 className="text-xl font-bold text-white mb-2">You're all caught up!</h3>
+                <p className="text-sm text-gray-500 max-w-sm mx-auto mb-8 font-medium">No pending follow-ups or interview prep tasks today. Time to refine your resume or explore new roles.</p>
+                <Link to="/pipeline" className="px-8 py-3 bg-[#FC6100] text-white rounded-lg font-black uppercase tracking-widest text-[11px] hover:bg-[#E35205] transition-all inline-flex items-center tactile-press border border-white/10">
+                  Go to Pipeline <ArrowRight className="w-4 h-4 ml-2" />
+                </Link>
+              </div>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
