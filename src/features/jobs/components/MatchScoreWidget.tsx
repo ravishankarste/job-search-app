@@ -1,6 +1,7 @@
 import React from 'react';
 import { Target, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import { useMatchScore } from '../hooks/useMatchScore';
+import { trackEvent } from '../../../lib/analytics';
 
 interface MatchScoreWidgetProps {
   jobId: string;
@@ -10,6 +11,7 @@ interface MatchScoreWidgetProps {
 }
 
 export const MatchScoreWidget: React.FC<MatchScoreWidgetProps> = ({ 
+  jobId,
   jobTitle, 
   jobDescription, 
   linkedResumeId 
@@ -19,6 +21,17 @@ export const MatchScoreWidget: React.FC<MatchScoreWidgetProps> = ({
     jobTitle,
     jobDescription || ""
   );
+
+  // Track the 'Aha' moment when the score is viewed
+  React.useEffect(() => {
+    if (!isLoading && score !== undefined) {
+      trackEvent('match_score_viewed', {
+        job_id: jobId,
+        score: score,
+        company: jobTitle // Use title as proxy for context
+      });
+    }
+  }, [isLoading, score, jobId, jobTitle]);
 
 
   return (
