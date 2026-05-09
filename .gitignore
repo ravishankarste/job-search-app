@@ -23,9 +23,17 @@ dist-ssr
 *.sln
 *.sw?
 
-# Environment variables
+# Environment variables & Secrets
 .env
 .env.*
-*.json
 client_secret_*.json
+!.package.json
+!.tsconfig.json
+!.package-lock.json
+
+# Data & Assets
+*.json
+!package.json
+!tsconfig.json
+!package-lock.json
 Promotion_material/

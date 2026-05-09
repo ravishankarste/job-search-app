@@ -85,35 +85,35 @@ const KEYWORD_WEIGHTS: Record<string, number> = {
 // Synonym Mapping to handle "Literal vs Meaning" gap (Multi-Industry)
 export const SYNONYMS: Record<string, string[]> = {
   // TECHNICAL & DEVOPS
-  'CI/CD': ['continuous integration', 'continuous delivery', 'deployment pipeline', 'automated deployment'],
-  'AWS': ['amazon web services', 'ec2', 's3', 'lambda'],
-  'GCP': ['google cloud platform', 'bigquery', 'cloud run'],
-  'Azure': ['microsoft azure', 'azure devops'],
-  'SQL': ['database management', 'relational database', 'postgresql', 'mysql', 'querying'],
-  'Agile': ['scrum master', 'kanban', 'software development lifecycle', 'sdlc', 'sprints'],
-  'Frontend': ['ui engineering', 'client-side', 'user interface'],
-  'Backend': ['server-side', 'api development', 'infrastructure engineering'],
-  'Cybersecurity': ['information security', 'infosec', 'penetration testing', 'threat detection'],
+  'ci/cd': ['continuous integration', 'continuous delivery', 'deployment pipeline', 'automated deployment'],
+  'aws': ['amazon web services', 'ec2', 's3', 'lambda'],
+  'gcp': ['google cloud platform', 'bigquery', 'cloud run'],
+  'azure': ['microsoft azure', 'azure devops'],
+  'sql': ['database management', 'relational database', 'postgresql', 'mysql', 'querying'],
+  'agile': ['scrum master', 'kanban', 'software development lifecycle', 'sdlc', 'sprints'],
+  'frontend': ['ui engineering', 'client-side', 'user interface'],
+  'backend': ['server-side', 'api development', 'infrastructure engineering'],
+  'cybersecurity': ['information security', 'infosec', 'penetration testing', 'threat detection'],
 
   // PROJECT & OPERATIONS
-  'Project Management': ['managing projects', 'project coordination', 'pm', 'pmo', 'delivery management'],
-  'Operations': ['ops', 'process improvement', 'operational excellence', 'efficiency'],
-  'Leadership': ['management', 'team lead', 'mentoring', 'head of'],
-  'Stakeholder Management': ['client relations', 'business communication', 'managing expectations'],
+  'project management': ['managing projects', 'project coordination', 'pm', 'pmo', 'delivery management'],
+  'operations': ['ops', 'process improvement', 'operational excellence', 'efficiency'],
+  'leadership': ['management', 'team lead', 'mentoring', 'head of'],
+  'stakeholder management': ['client relations', 'business communication', 'managing expectations'],
 
   // FINANCE & LEGAL
-  'Compliance': ['regulatory standards', 'audit', 'risk management', 'governance'],
-  'Finance': ['accounting', 'financial analysis', 'budgeting', 'p&l'],
-  'Data Analysis': ['business intelligence', 'bi', 'data visualization', 'analytics'],
+  'compliance': ['regulatory standards', 'audit', 'risk management', 'governance'],
+  'finance': ['accounting', 'financial analysis', 'budgeting', 'p&l'],
+  'data analysis': ['business intelligence', 'bi', 'data visualization', 'analytics'],
 
   // HEALTHCARE & CLINICAL
-  'Clinical': ['patient care', 'medical records', 'healthcare administration', 'hospital'],
-  'Research': ['clinical trials', 'data collection', 'laboratory', 'scientific method'],
+  'clinical': ['patient care', 'medical records', 'healthcare administration', 'hospital'],
+  'research': ['clinical trials', 'data collection', 'laboratory', 'scientific method'],
 
   // MARKETING & SALES
-  'Digital Marketing': ['seo', 'sem', 'content strategy', 'social media management'],
-  'Sales': ['business development', 'account management', 'lead generation', 'revenue growth'],
-  'UI/UX': ['user experience', 'user interface design', 'product design', 'wireframing']
+  'digital marketing': ['seo', 'sem', 'content strategy', 'social media management'],
+  'sales': ['business development', 'account management', 'lead generation', 'revenue growth'],
+  'ui/ux': ['user experience', 'user interface design', 'product design', 'wireframing']
 };
 
 export const matchAnalysisService = {

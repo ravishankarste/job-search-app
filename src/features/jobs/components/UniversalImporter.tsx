@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Loader2, Sparkles, AlertCircle } from 'lucide-react';
 import { apifyService } from '../../discovery/services/apifyService';
 import { useJobActions } from '../hooks/useJobActions';
+import { trackEvent } from '../../lib/analytics';
 
 interface UniversalImporterProps {
   onImportSuccess: (data: any) => void;
@@ -19,6 +20,7 @@ export const UniversalImporter: React.FC<UniversalImporterProps> = ({ onImportSu
     
     setIsScraping(true);
     setError(null);
+    trackEvent('job_import_started', { url });
 
     // 1. Validator: Check if it's a collection/search URL instead of a single job
     if (url.includes('linkedin.com/jobs/search') || url.includes('linkedin.com/jobs/collections')) {
@@ -61,6 +63,8 @@ export const UniversalImporter: React.FC<UniversalImporterProps> = ({ onImportSu
         employment_type: 'full-time',
       });
       
+      trackEvent('job_import_success', { method: 'automated', url });
+      
       // Clear input and show success
       setUrl('');
       setIsScraping(false);
@@ -76,6 +80,7 @@ export const UniversalImporter: React.FC<UniversalImporterProps> = ({ onImportSu
         url: url,
         location: "Remote",
       });
+      trackEvent('job_import_success', { method: 'fallback_manual', url });
       setIsScraping(false);
       setUrl('');
     }
