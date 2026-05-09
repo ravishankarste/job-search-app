@@ -46,7 +46,7 @@ export const UniversalImporter: React.FC<UniversalImporterProps> = ({ onImportSu
     // 4. Sprint Scrape: Try to get full details but don't wait more than 15s
     const scrapePromise = apifyService.scrapeJobUrl(url);
     const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error("Timeout")), 15000)
+      setTimeout(() => reject(new Error("Timeout")), 25000)
     );
 
     try {

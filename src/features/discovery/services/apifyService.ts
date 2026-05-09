@@ -257,11 +257,23 @@ export const apifyService = {
   },
 
   async scrapeSingleLinkedIn(url: string): Promise<DiscoveredJob> {
-    const actorId = 'curious_coder~linkedin-jobs-scraper';
-    const input = { urls: [url], maxItems: 1 };
-    const items = await this.runActorAndGetResults(actorId, input);
-    if (!items || !items.length) throw new Error("Could not find job details.");
-    return this.mapLinkedInItem(items[0], 0);
+    const primaryActor = 'curious_coder~linkedin-jobs-scraper';
+    const secondaryActor = 'pro_scraper~linkedin-jobs-detail-scraper'; // Fallback
+    
+    try {
+      const input = { urls: [url], maxItems: 1 };
+      const items = await this.runActorAndGetResults(primaryActor, input);
+      if (items && items.length > 0) return this.mapLinkedInItem(items[0], 0);
+    } catch (e) {
+      console.warn("[apifyService] Primary LinkedIn scraper failed, trying secondary...", e);
+    }
+
+    // Try secondary actor if primary failed
+    const secondaryInput = { jobUrls: [url] };
+    const secondaryItems = await this.runActorAndGetResults(secondaryActor, secondaryInput);
+    if (!secondaryItems || !secondaryItems.length) throw new Error("Could not find job details after two attempts.");
+    
+    return this.mapLinkedInItem(secondaryItems[0], 0);
   },
 
   async scrapeSingleIndeed(url: string): Promise<DiscoveredJob> {
