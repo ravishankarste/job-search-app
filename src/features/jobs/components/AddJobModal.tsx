@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Plus } from 'lucide-react';
-import { trackEvent } from '../../lib/analytics';
+import { trackEvent } from '../../../lib/analytics';
 
 interface AddJobModalProps {
   isOpen: boolean;

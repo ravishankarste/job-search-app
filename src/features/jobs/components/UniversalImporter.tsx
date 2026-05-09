@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Loader2, Sparkles, AlertCircle } from 'lucide-react';
 import { apifyService } from '../../discovery/services/apifyService';
 import { useJobActions } from '../hooks/useJobActions';
-import { trackEvent } from '../../lib/analytics';
+import { trackEvent } from '../../../lib/analytics';
 
 interface UniversalImporterProps {
   onImportSuccess: (data: any) => void;
