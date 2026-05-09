@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Plus } from 'lucide-react';
+import { trackEvent } from '../../lib/analytics';
 
 interface AddJobModalProps {
   isOpen: boolean;
@@ -51,6 +52,7 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    trackEvent('job_import_success', { method: 'manual', url: formData.url });
     onSubmit(formData);
   };
 

@@ -9,7 +9,7 @@
 *   **Brand**: Strava-inspired dark design (High-performance aesthetics).
 *   **Core Tech**: React + Vite + TypeScript + Supabase.
 *   **The Problem**: Bridging the "LinkedIn Black Hole" with data-driven match scoring.
-*   **Core UI**: Dashboard, Job Pipeline, Resume Manager.
+*   **HARD CONSTRAINT**: **Apify scrapers are on rate-limit lockdown until May 16th.** All discovery must be manual or via legal APIs until then.
 
 ---
 
@@ -34,6 +34,7 @@
 
 ## 🔮 4. Future Pipeline (The "Wait for Feedback" List)
 *Do NOT build these until GTM data proves they are needed.*
+- [ ] **Legal API Migration**: Research and integrate Google Jobs API (via SerpApi) to replace brittle scraping with a stable, legal data pipeline.
 - [ ] **Viral Loop**: Referral credits for friends.
 - [ ] **Success Hall of Fame**: UI for showcasing before/after ATS scores of hired users.
 - [ ] **Browser Extension**: 1-click "import and score" directly on LinkedIn.
