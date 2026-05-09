@@ -6,14 +6,17 @@ const POSTHOG_KEY = import.meta.env.VITE_POSTHOG_KEY || '';
 
 export const initAnalytics = () => {
   if (typeof window !== 'undefined' && POSTHOG_KEY) {
+    console.log("[Analytics] Initializing PostHog...");
     posthog.init(POSTHOG_KEY, {
       api_host: 'https://eu.i.posthog.com',
       autocapture: true,
       capture_pageview: true,
       persistence: 'localStorage',
       person_profiles: 'identified_only',
-      debug: true, // Enable debug mode to see ingestion in console
+      debug: true, 
     });
+  } else {
+    console.error("[Analytics] FATAL: PostHog Key is missing. Tracking will not work.");
   }
 };
 
