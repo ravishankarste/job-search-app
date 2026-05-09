@@ -21,6 +21,7 @@ export const initAnalytics = () => {
  * Use this to track specific high-value actions like "Join Alpha" clicks
  */
 export const trackEvent = (eventName: string, properties?: Record<string, any>) => {
+  console.log(`[Analytics] Tracking Event: ${eventName}`, properties);
   if (typeof window !== 'undefined' && POSTHOG_KEY) {
     posthog.capture(eventName, properties);
   }
