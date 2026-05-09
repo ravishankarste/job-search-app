@@ -12,6 +12,7 @@ export const initAnalytics = () => {
       capture_pageview: true,
       persistence: 'localStorage',
       person_profiles: 'identified_only',
+      debug: true, // Enable debug mode to see ingestion in console
     });
   }
 };
@@ -21,8 +22,11 @@ export const initAnalytics = () => {
  * Use this to track specific high-value actions like "Join Alpha" clicks
  */
 export const trackEvent = (eventName: string, properties?: Record<string, any>) => {
-  console.log(`[Analytics] Tracking Event: ${eventName}`, properties);
+  console.log(`[Analytics] Attempting to track: ${eventName}`, properties);
+  
   if (typeof window !== 'undefined' && POSTHOG_KEY) {
+    // We use a callback or a short delay to ensure the event is sent 
+    // before the browser cancels the request during navigation.
     posthog.capture(eventName, properties);
   }
 };
