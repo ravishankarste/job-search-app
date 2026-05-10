@@ -12,27 +12,34 @@ export const Signup: React.FC = () => {
   const [nonce, setNonce] = useState('');
 
   React.useEffect(() => {
-    // Generate a secure random nonce
-    const rawNonce = btoa(String.fromCharCode(...window.crypto.getRandomValues(new Uint8Array(16))));
+    // Generate a secure, URL-safe hex nonce
+    const array = new Uint8Array(16);
+    window.crypto.getRandomValues(array);
+    const rawNonce = Array.from(array).map(b => b.toString(16).padStart(2, '0')).join('');
     setNonce(rawNonce);
 
     // Initialize Google Identity Services
     const initializeGoogle = () => {
       const google = (window as any).google;
       if (google) {
-        google.accounts.id.initialize({
-          client_id: env.VITE_GOOGLE_CLIENT_ID,
-          callback: handleGoogleResponse,
-          nonce: rawNonce,
-          auto_select: false,
-          cancel_on_tap_outside: true,
-          context: 'signup',
-          ux_mode: 'popup'
-        });
+        try {
+          google.accounts.id.initialize({
+            client_id: env.VITE_GOOGLE_CLIENT_ID,
+            callback: handleGoogleResponse,
+            nonce: rawNonce,
+            auto_select: false,
+            use_fedcm_for_prompt: true, // Crucial for modern browser support
+            cancel_on_tap_outside: true,
+            context: 'signup',
+            ux_mode: 'popup'
+          });
+          console.log('Google Identity initialized for Signup with FedCM support.');
+        } catch (e) {
+          console.error('Failed to initialize Google Identity for Signup:', e);
+        }
       }
     };
 
-    // Small delay to ensure script is loaded
     const timer = setTimeout(initializeGoogle, 500);
     return () => clearTimeout(timer);
   }, []);
@@ -41,12 +48,15 @@ export const Signup: React.FC = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const { session } = await authService.signInWithIdToken(response.credential, nonce);
+      console.log('Received Google response for Signup, signing in with IdToken...');
+      const { session, error: authError } = await authService.signInWithIdToken(response.credential, nonce);
+      if (authError) throw authError;
       if (session) {
         navigate('/dashboard');
       }
     } catch (err: any) {
-      setError(err.message || 'Google signup failed');
+      console.error('Google Signup Error:', err);
+      setError(err.message || 'Google signup failed. Please ensure your account is verified.');
     } finally {
       setIsLoading(false);
     }

@@ -73,7 +73,7 @@ export const authService = {
     }
   },
   
-  async signInWithIdToken(token: string, nonce?: string): Promise<AuthResponse> {
+  async signInWithIdToken(token: string, nonce?: string): Promise<AuthResponse & { error?: any }> {
     try {
       // If no nonce was passed, attempt to extract it from the token as a fallback
       if (!nonce) {
@@ -100,7 +100,8 @@ export const authService = {
       if (error) throw error;
       return { user: data.user, session: data.session };
     } catch (error) {
-      return handleApiError(error);
+      console.error('Supabase IdToken Auth Error:', error);
+      return { user: null, session: null, error };
     }
   },
 };
