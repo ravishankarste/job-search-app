@@ -17,8 +17,8 @@
 ## 🛡️ Session Closing Checklist
 - [x] **Git Lockdown**: Latest code committed and pushed to `main`.
 - [x] **CI/CD Status**: Deployment workflow triggered and verified.
-- [ ] **Secret Sovereignty**: (Action Required) Add `VITE_GOOGLE_CLIENT_ID` to GitHub Secrets.
-- [ ] **Verification**: (Action Required) Click "Verify" in Google Search Console after deployment completes.
+- [x] **Secret Sovereignty**: Add `VITE_GOOGLE_CLIENT_ID` to GitHub Secrets.
+- [x] **Verification**: Click "Verify" in Google Search Console after deployment completes.
 - [x] **Knowledge Sync**: Updated `docs/KnowledgeLog.md` and `docs/ARCHITECTURE_MAP.md`.
 
 ---
