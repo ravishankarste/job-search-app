@@ -42,15 +42,15 @@ jobs:
       - name: "🚀 Sync to Production (Primary Root: upanita.com)"
         run: |
           # Debug: Test connectivity first
-          nc -zv -w 10 ${{ secrets.SSH_HOST }} 65002 || echo "NETWORK BLOCK DETECTED: Port 65002 unreachable"
+          nc -zv -w 10 141.136.43.105 65002 || echo "NETWORK BLOCK DETECTED: Port 65002 unreachable"
           
           # 1. Sync to upanita.com (Protecting lab/runner subfolders)
-          ssh -vvv -p 65002 -o ConnectTimeout=120 -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "find domains/upanita.com/public_html/ -maxdepth 1 ! -name 'lab' ! -name 'runner' ! -name 'jobs' ! -path 'domains/upanita.com/public_html/' -exec rm -rf {} +"
-          rsync -avz --delete --exclude 'lab' --exclude 'runner' --exclude 'jobs' -e "ssh -vvv -p 65002 -o ConnectTimeout=120" dist/ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:domains/upanita.com/public_html/
+          ssh -vvv -p 65002 -o ConnectTimeout=120 -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@141.136.43.105 "find domains/upanita.com/public_html/ -maxdepth 1 ! -name 'lab' ! -name 'runner' ! -name 'jobs' ! -path 'domains/upanita.com/public_html/' -exec rm -rf {} +"
+          rsync -avz --delete --exclude 'lab' --exclude 'runner' --exclude 'jobs' -e "ssh -vvv -p 65002 -o ConnectTimeout=120" dist/ ${{ secrets.SSH_USERNAME }}@141.136.43.105:domains/upanita.com/public_html/
           
           # 2. Sync to upanita.app (Mirror/Backup)
-          ssh -vvv -p 65002 -o ConnectTimeout=120 -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "rm -rf domains/upanita.app/public_html/*"
-          rsync -avz --delete -e "ssh -vvv -p 65002 -o ConnectTimeout=120" dist/ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:domains/upanita.app/public_html/
+          ssh -vvv -p 65002 -o ConnectTimeout=120 -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@141.136.43.105 "rm -rf domains/upanita.app/public_html/*"
+          rsync -avz --delete -e "ssh -vvv -p 65002 -o ConnectTimeout=120" dist/ ${{ secrets.SSH_USERNAME }}@141.136.43.105:domains/upanita.app/public_html/
           
           # 3. Verification
-          ssh -vvv -p 65002 -o ConnectTimeout=120 -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "ls -la domains/upanita.com/public_html/"
+          ssh -vvv -p 65002 -o ConnectTimeout=120 -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@141.136.43.105 "ls -la domains/upanita.com/public_html/"
