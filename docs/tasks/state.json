@@ -1,0 +1,50 @@
+{
+  "active_tasks": [
+    {
+      "id": "T109",
+      "description": "Resolve SSH Connection Timeout in CI/CD (Port 65002)",
+      "type": "bug",
+      "priority": "critical",
+      "status": "in_progress",
+      "created_at": "2026-05-10T22:04:00Z",
+      "context": "Production Infrastructure / Deployment Blocker"
+    },
+    {
+      "id": "T105",
+      "description": "Legal API Migration (Google Jobs API)",
+      "type": "feature",
+      "priority": "low",
+      "status": "backlog",
+      "created_at": "2026-05-09T00:00:00Z",
+      "context": "Future Pipeline"
+    },
+    {
+      "id": "T106",
+      "description": "Viral Loop (Referral Program)",
+      "type": "feature",
+      "priority": "low",
+      "status": "backlog",
+      "created_at": "2026-05-09T00:00:00Z",
+      "context": "Future Pipeline"
+    },
+    {
+      "id": "T107",
+      "description": "Success Hall of Fame",
+      "type": "feature",
+      "priority": "low",
+      "status": "backlog",
+      "created_at": "2026-05-09T00:00:00Z",
+      "context": "Future Pipeline"
+    },
+    {
+      "id": "T108",
+      "description": "Browser Extension (LinkedIn Scoring)",
+      "type": "feature",
+      "priority": "low",
+      "status": "backlog",
+      "created_at": "2026-05-09T00:00:00Z",
+      "context": "Future Pipeline"
+    }
+  ],
+  "last_archived_at": "2026-05-10T22:00:00Z"
+}

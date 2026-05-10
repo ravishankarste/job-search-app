@@ -1,0 +1,186 @@
+{
+  "archived_tasks": [
+    {
+      "id": "T001",
+      "description": "Strategic Core (Resume & Job Map)",
+      "type": "feature",
+      "status": "completed",
+      "completed_at": "2026-04-26T10:00:00Z"
+    },
+    {
+      "id": "T002",
+      "description": "Matching Algorithm (Deep Module)",
+      "type": "feature",
+      "status": "completed",
+      "completed_at": "2026-05-02T10:00:00Z"
+    },
+    {
+      "id": "T003",
+      "description": "Basic Search (Local)",
+      "type": "feature",
+      "status": "completed",
+      "completed_at": "2026-05-02T11:00:00Z"
+    },
+    {
+      "id": "T004",
+      "description": "Pipeline View (Kanban)",
+      "type": "feature",
+      "status": "completed",
+      "completed_at": "2026-05-02T12:00:00Z"
+    },
+    {
+      "id": "T005",
+      "description": "Universal Job Importer (Magic Box)",
+      "type": "feature",
+      "status": "completed",
+      "completed_at": "2026-05-02T13:00:00Z"
+    },
+    {
+      "id": "T006",
+      "description": "PDF Intelligence Pipeline (pdfjs-dist)",
+      "type": "feature",
+      "status": "completed",
+      "completed_at": "2026-05-02T14:00:00Z"
+    },
+    {
+      "id": "T007",
+      "description": "Interview Prep Coach & Cover Letter Generator",
+      "type": "feature",
+      "status": "completed",
+      "completed_at": "2026-05-02T15:00:00Z"
+    },
+    {
+      "id": "T008",
+      "description": "Deployment Foundation (upanita.app)",
+      "type": "chore",
+      "status": "completed",
+      "completed_at": "2026-05-04T09:00:00Z"
+    },
+    {
+      "id": "T009",
+      "description": "Vitest Safety Net",
+      "type": "chore",
+      "status": "completed",
+      "completed_at": "2026-05-04T10:00:00Z"
+    },
+    {
+      "id": "T010",
+      "description": "Private Storage & Data Isolation",
+      "type": "security",
+      "status": "completed",
+      "completed_at": "2026-05-04T11:00:00Z"
+    },
+    {
+      "id": "T011",
+      "description": "Hostinger to Root Migration (upanita.app)",
+      "type": "chore",
+      "status": "completed",
+      "completed_at": "2026-05-04T12:00:00Z"
+    },
+    {
+      "id": "T012",
+      "description": "Dual Domain Sync (jobs.upanita.com)",
+      "type": "chore",
+      "status": "completed",
+      "completed_at": "2026-05-04T13:00:00Z"
+    },
+    {
+      "id": "T013",
+      "description": "GitHub Actions Dominant Deployer",
+      "type": "chore",
+      "status": "completed",
+      "completed_at": "2026-05-04T14:00:00Z"
+    },
+    {
+      "id": "T014",
+      "description": "GTM Content Automation (Growth Lab 2.0)",
+      "type": "gtm",
+      "status": "completed",
+      "completed_at": "2026-05-08T15:00:00Z"
+    },
+    {
+      "id": "T015",
+      "description": "Branding Sovereignty (Google GIS SDK Migration)",
+      "type": "feature",
+      "status": "completed",
+      "completed_at": "2026-05-09T22:00:00Z"
+    },
+    {
+      "id": "T016",
+      "description": "Auth Pipeline Hardening (JWT Nonce Fix)",
+      "type": "security",
+      "status": "completed",
+      "completed_at": "2026-05-09T23:00:00Z"
+    },
+    {
+      "id": "T017",
+      "description": "Development Manifesto & Protocol Violation Rules",
+      "type": "chore",
+      "status": "completed",
+      "completed_at": "2026-05-10T08:00:00Z"
+    },
+    {
+      "id": "T018",
+      "description": "Scoring Transparency (Clickable Breakdown)",
+      "type": "feature",
+      "status": "completed",
+      "completed_at": "2026-05-10T08:30:00Z"
+    },
+    {
+      "id": "T019",
+      "description": "Geometry Fixes (Corner Clipping)",
+      "type": "bug",
+      "status": "completed",
+      "completed_at": "2026-05-10T09:00:00Z"
+    },
+    {
+      "id": "T020",
+      "description": "Data Isolation Hardening (Service Layer Filters)",
+      "type": "security",
+      "status": "completed",
+      "completed_at": "2026-05-10T09:30:00Z"
+    },
+    {
+      "id": "T021",
+      "description": "Sovereign Intelligence Vault Setup (Supabase Feedback Table)",
+      "type": "chore",
+      "status": "completed",
+      "completed_at": "2026-05-10T19:30:00Z"
+    },
+    {
+      "id": "T022",
+      "description": "Sovereign Intelligence Loop (Feedback Sync to Persona OS)",
+      "type": "feature",
+      "status": "completed",
+      "completed_at": "2026-05-10T20:30:00Z"
+    },
+    {
+      "id": "T101",
+      "description": "Onboarding Polish (Zero-Friction Flow)",
+      "type": "feature",
+      "status": "completed",
+      "completed_at": "2026-05-10T21:53:00Z"
+    },
+    {
+      "id": "T103",
+      "description": "Landing Page v2 (Interactive Sandbox)",
+      "type": "feature",
+      "status": "completed",
+      "completed_at": "2026-05-10T21:55:00Z"
+    },
+    {
+      "id": "T102",
+      "description": "LinkedIn Promotion (60 Users Post)",
+      "type": "gtm",
+      "status": "completed",
+      "completed_at": "2026-05-10T21:59:00Z"
+    },
+    {
+      "id": "T104",
+      "description": "UAT & Production Deployment (Final Cycle)",
+      "type": "chore",
+      "status": "completed",
+      "completed_at": "2026-05-10T22:00:00Z"
+    }
+  ]
+}
