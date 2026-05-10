@@ -81,13 +81,13 @@ export const JobDetailPage: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
         {/* Main Content */}
-        <div className="lg:col-span-2 space-y-10">
-          <div className="bg-[#121212] p-6 md:p-10 rounded-[32px] border border-white/5 space-y-8 md:space-y-10 shadow-2xl relative overflow-hidden group">
+        <div className="lg:col-span-2 flex flex-col gap-10">
+          <div className="bg-[#121212] border border-white/5 rounded-[32px] p-8 md:p-12 pb-20 shadow-2xl relative overflow-visible group">
             <div className="absolute top-0 right-0 w-64 h-64 bg-[#FC6100]/5 blur-[100px] -mr-32 -mt-32"></div>
             
-            <div className="flex justify-between items-start relative z-10">
+            <div className="flex items-start justify-between gap-4 relative">
               <div className="space-y-6">
-                <div className="flex items-center gap-3">
+                <div className="flex shrink-0 items-center gap-3">
                    <div className="w-6 h-[2px] bg-[#FC6100]"></div>
                    <span className="text-[10px] font-black uppercase tracking-widest text-[#FC6100]">Application Detail</span>
                 </div>
@@ -97,7 +97,7 @@ export const JobDetailPage: React.FC = () => {
                   {job.company_name}
                 </div>
               </div>
-              <div className="flex gap-3">
+              <div className="flex shrink-0 items-center gap-3">
                 {job.url && (
                   <a 
                     href={job.url} 
@@ -147,7 +147,7 @@ export const JobDetailPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="space-y-6 relative z-10 pt-4">
+            <div className="space-y-6 relative pt-4">
               <h3 className="text-[9px] font-black text-gray-500 uppercase tracking-wider">Pipeline Stage</h3>
               <div className="flex flex-wrap gap-2">
                 {statuses.map((status) => {

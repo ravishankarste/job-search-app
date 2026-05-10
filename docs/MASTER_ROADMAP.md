@@ -27,7 +27,7 @@
 ## 🛠️ 3. Pending Features (Absolutely Necessary)
 *These must be completed before escalating GTM activity.*
 - [ ] **Onboarding Polish**: Ensure a user landing on the page for the first time knows exactly where to paste their first job.
-- [ ] **Scoring Transparency**: Let users click on the match score to see *exactly* why they are missing points (making the "Deep Module" transparent).
+- [x] **Scoring Transparency**: Users can click the match score to see exactly why they are missing points (Deciphering the algorithm).
 - [ ] **Landing Page v2**: Focus on the "Draft Headlines" (Performance, Efficiency, Growth) to optimize for signups.
 
 ---

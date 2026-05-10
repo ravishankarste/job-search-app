@@ -6,13 +6,15 @@ interface MatchScoreBadgeProps {
   isLoading?: boolean;
   size?: 'sm' | 'md' | 'lg';
   showLabel?: boolean;
+  onClick?: (e: React.MouseEvent) => void;
 }
 
 export const MatchScoreBadge: React.FC<MatchScoreBadgeProps> = ({ 
   score, 
   isLoading,
   size = 'md',
-  showLabel = true 
+  showLabel = true,
+  onClick
 }) => {
   if (isLoading) {
     return (
@@ -43,7 +45,10 @@ export const MatchScoreBadge: React.FC<MatchScoreBadgeProps> = ({
   };
 
   return (
-    <div className={`inline-flex items-center font-bold uppercase tracking-wider rounded-lg border transition-all ${getColor()} ${sizeClasses[size]}`}>
+    <div 
+      onClick={onClick}
+      className={`inline-flex items-center font-bold uppercase tracking-wider rounded-lg border transition-all ${getColor()} ${sizeClasses[size]} ${onClick ? 'cursor-pointer hover:scale-105 active:scale-95' : ''}`}
+    >
       <Target className={iconSizes[size]} />
       {showLabel && <span>Match</span>}
       <span className="text-white">{score}%</span>

@@ -136,3 +136,17 @@ h1, h2, h3, h4, h5, h6 {
 .status-badge {
   @apply px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/10;
 }
+
+/* Onboarding & Accelerator Utilities */
+.pulse-brand {
+  animation: pulseBrand 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulseBrand {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: .7; transform: scale(1.02); }
+}
+
+.accelerator-gradient {
+  background: linear-gradient(135deg, rgba(252, 97, 0, 0.1) 0%, rgba(252, 97, 0, 0) 100%);
+}

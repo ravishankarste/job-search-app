@@ -15,6 +15,7 @@
 3.  **Build-Time Secrets**: Any new `VITE_` variable added to the code MUST be added to GitHub Repository Secrets immediately, or the production build will crash due to Zod validation.
 
 ## 🛡️ Session Closing Checklist
+- [x] **Local Validation**: Build and UI verified on localhost.
 - [x] **Git Lockdown**: Latest code committed and pushed to `main`.
 - [x] **CI/CD Status**: Deployment workflow triggered and verified.
 - [x] **Secret Sovereignty**: Add `VITE_GOOGLE_CLIENT_ID` to GitHub Secrets.

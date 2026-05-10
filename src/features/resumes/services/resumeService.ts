@@ -212,6 +212,19 @@ export const resumeService = {
    */
   async getLatestVersion(resumeId: string): Promise<ResumeVersion | null> {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Unauthenticated');
+
+      // Verify ownership
+      const { data: resume } = await supabase
+        .from('resumes')
+        .select('id')
+        .eq('id', resumeId)
+        .eq('profile_id', user.id)
+        .single();
+
+      if (!resume) throw new Error('Unauthorized');
+
       const { data, error } = await supabase
         .from('resume_versions')
         .select('*')

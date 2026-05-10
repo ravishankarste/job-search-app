@@ -102,3 +102,17 @@ Successfully migrated from Hostinger subdirectory `/jobs/` to the root of `upani
 ### ⚙️ 3. Environment Integrity
 *   **Newline Guard**: Fixed a critical `.env` corruption issue where keys were merged due to missing trailing newlines.
 *   **Schema Update**: Updated `env.ts` (Zod validation) and `.env.example` to require `VITE_GOOGLE_CLIENT_ID`, ensuring system-wide stability.
+
+## [2026-05-10] - Engineering Discipline & Scoring Transparency
+
+### 🏛️ 1. The "Protocol Violation" Reset
+*   **The Lesson**: Jumping directly to code without a confirmed Phase 1 Plan is a violation of the Sovereign Workflow.
+*   **The Fix**: Implemented a **Development Manifesto** and performed a full code reset on the "Scoring Transparency" feature to demonstrate commitment to discipline.
+
+### 💎 2. Scoring Transparency (The Sticky Feature)
+*   **Objective**: Convert the "Black Box" ATS score into a Strategic Checklist.
+*   **Implementation**: Added a clickable breakdown to `MatchScoreBadge`. Users can now see:
+    *   **Assets Found**: Specific technical keywords matching the resume.
+    *   **Impact Gaps**: Crucial missing requirements.
+    *   **Reality Check**: Detection of seniority/experience mismatches.
+*   **Architecture**: Built using `createPortal` for the modal to ensure Z-index integrity above the Pipeline Kanban.

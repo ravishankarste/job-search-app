@@ -16,6 +16,19 @@ export const followupService = {
    */
   async getFollowupsByApplication(applicationId: string): Promise<Followup[]> {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Unauthenticated');
+
+      // Verify ownership of the parent application
+      const { data: application } = await supabase
+        .from('applications')
+        .select('id')
+        .eq('id', applicationId)
+        .eq('profile_id', user.id)
+        .single();
+
+      if (!application) throw new Error('Unauthorized');
+
       const { data, error } = await supabase
         .from('followups')
         .select('*')
@@ -47,6 +60,7 @@ export const followupService = {
             job:jobs(id, title, company_name)
           )
         `)
+        .eq('application.profile_id', user.id) // CRITICAL: Security Isolation
         .is('completed_at', null)
         .order('scheduled_at', { ascending: true })
         .limit(5);

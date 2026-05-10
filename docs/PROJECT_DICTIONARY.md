@@ -1,4 +1,4 @@
-# Ubiquitous Language: Job Search OS (Udyog Marg)
+# 📖 The Dictionary: Udyog Marg
 
 This document establishes the formalized, shared vocabulary for the Job Search OS ecosystem. Use these terms strictly to ensure alignment between the Product Vision and Technical Implementation.
 

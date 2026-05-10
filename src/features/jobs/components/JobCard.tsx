@@ -7,6 +7,7 @@ import { useMatchScore } from '../hooks/useMatchScore';
 import { MatchScoreBadge } from './MatchScoreBadge';
 
 import { followupService } from '../services/followupService';
+import { MatchScoreModal } from './MatchScoreModal';
 
 interface JobCardProps {
   job: JobWithApplication;
@@ -15,7 +16,8 @@ interface JobCardProps {
 
 export const JobCard: React.FC<JobCardProps> = ({ job, onFollowUpClick }) => {
   const navigate = useNavigate();
-  const { score, isLoading } = useMatchScore(job.title, job.description);
+  const [showScoreDetails, setShowScoreDetails] = React.useState(false);
+  const { score, matchingSkills, missingSkills, warnings, isLoading } = useMatchScore(job.title, job.description);
 
   const ghosted = job.application?.status === 'applied' || job.application?.status === 'interviewing'
     ? followupService.isStale(job.application.updated_at || job.application.created_at)
@@ -35,7 +37,16 @@ export const JobCard: React.FC<JobCardProps> = ({ job, onFollowUpClick }) => {
         </div>
         
         <div className="flex items-center gap-2">
-          <MatchScoreBadge score={score} isLoading={isLoading} size="sm" showLabel={false} />
+          <MatchScoreBadge 
+            score={score} 
+            isLoading={isLoading} 
+            size="sm" 
+            showLabel={false} 
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowScoreDetails(true);
+            }}
+          />
           {job.url && (
             <a
               href={job.url}
@@ -82,6 +93,17 @@ export const JobCard: React.FC<JobCardProps> = ({ job, onFollowUpClick }) => {
           <ChevronRight className="w-4 h-4" />
         </div>
       </div>
+
+      <MatchScoreModal
+        isOpen={showScoreDetails}
+        onClose={() => setShowScoreDetails(false)}
+        score={score}
+        matchingSkills={matchingSkills}
+        missingSkills={missingSkills}
+        warnings={warnings}
+        jobTitle={job.title}
+        companyName={job.company_name}
+      />
     </div>
   );
 };

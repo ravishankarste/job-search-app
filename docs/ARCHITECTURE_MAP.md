@@ -12,8 +12,11 @@ job-search-app/
 ├── docs/                      # 📜 Sovereign Knowledge Base & System Documentation
 │   ├── ARCHITECTURE_MAP.md    # You are here (The Map)
 │   ├── GTM_Strategy.md        # Growth & Acquisition Roadmap
+│   ├── MASTER_ROADMAP.md      # Master Feature & Loop Tracker
+│   ├── PROJECT_DICTIONARY.md   # The Dictionary (Core Vocabulary)
+│   ├── DEVELOPMENT_MANIFESTO.md # The Laws of the Code (Workflow)
 │   ├── KnowledgeLog.md        # System Memory & Decision Journal
-│   └── ... (Constitution, Roadmap, Identity)
+│   └── ... (Constitution, Identity)
 ├── node_modules/              # 📚 System Dependencies (External)
 ├── playwright-report/         # 📊 Automated Test Execution Reports
 ├── public/                    # 🌐 Static Assets & SEO Resources

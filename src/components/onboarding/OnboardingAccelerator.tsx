@@ -21,18 +21,7 @@ export const OnboardingAccelerator: React.FC<OnboardingAcceleratorProps> = ({
       company_name: 'Netflix',
       title: 'Senior Software Engineer (UI)',
       location: 'Los Gatos, CA (Remote)',
-      description: `About the Role:
-We are looking for a Senior UI Engineer to join our Content Experience team. You will be responsible for building the next generation of Netflix's discovery interface.
-
-Requirements:
-- 5+ years of experience with React and TypeScript.
-- Deep understanding of browser performance and rendering.
-- Experience with high-scale distributed systems.
-- Passion for cinematic user experiences.
-
-Bonus:
-- Experience with GraphQL and Node.js.
-- Strong design sensibility.`,
+      description: `About the Role:\nWe are looking for a Senior UI Engineer to join our Content Experience team. You will be responsible for building the next generation of Netflix's discovery interface.\n\nRequirements:\n- 5+ years of experience with React and TypeScript.\n- Deep understanding of browser performance and rendering.\n- Experience with high-scale distributed systems.\n- Passion for cinematic user experiences.\n\nBonus:\n- Experience with GraphQL and Node.js.\n- Strong design sensibility.`,
       employment_type: 'full-time',
       url: 'https://jobs.netflix.com/jobs/sample-demo'
     });
@@ -41,18 +30,18 @@ Bonus:
   return (
     <div className="max-w-4xl mx-auto py-12 px-4 fade-in-up">
       <div className="text-center space-y-4 mb-12">
-        <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#FC6100]/10 border border-[#FC6100]/20 rounded-full mb-4">
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#FC6100]/10 border border-[#FC6100]/20 rounded-full mb-4 pulse-brand">
           <Zap className="w-4 h-4 text-[#FC6100]" />
           <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#FC6100]">Accelerator Active</span>
         </div>
-        <h2 className="text-4xl font-bold text-white tracking-tighter">Activate Your Search Intelligence</h2>
+        <h2 className="text-4xl font-bold text-white tracking-tighter">The Accelerator</h2>
         <p className="text-gray-400 text-sm max-w-xl mx-auto font-medium">
           Your pipeline is empty. Let's get your first <strong>Match Score</strong> calculated so you can see how you stack up against the competition.
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Option 1: The Hook */}
+        {/* Option 1: The Hook (Sample Injection) */}
         <button
           onClick={handleSampleInjection}
           disabled={isCreating}

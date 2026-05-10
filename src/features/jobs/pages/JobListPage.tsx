@@ -9,7 +9,7 @@ import { UniversalImporter } from '../components/UniversalImporter';
 import { OnboardingAccelerator } from '../../../components/onboarding/OnboardingAccelerator';
 
 export const JobListPage: React.FC = () => {
-  const { data: jobs, isLoading } = useJobs();
+  const { data: jobs, isPending, isError, error, refetch } = useJobs();
   const { createJob, isCreating } = useJobActions();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -53,11 +53,32 @@ export const JobListPage: React.FC = () => {
     return map;
   }, [filteredJobs]);
 
-  if (isLoading) {
+  if (isPending) {
     return (
       <div className="flex flex-col items-center justify-center p-20 space-y-4">
         <div className="w-12 h-12 border-4 border-[#FC6100] border-t-transparent rounded-full animate-spin"></div>
         <p className="text-gray-400 font-bold">Synchronizing Pipeline...</p>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex flex-col items-center justify-center p-20 space-y-6 text-center">
+        <div className="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center border border-red-500/20">
+          <Search className="w-8 h-8 text-red-500" />
+        </div>
+        <div className="space-y-2">
+          <h2 className="text-xl font-bold text-white tracking-tight">Sync Failure</h2>
+          <p className="text-sm text-gray-500 max-w-sm">We couldn't reach your pipeline. This might be a temporary network issue.</p>
+          <p className="text-[10px] text-red-500/50 font-mono mt-2">Error: {error?.message || 'Unknown Protocol Error'}</p>
+        </div>
+        <button 
+          onClick={() => refetch()}
+          className="px-8 py-3 bg-white/5 hover:bg-white/10 text-white text-[11px] font-black uppercase tracking-widest rounded-lg border border-white/10 transition-all tactile-press"
+        >
+          Force Retry
+        </button>
       </div>
     );
   }
