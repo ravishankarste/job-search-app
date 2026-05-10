@@ -116,12 +116,18 @@ export const apifyService = {
     if (url.includes('linkedin.com')) {
       try {
         const urlObj = new URL(url);
+        // Handle search pages with active job selection
         const jobId = urlObj.searchParams.get('currentJobId');
         if (jobId) return `https://www.linkedin.com/jobs/view/${jobId}/`;
       } catch (e) {}
       
-      const viewMatch = url.match(/\/jobs\/view\/(\d+)/);
+      // Handle direct view links with slugs
+      const viewMatch = url.match(/\/view\/(\d+)/) || url.match(/\/jobs\/view\/(\d+)/);
       if (viewMatch) return `https://www.linkedin.com/jobs/view/${viewMatch[1]}/`;
+
+      // Handle simple /jobs/ID
+      const idMatch = url.match(/\/jobs\/(\d+)/);
+      if (idMatch) return `https://www.linkedin.com/jobs/view/${idMatch[1]}/`;
     }
     
     if (url.includes('indeed.com')) {
@@ -142,26 +148,24 @@ export const apifyService = {
     const details: { title?: string, company?: string } = {};
     
     if (url.includes('linkedin.com')) {
-      const slug = url.split('/view/')[1] || url.split('/jobs/')[1] || "";
-      const cleanSlug = slug.split('?')[0].split('/')[0];
-      const parts = cleanSlug.split('-');
+      // Catch slugs like 'software-engineer-at-google-3893322131'
+      const slugMatch = url.match(/\/view\/([^\/]+)/) || url.match(/\/jobs\/([^\/]+)/);
+      const slug = slugMatch ? slugMatch[1].split('?')[0] : "";
       
-      const atIndex = parts.indexOf('at');
-      if (atIndex > 0) {
-        details.title = parts.slice(0, atIndex).map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
-        details.company = parts.slice(atIndex + 1).filter(p => !/^\d+$/.test(p)).map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
-      } else if (parts.length > 2) {
-        // Fallback for slugs like 'software-engineer-google'
-        details.title = parts.slice(0, -1).map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
-        details.company = parts.slice(-1).map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
-      }
-    }
-
-    if (url.includes('indeed.com')) {
-      const slug = url.split('/rc/clk?')[1] || url.split('/viewjob?')[1] || "";
-      // Indeed URLs often don't have titles in the slug, so we rely more on the Web Peek here
-      if (slug.includes('jk=')) {
-        // No title in Indeed slug usually, but we keep the structure
+      if (slug && !/^\d+$/.test(slug)) {
+        const parts = slug.split('-');
+        
+        // Pattern: "title-title-at-company-company-ID"
+        const atIndex = parts.indexOf('at');
+        if (atIndex > 0) {
+          details.title = parts.slice(0, atIndex).map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
+          // Strip the trailing numeric ID from the company name
+          details.company = parts.slice(atIndex + 1).filter(p => !/^\d+$/.test(p)).map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
+        } else if (parts.length > 2) {
+          // Pattern: "software-engineer-google-123"
+          details.title = parts.slice(0, -2).map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
+          details.company = parts.slice(-2, -1).map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
+        }
       }
     }
 

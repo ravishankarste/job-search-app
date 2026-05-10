@@ -16,6 +16,7 @@ import {
   X
 } from 'lucide-react';
 import { SupportBot } from '../components/common/SupportBot';
+import { ExitNudge } from '../components/common/ExitNudge';
 import { useJobs } from '../features/jobs/hooks/useJobs';
 import { useNotifications } from '../features/notifications/hooks/useNotifications';
 
@@ -111,6 +112,7 @@ export const DashboardLayout: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState('');
   const [isNotificationsOpen, setIsNotificationsOpen] = React.useState(false);
+  const [isExitNudgeOpen, setIsExitNudgeOpen] = React.useState(false);
   const location = useLocation();
 
   const filteredJobs = React.useMemo(() => {
@@ -125,6 +127,23 @@ export const DashboardLayout: React.FC = () => {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
 
+  // Exit Intent Logic
+  React.useEffect(() => {
+    const handleMouseLeave = (e: MouseEvent) => {
+      // Trigger if mouse leaves toward the top (tab area)
+      if (e.clientY <= 10) {
+        const hasSeenNudge = sessionStorage.getItem('udyog_marg_exit_nudge_seen');
+        if (!hasSeenNudge) {
+          setIsExitNudgeOpen(true);
+          sessionStorage.setItem('udyog_marg_exit_nudge_seen', 'true');
+        }
+      }
+    };
+
+    document.addEventListener('mouseleave', handleMouseLeave);
+    return () => document.removeEventListener('mouseleave', handleMouseLeave);
+  }, []);
+
   if (authLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-black">
@@ -138,6 +157,7 @@ export const DashboardLayout: React.FC = () => {
   }
 
   const handleLogout = async () => {
+    sessionStorage.removeItem('udyog_marg_exit_nudge_seen');
     await authService.signOut();
   };
 
@@ -305,6 +325,12 @@ export const DashboardLayout: React.FC = () => {
 
         {/* Help & Support Bot */}
         <SupportBot />
+
+        {/* Sovereign Exit Nudge */}
+        <ExitNudge 
+          isOpen={isExitNudgeOpen} 
+          onClose={() => setIsExitNudgeOpen(false)} 
+        />
       </main>
     </div>
   );

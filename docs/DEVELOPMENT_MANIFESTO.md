@@ -6,6 +6,7 @@ This document defines the "Laws of the Code" for the Udyog Marg ecosystem. Adher
 Every technical task MUST follow these 5 phases in order. Skipping any phase is a **PROTOCOL VIOLATION**.
 
 1.  **Plan and Understand**: 
+    *   **Sovereign Audit**: Check **`docs/KnowledgeLog.md`** for similar past issues or "Basics" patterns.
     *   Draft a **Planning Artifact** (modalities, logic, edge cases).
     *   Present the plan to the User.
     *   Wait for the **"Proceed"** command.
@@ -44,3 +45,11 @@ Every technical task MUST follow these 5 phases in order. Skipping any phase is 
 
 ---
 **Signed by the AI Architect.** 🛡️⚖️🏛️
+
+### 🛡️ Persistence Protocol: The Hydration Shield
+Any feature that writes state to the local filesystem (e.g., via a Vite server plugin) MUST implement the **Hydration Shield**.
+1. **Initial State**: Always start with a baseline placeholder.
+2. **Latch**: Maintain an `isHydrated` boolean state (default: false).
+3. **Hydrate**: Perform an asynchronous fetch on mount to load data from disk. Set `isHydrated(true)` only after success.
+4. **Shield**: Wrap all `saveToDisk` triggers in an `if (isHydrated)` condition. 
+**NEVER allow a disk write to occur before the initial load is confirmed.**

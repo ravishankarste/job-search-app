@@ -116,3 +116,32 @@ Successfully migrated from Hostinger subdirectory `/jobs/` to the root of `upani
     *   **Impact Gaps**: Crucial missing requirements.
     *   **Reality Check**: Detection of seniority/experience mismatches.
 *   **Architecture**: Built using `createPortal` for the modal to ensure Z-index integrity above the Pipeline Kanban.
+
+## [2026-05-10] - Geometric Sovereignty & Data Isolation
+Resolved critical layout clipping issues and hardened user-data boundaries.
+
+### 📐 1. The "Basics" of Geometry (Corner Clipping)
+*   **The Glitch**: UI elements (buttons/labels) were being cut off by the `rounded-[32px]` corners of glass panels.
+*   **The Root Cause**: `overflow-hidden` combined with large border radii "scalps" any element positioned near the corners.
+*   **The Fix**: 
+    - Switch to **`overflow-visible`** for main containers.
+    - Implement **`shrink-0`** on all action button containers.
+    - Use **`flex items-start justify-between gap-4`** for headers to ensure responsive clearance.
+    - Maintain a minimum **`p-8 md:p-12`** buffer to keep content away from dangerous curved edges.
+
+### 🔐 2. Data Isolation Hardening
+*   **The Glitch**: Follow-up tasks and resume versions were lacking strict `profile_id` filtering, leading to a cross-user data leak.
+*   **The Fix**: Hardened `followupService.ts` and `resumeService.ts` with explicit user-ownership checks.
+*   **Validation**: Added `src/features/jobs/services/followupService.test.ts` to programmatically guarantee user-isolation.
+
+## [2026-05-10] - Sovereign Intelligence Vault & Secret Hardening
+
+### 🔑 1. Secret Role Key Rectification
+*   **The Discovery**: Found that **`persona-os/.env`** was incorrectly using the **`VITE_SUPABASE_ANON_KEY`** value for the **`SUPABASE_SERVICE_ROLE_KEY`** variable.
+*   **The Impact**: This prevented Persona OS from bypassing Row Level Security (RLS), effectively blocking the "Sovereign Intelligence" synchronization between Udyog Marg and Persona OS.
+*   **The Fix**: Rectified the environment configuration. Persona OS now has the correct Service Role permissions to read/write across the shared Supabase project.
+
+### 🧠 2. User Feedback Intelligence Loop
+*   **Objective**: Close the growth loop by capturing user sentiment and materializing it into actionable intelligence.
+*   **Migration**: Created `supabase/migrations/20260510_user_feedback.sql` to establish the `user_feedback` table with RLS policies allowing both authenticated and anonymous (exit-intent) feedback.
+*   **The Loop**: This table serves as the primary "Scribe" for the Persona OS Command Center to ingest and transform into prioritized product improvements.

@@ -13,6 +13,7 @@ job-search-app/
 │   ├── ARCHITECTURE_MAP.md    # You are here (The Map)
 │   ├── GTM_Strategy.md        # Growth & Acquisition Roadmap
 │   ├── MASTER_ROADMAP.md      # Master Feature & Loop Tracker
+│   ├── tasks/                 # 🗓️ Task Ledger (State & History)
 │   ├── PROJECT_DICTIONARY.md   # The Dictionary (Core Vocabulary)
 │   ├── DEVELOPMENT_MANIFESTO.md # The Laws of the Code (Workflow)
 │   ├── KnowledgeLog.md        # System Memory & Decision Journal
