@@ -9,14 +9,14 @@ export const Signup: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const [nonce, setNonce] = useState('');
+  const nonceRef = React.useRef('');
 
   React.useEffect(() => {
     // Generate a secure, URL-safe hex nonce
     const array = new Uint8Array(16);
     window.crypto.getRandomValues(array);
     const rawNonce = Array.from(array).map(b => b.toString(16).padStart(2, '0')).join('');
-    setNonce(rawNonce);
+    nonceRef.current = rawNonce;
 
     // Initialize Google Identity Services
     const initializeGoogle = () => {
@@ -49,7 +49,7 @@ export const Signup: React.FC = () => {
     setError(null);
     try {
       console.log('Received Google response for Signup, signing in with IdToken...');
-      const { session, error: authError } = await authService.signInWithIdToken(response.credential, nonce);
+      const { session, error: authError } = await authService.signInWithIdToken(response.credential, nonceRef.current);
       if (authError) throw authError;
       if (session) {
         navigate('/dashboard');
