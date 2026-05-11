@@ -1,6 +1,9 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const APIFY_API_TOKEN = Deno.env.get("APIFY_API_TOKEN")
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL")
+const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,6 +16,19 @@ serve(async (req) => {
   }
 
   try {
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      throw new Error("Missing Authorization header")
+    }
+
+    // 1. Initialize Supabase to verify the user
+    const supabaseClient = createClient(SUPABASE_URL!, SUPABASE_ANON_KEY!)
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(authHeader.replace('Bearer ', ''))
+    
+    if (authError || !user) {
+      throw new Error("Unauthorized: You must be logged in to use the discovery engine.")
+    }
+
     const { action, actorId, input } = await req.json()
 
     if (!APIFY_API_TOKEN) {
@@ -51,7 +67,7 @@ serve(async (req) => {
   } catch (error) {
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 400,
+      status: 401,
     })
   }
 })
