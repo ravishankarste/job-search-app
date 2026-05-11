@@ -35,13 +35,16 @@ jobs:
           VITE_POSTHOG_KEY: ${{ secrets.VITE_POSTHOG_KEY }}
 
       - name: 🛡️ Run 'Decathlon' Sanity Suite
-        run: |
-          npx playwright install --with-deps chromium
-          npm run test:sanity
+        uses: microsoft/playwright-github-action@v1
+        with:
+          command: npm run test:sanity
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
+          VITE_APIFY_API_TOKEN: ${{ secrets.VITE_APIFY_API_TOKEN }}
+          VITE_APIFY_ACTOR_ID: ${{ secrets.VITE_APIFY_ACTOR_ID }}
+          VITE_POSTHOG_KEY: ${{ secrets.VITE_POSTHOG_KEY }}
 
       - name: 🔐 Setup SSH key
         uses: webfactory/ssh-agent@v0.9.0
