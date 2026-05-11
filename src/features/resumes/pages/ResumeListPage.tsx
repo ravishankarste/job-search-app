@@ -25,19 +25,22 @@ export const ResumeListPage: React.FC = () => {
 
   return (
     <div className="space-y-8 fade-in-up">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <div>
-          <h1 className="text-3xl font-bold text-white mb-1">Resumes</h1>
-          <p className="text-gray-400 font-medium">Manage your resume versions and professional templates.</p>
+      <div className="text-center space-y-6 mb-12">
+        <div className="space-y-2">
+          <h1 className="text-5xl font-bold text-white tracking-tighter">Resumes</h1>
+          <p className="text-gray-400 font-medium text-lg">Manage your resume versions and professional templates.</p>
         </div>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          data-testid="resume-create-btn"
-          className="inline-flex items-center justify-center px-6 py-2 bg-[#FC6100] text-white text-sm font-bold rounded-lg shadow-md hover:bg-[#E35205] transition-all"
-        >
-          <Plus className="w-5 h-5 mr-2" />
-          Create Resume
-        </button>
+        
+        <div className="flex justify-center pt-4">
+          <button
+            onClick={() => setIsModalOpen(true)}
+            data-testid="resume-create-btn"
+            className="inline-flex items-center justify-center px-10 py-4 bg-[#FC6100] text-white text-xs font-black uppercase tracking-widest rounded-xl shadow-2xl shadow-[#FC6100]/20 hover:bg-[#E35205] transition-all border border-white/10 hover:scale-105 active:scale-95"
+          >
+            <Plus className="w-5 h-5 mr-2" />
+            Create New Version
+          </button>
+        </div>
       </div>
 
       {isLoading ? (
