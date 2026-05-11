@@ -22,3 +22,9 @@ Only after Steps 1, 2, and 3 have passed, push the code:
 `git add .`
 `git commit -m "Your clear description"`
 `git push`
+
+### Step 6: Verify the GitHub Action Build
+- Go to GitHub and check the "Actions" tab.
+- Wait for the "Build and Deploy" workflow to finish.
+- If it fails, we must fix it immediately.
+- **Note**: If I (the AI) cannot see the GitHub status, I will remind you to check it and show me a screenshot so we can fix any errors together.
