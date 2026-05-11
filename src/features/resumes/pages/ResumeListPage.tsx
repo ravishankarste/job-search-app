@@ -25,21 +25,29 @@ export const ResumeListPage: React.FC = () => {
 
   return (
     <div className="space-y-8 fade-in-up">
-      <div className="text-center space-y-6 mb-12">
-        <div className="space-y-2">
-          <h1 className="text-5xl font-bold text-white tracking-tighter">Resumes</h1>
-          <p className="text-gray-400 font-medium text-lg">Manage your resume versions and professional templates.</p>
-        </div>
-        
-        <div className="flex justify-center pt-4">
-          <button
-            onClick={() => setIsModalOpen(true)}
-            data-testid="resume-create-btn"
-            className="inline-flex items-center justify-center px-10 py-4 bg-[#FC6100] text-white text-xs font-black uppercase tracking-widest rounded-xl shadow-2xl shadow-[#FC6100]/20 hover:bg-[#E35205] transition-all border border-white/10 hover:scale-105 active:scale-95"
-          >
-            <Plus className="w-5 h-5 mr-2" />
-            Create New Version
-          </button>
+      <div className="mb-12">
+        {/* Three-column grid to ensure perfect centering of the button */}
+        <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-6">
+          {/* Left Column: Title */}
+          <div className="space-y-1 text-left">
+            <h1 className="text-5xl font-bold text-white tracking-tighter">Resumes</h1>
+            <p className="text-gray-400 font-medium text-sm">Manage versions.</p>
+          </div>
+          
+          {/* Center Column: Primary Action (Aligned with Top-Bar Search) */}
+          <div className="flex justify-center">
+            <button
+              onClick={() => setIsModalOpen(true)}
+              data-testid="resume-create-btn"
+              className="inline-flex items-center justify-center px-8 py-3 bg-[#FC6100] text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl shadow-2xl shadow-[#FC6100]/20 hover:bg-[#E35205] transition-all border border-white/10 hover:scale-105 active:scale-95"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Create New Version
+            </button>
+          </div>
+
+          {/* Right Column: Empty Space for the Heart Widget */}
+          <div className="hidden md:block"></div>
         </div>
       </div>
 
