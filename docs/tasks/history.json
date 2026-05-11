@@ -181,6 +181,13 @@
       "type": "chore",
       "status": "completed",
       "completed_at": "2026-05-10T22:00:00Z"
+    },
+    {
+      "id": "T109",
+      "description": "Resolve SSH Connection Timeout (IP Bypass)",
+      "type": "bug",
+      "status": "completed",
+      "completed_at": "2026-05-10T22:12:00Z"
     }
   ]
 }

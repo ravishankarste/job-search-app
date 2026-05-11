@@ -15,6 +15,8 @@ export const ResumeCard: React.FC<ResumeCardProps> = ({ resume }) => {
   return (
     <Link
       to={`/resumes/${resume.id}`}
+      data-testid="resume-card"
+      data-resume-id={resume.id}
       className="clean-card group block no-underline bg-[#121212] border-white/10 hover:border-[#FC6100]/50"
     >
       <div className="flex items-start justify-between mb-6">

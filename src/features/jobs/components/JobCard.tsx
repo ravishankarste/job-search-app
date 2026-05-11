@@ -26,6 +26,8 @@ export const JobCard: React.FC<JobCardProps> = ({ job, onFollowUpClick }) => {
   return (
     <div 
       onClick={() => navigate(`/pipeline/${job.id}`)}
+      data-testid="job-card"
+      data-job-id={job.id}
       className={`clean-card p-5 group relative bg-white/[0.02] border-white/5 hover:border-[#FC6100]/30 cursor-pointer transition-all ${
         ghosted ? 'border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.05)]' : 'shadow-[0_4px_20px_rgba(0,0,0,0.3)]'
       }`}
@@ -55,6 +57,7 @@ export const JobCard: React.FC<JobCardProps> = ({ job, onFollowUpClick }) => {
               title="Open Original Job Posting"
               className="p-1.5 text-gray-500 hover:text-[#FC6100] hover:bg-[#FC6100]/10 rounded-lg transition-all"
               onClick={(e) => e.stopPropagation()}
+              data-testid="job-external-link"
             >
               <ExternalLink className="w-4 h-4" />
             </a>
@@ -76,6 +79,7 @@ export const JobCard: React.FC<JobCardProps> = ({ job, onFollowUpClick }) => {
               onFollowUpClick?.(job.company_name);
             }}
             className="mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 bg-red-500/10 text-red-400 text-[11px] font-bold rounded-lg border border-red-500/20 hover:bg-red-500/20 hover:border-red-500/40 transition-all cursor-pointer"
+            data-testid="job-follow-up-btn"
           >
             <Ghost className="w-3 h-3" />
             Ghosted? Follow up

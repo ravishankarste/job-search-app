@@ -41,7 +41,11 @@ export const FollowUpModal: React.FC<FollowUpModalProps> = ({
               <h2 className="text-3xl font-bold text-white tracking-tighter">Application Follow-up</h2>
               <p className="text-gray-400 font-medium">Drafted specifically for {companyName}</p>
             </div>
-            <button onClick={onClose} className="w-10 h-10 bg-white/5 flex items-center justify-center rounded-full text-gray-500 hover:text-white transition-colors">
+            <button 
+              onClick={onClose} 
+              data-testid="followup-close-btn"
+              className="w-10 h-10 bg-white/5 flex items-center justify-center rounded-full text-gray-500 hover:text-white transition-colors"
+            >
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -65,12 +69,14 @@ export const FollowUpModal: React.FC<FollowUpModalProps> = ({
           <div className="flex flex-col sm:flex-row gap-4 pt-4">
             <button
               onClick={handleCopy}
+              data-testid="followup-copy-btn"
               className="flex-1 px-8 py-4 bg-white text-black text-sm font-black uppercase tracking-widest rounded-2xl hover:bg-gray-200 transition-all flex items-center justify-center"
             >
               {copied ? <><CheckCircle2 className="w-5 h-5 mr-2" /> Copied!</> : <><Copy className="w-5 h-5 mr-2" /> Copy to Clipboard</>}
             </button>
             <button
               onClick={() => window.open(`mailto:?subject=${encodeURIComponent(template.subject)}&body=${encodeURIComponent(template.body)}`)}
+              data-testid="followup-send-btn"
               className="flex-1 px-8 py-4 bg-[#FC6100] text-white text-sm font-black uppercase tracking-widest rounded-2xl hover:bg-[#E35205] transition-all flex items-center justify-center"
             >
               <Mail className="w-5 h-5 mr-2" /> Send Email

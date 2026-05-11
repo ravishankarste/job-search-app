@@ -1,13 +1,44 @@
 {
   "active_tasks": [
     {
+      "id": "T110",
+      "description": "Restore Google Auth (FedCM & Nonce Hardening)",
+      "type": "bug",
+      "priority": "critical",
+      "status": "completed",
+      "created_at": "2026-05-10T22:14:00Z",
+      "completed_at": "2026-05-10T22:32:00Z",
+      "context": "Auth Pipeline / Production Recovery"
+    },
+    {
+      "id": "T112",
+      "description": "Implement 'Decathlon' Sanity Suite (10 Core Playwright Tests)",
+      "type": "test",
+      "priority": "high",
+      "status": "completed",
+      "created_at": "2026-05-10T22:27:00Z",
+      "completed_at": "2026-05-10T22:47:00Z",
+      "context": "CI/CD Reliability / Zero-Regression Policy"
+    },
+    {
       "id": "T109",
       "description": "Resolve SSH Connection Timeout in CI/CD (Port 65002)",
       "type": "bug",
       "priority": "critical",
-      "status": "in_progress",
+      "status": "completed",
       "created_at": "2026-05-10T22:04:00Z",
+      "completed_at": "2026-05-10T22:12:00Z",
       "context": "Production Infrastructure / Deployment Blocker"
+    },
+    {
+      "id": "T111",
+      "description": "Implement Sovereign Timesheet (Temporal Analytics)",
+      "type": "chore",
+      "priority": "low",
+      "status": "completed",
+      "created_at": "2026-05-10T22:24:00Z",
+      "completed_at": "2026-05-10T22:52:00Z",
+      "context": "Engineering Discipline / Performance Metrics"
     },
     {
       "id": "T105",
@@ -44,6 +75,15 @@
       "status": "backlog",
       "created_at": "2026-05-09T00:00:00Z",
       "context": "Future Pipeline"
+    },
+    {
+      "id": "T115",
+      "description": "Harden Neural Log Categorization (Fix Idea-to-GTM Leak)",
+      "type": "bug",
+      "priority": "high",
+      "status": "todo",
+      "created_at": "2026-05-10T23:40:00Z",
+      "context": "Persona OS / Intelligence Isolation"
     }
   ],
   "last_archived_at": "2026-05-10T22:00:00Z"

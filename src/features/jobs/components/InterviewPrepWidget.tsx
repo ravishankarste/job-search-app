@@ -46,6 +46,7 @@ export const InterviewPrepWidget: React.FC<InterviewPrepWidgetProps> = ({
           <button
             onClick={handleGenerate}
             disabled={isGenerating}
+            data-testid="interview-prep-generate-btn"
             className="px-6 py-2.5 bg-purple-600 text-white text-sm font-bold rounded-xl hover:bg-purple-500 transition-all shadow-lg shadow-purple-600/20 flex items-center gap-2"
           >
             {isGenerating ? 'Analyzing Role...' : <><Sparkles className="w-4 h-4" /> Generate Prep Guide</>}
@@ -56,7 +57,10 @@ export const InterviewPrepWidget: React.FC<InterviewPrepWidgetProps> = ({
       {guide && (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
           {/* Elevator Pitch Section */}
-          <div className="p-6 bg-white/[0.02] border border-white/5 rounded-2xl space-y-3">
+          <div 
+            data-testid="interview-prep-pitch"
+            className="p-6 bg-white/[0.02] border border-white/5 rounded-2xl space-y-3"
+          >
             <div className="flex items-center gap-2 text-purple-400">
               <Mic className="w-4 h-4" />
               <span className="text-[10px] font-black uppercase tracking-widest">Your 30-Second Intro</span>
@@ -67,7 +71,11 @@ export const InterviewPrepWidget: React.FC<InterviewPrepWidgetProps> = ({
           {/* Questions Grid */}
           <div className="grid grid-cols-1 gap-4">
             {guide.map((q, idx) => (
-              <div key={idx} className="group p-5 bg-white/[0.01] hover:bg-white/[0.03] border border-white/5 rounded-2xl transition-all">
+              <div 
+                key={idx} 
+                data-testid="interview-prep-question"
+                className="group p-5 bg-white/[0.01] hover:bg-white/[0.03] border border-white/5 rounded-2xl transition-all"
+              >
                 <div className="flex items-start gap-4">
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-1 ${
                     q.type === 'strength' ? 'bg-emerald-500/10 text-emerald-500' :
@@ -93,6 +101,7 @@ export const InterviewPrepWidget: React.FC<InterviewPrepWidgetProps> = ({
 
           <button 
             onClick={() => setGuide(null)}
+            data-testid="interview-prep-refresh-btn"
             className="w-full py-3 text-[10px] font-black text-gray-600 uppercase tracking-widest hover:text-white transition-colors"
           >
             Refresh Guide

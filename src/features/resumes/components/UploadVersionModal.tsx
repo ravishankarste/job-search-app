@@ -90,6 +90,7 @@ export const UploadVersionModal: React.FC<UploadVersionModalProps> = ({
               onDragOver={(e) => e.preventDefault()}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
+              data-testid="resume-drop-zone"
             >
               <div className="space-y-1 text-center">
                 <UploadCloud className={`mx-auto h-12 w-12 transition-colors ${file ? 'text-[#FC6100]' : 'text-gray-600'}`} />
@@ -102,6 +103,7 @@ export const UploadVersionModal: React.FC<UploadVersionModalProps> = ({
                     id="file-upload"
                     name="file-upload"
                     type="file"
+                    data-testid="resume-file-input"
                     accept=".pdf"
                     className="sr-only"
                     ref={fileInputRef}
@@ -132,6 +134,7 @@ export const UploadVersionModal: React.FC<UploadVersionModalProps> = ({
               type="button"
               onClick={onClose}
               disabled={isUploading}
+              data-testid="resume-upload-cancel-btn"
               className="px-8 py-2.5 text-sm font-bold text-gray-400 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all disabled:opacity-50 whitespace-nowrap"
             >
               Cancel
@@ -139,6 +142,7 @@ export const UploadVersionModal: React.FC<UploadVersionModalProps> = ({
             <button
               type="submit"
               disabled={!file || isUploading}
+              data-testid="resume-upload-submit-btn"
               className="px-8 py-2.5 text-sm font-bold text-white bg-[#FC6100] border border-transparent rounded-xl hover:bg-[#E35205] transition-all disabled:opacity-50 flex items-center whitespace-nowrap shadow-lg shadow-[#FC6100]/10"
             >
               {isUploading ? 'Uploading...' : 'Upload File'}

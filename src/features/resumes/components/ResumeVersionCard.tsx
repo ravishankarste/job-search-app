@@ -67,6 +67,8 @@ export const ResumeVersionCard: React.FC<ResumeVersionCardProps> = ({
   return (
     <div 
       onClick={isSelectionMode ? onSelect : undefined}
+      data-testid="resume-version-card"
+      data-version-id={version.id}
       className={`bg-[#121212] border rounded-2xl p-5 transition-all group ${
         isSelectionMode ? 'cursor-pointer' : ''
       } ${
@@ -102,6 +104,7 @@ export const ResumeVersionCard: React.FC<ResumeVersionCardProps> = ({
           <button
             onClick={handleDownload}
             disabled={isDownloading}
+            data-testid="resume-version-download-btn"
             className="p-2.5 text-gray-500 bg-white/5 border border-white/10 rounded-xl hover:bg-[#FC6100] hover:text-white hover:border-[#FC6100] transition-all disabled:opacity-50"
             title="Download/View PDF"
           >

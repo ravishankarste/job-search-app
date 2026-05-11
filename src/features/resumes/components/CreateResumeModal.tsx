@@ -52,6 +52,7 @@ export const CreateResumeModal: React.FC<CreateResumeModalProps> = ({
               id="name"
               type="text"
               required
+              data-testid="resume-name-input"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g., Senior Frontend Engineer"
@@ -66,6 +67,7 @@ export const CreateResumeModal: React.FC<CreateResumeModalProps> = ({
             <input
               id="targetRole"
               type="text"
+              data-testid="resume-target-role-input"
               value={targetRole}
               onChange={(e) => setTargetRole(e.target.value)}
               placeholder="e.g., React Developer"
@@ -78,6 +80,7 @@ export const CreateResumeModal: React.FC<CreateResumeModalProps> = ({
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
+              data-testid="resume-cancel-btn"
               className="px-4 py-2 text-sm font-bold text-gray-400 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-all disabled:opacity-50"
             >
               Cancel
@@ -85,6 +88,7 @@ export const CreateResumeModal: React.FC<CreateResumeModalProps> = ({
             <button
               type="submit"
               disabled={!name.trim() || isSubmitting}
+              data-testid="resume-submit-btn"
               className="px-4 py-2 text-sm font-bold text-white bg-[#FC6100] border border-transparent rounded-lg hover:bg-[#E35205] transition-all disabled:opacity-50 flex items-center shadow-lg shadow-[#FC6100]/10"
             >
               {isSubmitting ? 'Creating...' : 'Create Resume'}

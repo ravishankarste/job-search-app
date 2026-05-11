@@ -44,6 +44,7 @@ export const TaskEngine: React.FC<TaskEngineProps> = ({ applicationId }) => {
         </h3>
         <button
           onClick={() => setIsAdding(!isAdding)}
+          data-testid="task-add-btn"
           className="p-2 bg-white/5 text-white hover:text-[#FC6100] hover:bg-[#FC6100]/10 rounded-xl transition-all"
         >
           <Plus className="w-5 h-5" />
@@ -57,6 +58,7 @@ export const TaskEngine: React.FC<TaskEngineProps> = ({ applicationId }) => {
             <input
               type="text"
               required
+              data-testid="task-notes-input"
               placeholder="e.g., Email recruiter, Prepare portfolio"
               value={taskNotes}
               onChange={(e) => setTaskNotes(e.target.value)}
@@ -69,6 +71,7 @@ export const TaskEngine: React.FC<TaskEngineProps> = ({ applicationId }) => {
               <input
                 type="date"
                 required
+                data-testid="task-date-input"
                 value={taskDate}
                 onChange={(e) => setTaskDate(e.target.value)}
                 className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#FC6100] focus:ring-1 focus:ring-[#FC6100] [color-scheme:dark]"
@@ -78,6 +81,7 @@ export const TaskEngine: React.FC<TaskEngineProps> = ({ applicationId }) => {
               <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider">Type</label>
               <select
                 value={taskType}
+                data-testid="task-type-select"
                 onChange={(e) => setTaskType(e.target.value)}
                 className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#FC6100] focus:ring-1 focus:ring-[#FC6100]"
               >
@@ -99,6 +103,7 @@ export const TaskEngine: React.FC<TaskEngineProps> = ({ applicationId }) => {
             <button
               type="submit"
               disabled={isCreating}
+              data-testid="task-submit-btn"
               className="px-5 py-2 bg-[#FC6100] text-white text-sm font-bold rounded-xl hover:bg-[#E35205] transition-all disabled:opacity-50"
             >
               {isCreating ? 'Adding...' : 'Add Task'}
@@ -129,6 +134,7 @@ export const TaskEngine: React.FC<TaskEngineProps> = ({ applicationId }) => {
             >
               <button
                 onClick={() => toggleFollowup({ id: task.id, isCompleted: !task.completed_at })}
+                data-testid="task-toggle-btn"
                 className="mt-0.5 mr-4 flex-shrink-0 focus:outline-none"
               >
                 {task.completed_at ? (
@@ -153,6 +159,7 @@ export const TaskEngine: React.FC<TaskEngineProps> = ({ applicationId }) => {
               </div>
               <button
                 onClick={() => deleteFollowup(task.id)}
+                data-testid="task-delete-btn"
                 className="ml-4 p-2 text-gray-600 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
                 style={{ opacity: 1 }} // Make always visible for now to avoid group-hover issues if group class is missing
               >

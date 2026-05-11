@@ -53,8 +53,8 @@ export const DiscoveryPage: React.FC = () => {
           <div className="text-[10px] font-black text-gray-700 uppercase tracking-[0.4em]">Expected Deployment</div>
           <div className="flex gap-4">
             <div className="clean-card px-8 py-5 bg-white/[0.03] border-white/10 shadow-2xl">
-              <span className="text-4xl font-black text-white italic tracking-tighter">MAY</span>
-              <span className="ml-3 text-sm font-black text-[#FC6100] uppercase">2026</span>
+              <span className="text-4xl font-black text-white italic tracking-tighter">MAY 16,</span>
+              <span className="ml-2 text-sm font-black text-[#FC6100] uppercase">2026</span>
             </div>
           </div>
         </div>

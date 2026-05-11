@@ -75,6 +75,7 @@ export const JobListPage: React.FC = () => {
         </div>
         <button 
           onClick={() => refetch()}
+          data-testid="pipeline-retry-btn"
           className="px-8 py-3 bg-white/5 hover:bg-white/10 text-white text-[11px] font-black uppercase tracking-widest rounded-lg border border-white/10 transition-all tactile-press"
         >
           Force Retry
@@ -99,6 +100,7 @@ export const JobListPage: React.FC = () => {
           <div className="relative">
             <input
               type="text"
+              data-testid="pipeline-search-input"
               placeholder="Filter by title or company..."
               className="pl-4 pr-10 py-3 bg-white/10 border border-white/20 rounded-lg text-xs text-white placeholder-white/40 focus:border-[#FC6100] outline-none transition-all w-64 font-bold"
               value={searchTerm}
@@ -108,6 +110,7 @@ export const JobListPage: React.FC = () => {
           </div>
           <button
             onClick={() => setIsModalOpen(true)}
+            data-testid="pipeline-add-btn"
             className="px-8 py-3 bg-[#FC6100] text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-[#E35205] transition-all flex items-center gap-2 border border-white/10 tactile-press"
           >
             <Plus className="w-4 h-4" />
@@ -143,6 +146,7 @@ export const JobListPage: React.FC = () => {
                   board.scrollTo({ left: targetScroll, behavior: 'smooth' });
                 }
               }}
+              data-testid={`pipeline-nav-${status}`}
               className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all group shrink-0 tactile-press ${
                 isRejected 
                   ? 'bg-red-500/10 border border-red-500/30 hover:border-red-500/50 hover:bg-red-500/20' 
@@ -179,7 +183,7 @@ export const JobListPage: React.FC = () => {
           {['saved', 'applied', 'interviewing', 'offered', 'rejected'].map(status => {
             const isRejected = status === 'rejected';
             return (
-              <div key={status} id={`column-${status}`} className="min-w-[320px] w-[320px] flex flex-col gap-4">
+              <div key={status} id={`column-${status}`} data-testid={`pipeline-column-${status}`} className="min-w-[320px] w-[320px] flex flex-col gap-4">
                 <div className={`p-4 rounded-t-xl border-b-4 ${
                   isRejected ? 'bg-red-500/10 border-red-500 rejected-glow' : 'bg-[#1A1A1A] border-[#FC6100]'
                 }`}>

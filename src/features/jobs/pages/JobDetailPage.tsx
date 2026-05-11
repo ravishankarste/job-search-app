@@ -74,7 +74,11 @@ export const JobDetailPage: React.FC = () => {
       />
 
       <div className="flex items-center justify-between">
-        <Link to="/pipeline" className="inline-flex items-center text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-white transition-colors">
+        <Link 
+          to="/pipeline" 
+          data-testid="job-back-btn"
+          className="inline-flex items-center text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-white transition-colors"
+        >
           <ArrowLeft className="w-4 h-4 mr-2" /> Back to Pipeline
         </Link>
       </div>
@@ -103,6 +107,7 @@ export const JobDetailPage: React.FC = () => {
                     href={job.url} 
                     target="_blank" 
                     rel="noopener noreferrer"
+                    data-testid="job-external-link"
                     className="w-12 h-12 bg-white/5 text-gray-500 hover:text-[#FC6100] hover:bg-[#FC6100]/10 rounded-2xl flex items-center justify-center transition-all border border-white/10 group/btn shadow-lg"
                     title="Open Original Job Post"
                   >
@@ -112,6 +117,7 @@ export const JobDetailPage: React.FC = () => {
                 <button 
                   onClick={() => setIsDeleteModalOpen(true)}
                   disabled={isDeleting}
+                  data-testid="job-delete-btn"
                   className="w-12 h-12 bg-white/5 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-2xl flex items-center justify-center transition-all border border-white/10 group/btn shadow-lg"
                   title="Delete Job"
                 >
@@ -159,6 +165,7 @@ export const JobDetailPage: React.FC = () => {
                       key={status}
                       disabled={isUpdatingStatus}
                       onClick={() => handleStatusChange(status)}
+                      data-testid={`status-btn-${status}`}
                       className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${
                         isCurrent
                           ? (isRejected 

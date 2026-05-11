@@ -1,7 +1,9 @@
 import React from 'react';
-import { Target, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import { Target, CheckCircle2, AlertCircle, Loader2, ThumbsUp, ThumbsDown, Check } from 'lucide-react';
 import { useMatchScore } from '../hooks/useMatchScore';
 import { trackEvent } from '../../../lib/analytics';
+import { feedbackService } from '../../../services/feedbackService';
+import { useAuth } from '../../../contexts/AuthContext';
 
 interface MatchScoreWidgetProps {
   jobId: string;
@@ -21,6 +23,28 @@ export const MatchScoreWidget: React.FC<MatchScoreWidgetProps> = ({
     jobTitle,
     jobDescription || ""
   );
+  
+  const { user } = useAuth();
+  const [hasVoted, setHasVoted] = React.useState(false);
+
+  const handleVote = async (isAccurate: boolean) => {
+    setHasVoted(true);
+    
+    // 1. Track in PostHog
+    trackEvent('match_score_validation', {
+      job_id: jobId,
+      score,
+      is_accurate: isAccurate
+    });
+
+    // 2. Scribe to Supabase
+    await feedbackService.submitFeedback({
+      sentiment: isAccurate ? 'love' : 'confused',
+      content: `User voted ${isAccurate ? 'ACCURATE' : 'INACCURATE'} for score: ${score}% on job: ${jobTitle}`,
+      path: window.location.pathname,
+      user_id: user?.id
+    });
+  };
 
   // Track the 'Aha' moment when the score is viewed
   React.useEffect(() => {
@@ -54,11 +78,44 @@ export const MatchScoreWidget: React.FC<MatchScoreWidgetProps> = ({
              <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Analyzing...</span>
           </div>
         ) : (
-          <div className="text-right">
-            <div className={`text-4xl font-black ${score >= 80 ? 'text-emerald-500' : score >= 50 ? 'text-yellow-500' : 'text-[#FC6100]'}`}>
-              {score}%
+          <div className="flex items-center gap-6">
+            {!hasVoted ? (
+              <div className="flex flex-col items-center gap-2 pr-6 border-r border-white/5">
+                <span className="text-[8px] font-black text-gray-500 uppercase tracking-widest">Accurate?</span>
+                <div className="flex items-center gap-3">
+                  <button 
+                    onClick={() => handleVote(false)}
+                    data-testid="match-vote-down"
+                    className="p-1.5 hover:bg-red-500/10 rounded-lg transition-colors text-gray-600 hover:text-red-500"
+                    title="Inaccurate"
+                  >
+                    <ThumbsDown className="w-4 h-4" />
+                  </button>
+                  <button 
+                    onClick={() => handleVote(true)}
+                    data-testid="match-vote-up"
+                    className="p-1.5 hover:bg-emerald-500/10 rounded-lg transition-colors text-gray-600 hover:text-emerald-500"
+                    title="Accurate"
+                  >
+                    <ThumbsUp className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-1 pr-6 border-r border-white/5 animate-in fade-in slide-in-from-right-2">
+                <div className="w-7 h-7 bg-emerald-500/10 rounded-full flex items-center justify-center">
+                  <Check className="w-4 h-4 text-emerald-500" />
+                </div>
+                <span className="text-[7px] font-black text-emerald-500 uppercase tracking-tighter">Verified</span>
+              </div>
+            )}
+            
+            <div className="text-right">
+              <div className={`text-4xl font-black ${score >= 80 ? 'text-emerald-500' : score >= 50 ? 'text-yellow-500' : 'text-[#FC6100]'}`}>
+                {score}%
+              </div>
+              <div className="text-[9px] text-gray-500 font-black uppercase tracking-widest mt-1">Overall Compatibility</div>
             </div>
-            <div className="text-[9px] text-gray-500 font-black uppercase tracking-widest mt-1">Overall Compatibility</div>
           </div>
         )}
       </div>

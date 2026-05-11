@@ -13,7 +13,8 @@ import {
   Compass,
   Settings,
   Menu,
-  X
+  X,
+  Heart
 } from 'lucide-react';
 import { SupportBot } from '../components/common/SupportBot';
 import { ExitNudge } from '../components/common/ExitNudge';
@@ -43,6 +44,7 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
         <button
           className="text-gray-400"
           onClick={() => setIsMobileMenuOpen(false)}
+          aria-label="Close menu"
         >
           <X className="w-6 h-6" />
         </button>
@@ -70,6 +72,7 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
           <Link
             key={item.name}
             to={item.path}
+            data-testid={`nav-${item.name.toLowerCase().replace(/\s+/g, '-')}`}
             className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold transition-all tactile-press ${isActive
               ? 'bg-white/10 text-[#FC6100]'
               : 'text-gray-400 hover:bg-white/5 hover:text-white'
@@ -95,6 +98,7 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
 
       <button
         onClick={handleLogout}
+        data-testid="nav-logout-btn"
         className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-bold text-gray-500 hover:text-red-500 hover:bg-red-500/10 transition-all tactile-press"
       >
         <LogOut className="w-4 h-4" />
@@ -127,8 +131,10 @@ export const DashboardLayout: React.FC = () => {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
 
-  // Exit Intent Logic
+  // Exit Intent Logic & External Control
   React.useEffect(() => {
+    (window as any).setIsExitNudgeOpen = setIsExitNudgeOpen;
+    
     const handleMouseLeave = (e: MouseEvent) => {
       // Trigger if mouse leaves toward the top (tab area)
       if (e.clientY <= 10) {
@@ -140,8 +146,21 @@ export const DashboardLayout: React.FC = () => {
       }
     };
 
+    // Mobile/Session Fail-safe: Trigger after 5 minutes of focused activity
+    const pulseTimer = setTimeout(() => {
+      const hasSeenNudge = sessionStorage.getItem('udyog_marg_exit_nudge_seen');
+      if (!hasSeenNudge) {
+        setIsExitNudgeOpen(true);
+        sessionStorage.setItem('udyog_marg_exit_nudge_seen', 'true');
+      }
+    }, 5 * 60 * 1000);
+
     document.addEventListener('mouseleave', handleMouseLeave);
-    return () => document.removeEventListener('mouseleave', handleMouseLeave);
+    return () => {
+      document.removeEventListener('mouseleave', handleMouseLeave);
+      clearTimeout(pulseTimer);
+      delete (window as any).setIsExitNudgeOpen;
+    };
   }, []);
 
   if (authLoading) {
@@ -204,6 +223,7 @@ export const DashboardLayout: React.FC = () => {
             <button
               className="lg:hidden p-2 text-gray-400 hover:text-white"
               onClick={() => setIsMobileMenuOpen(true)}
+              aria-label="Open menu"
             >
               <Menu className="w-6 h-6" />
             </button>
@@ -325,6 +345,22 @@ export const DashboardLayout: React.FC = () => {
 
         {/* Help & Support Bot */}
         <SupportBot />
+
+        {/* Global Platform Sentiment FAB - Top Right Heart */}
+        <div className="fixed top-24 right-8 z-[60] flex flex-col items-end gap-3 group">
+          <button 
+            onClick={() => setIsExitNudgeOpen(true)}
+            data-testid="feedback-fab"
+            className="w-16 h-16 bg-[#111] border border-white/10 rounded-full flex items-center justify-center text-[#FC6100] shadow-2xl hover:bg-[#FC6100] hover:text-white transition-all relative overflow-hidden group/btn"
+          >
+            <div className="absolute inset-0 bg-gradient-to-tr from-[#FC6100]/20 to-transparent opacity-0 group-hover/btn:opacity-100 transition-opacity"></div>
+            <Heart className="w-7 h-7 relative z-10 group-hover/btn:scale-125 transition-transform animate-heartbeat" />
+            <div className="absolute inset-0 border-2 border-[#FC6100]/30 rounded-full animate-ping opacity-20 pointer-events-none"></div>
+          </button>
+          <div className="bg-[#111] border border-white/10 px-4 py-2 rounded-xl opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all shadow-2xl pointer-events-none">
+            <p className="text-[10px] font-black text-[#FC6100] uppercase tracking-widest whitespace-nowrap">Give Feedback</p>
+          </div>
+        </div>
 
         {/* Sovereign Exit Nudge */}
         <ExitNudge 

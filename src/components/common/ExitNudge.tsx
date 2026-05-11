@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, MessageSquare, Heart, Zap, Sparkles } from 'lucide-react';
+import { X, MessageSquare, Heart, Zap } from 'lucide-react';
 import { trackEvent } from '../../lib/analytics';
 import { useAuth } from '../../contexts/AuthContext';
 import { feedbackService } from '../../services/feedbackService';
@@ -67,6 +67,7 @@ export const ExitNudge: React.FC<ExitNudgeProps> = ({ isOpen, onClose }) => {
       <div className="relative w-full max-w-md bg-[#111] border border-white/10 rounded-[32px] overflow-hidden shadow-2xl shadow-orange-500/10 fade-in-up">
         <button 
           onClick={onClose}
+          data-testid="exit-nudge-close"
           className="absolute top-6 right-6 p-2 text-gray-500 hover:text-white transition-colors"
         >
           <X className="w-5 h-5" />
@@ -76,16 +77,17 @@ export const ExitNudge: React.FC<ExitNudgeProps> = ({ isOpen, onClose }) => {
           {step === 'initial' && (
             <>
               <div className="w-20 h-20 bg-gradient-to-br from-[#FC6100] to-[#FF9E00] rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-lg shadow-orange-500/20 rotate-3">
-                <Sparkles className="w-10 h-10 text-white" />
+                <Heart className="w-10 h-10 text-white" />
               </div>
-              <h3 className="text-3xl font-black text-white tracking-tight font-display mb-4 uppercase">Leaving So Soon?</h3>
+              <h3 className="text-3xl font-black text-white tracking-tight font-display mb-4 uppercase">How are we doing?</h3>
               <p className="text-gray-400 text-sm leading-relaxed mb-10 font-medium">
-                You're building something great. Before you go, tell us how the <span className="text-[#FC6100]">Udyog Marg</span> experience feels today.
+                We'd love to hear your thoughts so we can make <span className="text-[#FC6100]">Udyog Marg</span> even better for you.
               </p>
 
               <div className="grid grid-cols-1 gap-3">
                 <button 
                   onClick={() => handleSentiment('love')}
+                  data-testid="sentiment-love-btn"
                   className="flex items-center justify-between w-full p-5 bg-white/5 border border-white/5 rounded-2xl hover:bg-[#FC6100]/10 hover:border-[#FC6100]/30 transition-all group"
                 >
                   <div className="flex items-center gap-4">
@@ -97,6 +99,7 @@ export const ExitNudge: React.FC<ExitNudgeProps> = ({ isOpen, onClose }) => {
 
                 <button 
                   onClick={() => handleSentiment('confused')}
+                  data-testid="sentiment-confused-btn"
                   className="flex items-center justify-between w-full p-5 bg-white/5 border border-white/5 rounded-2xl hover:bg-purple-500/10 hover:border-purple-500/30 transition-all group"
                 >
                   <div className="flex items-center gap-4">
@@ -108,6 +111,7 @@ export const ExitNudge: React.FC<ExitNudgeProps> = ({ isOpen, onClose }) => {
 
                 <button 
                   onClick={() => handleSentiment('missing')}
+                  data-testid="sentiment-missing-btn"
                   className="flex items-center justify-between w-full p-5 bg-white/5 border border-white/5 rounded-2xl hover:bg-blue-500/10 hover:border-blue-500/30 transition-all group"
                 >
                   <div className="flex items-center gap-4">
@@ -128,10 +132,11 @@ export const ExitNudge: React.FC<ExitNudgeProps> = ({ isOpen, onClose }) => {
               <h3 className="text-2xl font-black text-white tracking-tight font-display mb-2 uppercase">
                 {sentiment === 'confused' ? "What's confusing?" : "What's missing?"}
               </h3>
-              <p className="text-gray-400 text-xs mb-6">Your insight helps us build the perfect Job Search OS.</p>
+              <p className="text-gray-400 text-xs mb-6">Your feedback helps us build the perfect Job Search tool.</p>
               
               <textarea 
                 autoFocus
+                data-testid="feedback-textarea"
                 placeholder="Type your thoughts..."
                 className="w-full h-32 bg-white/5 border border-white/10 rounded-xl p-4 text-white text-sm focus:border-[#FC6100] focus:ring-1 focus:ring-[#FC6100] outline-none transition-all mb-6 resize-none"
                 onKeyDown={(e) => {
@@ -153,9 +158,10 @@ export const ExitNudge: React.FC<ExitNudgeProps> = ({ isOpen, onClose }) => {
                     const el = document.querySelector('textarea') as HTMLTextAreaElement;
                     submitFeedback(sentiment!, el.value);
                   }}
+                  data-testid="feedback-submit-btn"
                   className="flex-[2] px-6 py-3 bg-[#FC6100] rounded-xl text-xs font-bold text-white hover:bg-[#E35205] transition-all uppercase shadow-lg shadow-orange-500/20"
                 >
-                  Scribe Intelligence
+                  Send Feedback
                 </button>
               </div>
             </div>
@@ -168,7 +174,7 @@ export const ExitNudge: React.FC<ExitNudgeProps> = ({ isOpen, onClose }) => {
               </div>
               <h3 className="text-3xl font-black text-white tracking-tight font-display mb-4 uppercase">Received!</h3>
               <p className="text-gray-400 text-sm leading-relaxed font-medium">
-                Your feedback is the foundation of the next <span className="text-[#FC6100]">Sovereign Release</span>. Safe travels, Architect.
+                Your feedback helps us build a better platform. Thanks for being with us!
               </p>
             </div>
           )}

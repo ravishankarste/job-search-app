@@ -79,6 +79,7 @@ export const LandingPage: React.FC = () => {
           <Link to="/login" className="text-sm font-bold text-gray-400 hover:text-white transition-colors">Login</Link>
           <Link 
             to="/signup" 
+            data-testid="nav-signup-btn"
             onClick={() => trackEvent('cta_click', { location: 'navbar' })}
             className="px-6 py-2.5 bg-[#FC6100] text-white text-xs font-black uppercase tracking-widest rounded-lg hover:bg-[#E35205] transition-all tactile-press border border-white/10"
           >
@@ -113,6 +114,7 @@ export const LandingPage: React.FC = () => {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6 animate-in fade-in slide-in-from-bottom-16 duration-700 delay-300 w-full sm:w-auto">
             <button 
               onClick={() => document.getElementById('demo-widget')?.scrollIntoView({ behavior: 'smooth' })}
+              data-testid="hero-demo-cta"
               className="w-full sm:w-auto px-10 py-5 bg-[#FC6100] text-white text-sm font-black uppercase tracking-[0.2em] rounded-lg hover:bg-[#E35205] transition-all tactile-press border border-white/10 flex items-center justify-center gap-2"
             >
               Try the Live Demo <ArrowRight className="w-5 h-5" />
@@ -127,6 +129,7 @@ export const LandingPage: React.FC = () => {
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Paste Job Description</label>
               <textarea 
                 value={jobText}
+                data-testid="demo-job-textarea"
                 onChange={(e) => setJobText(e.target.value)}
                 placeholder="Paste the requirements section here..."
                 className="w-full h-48 bg-black/40 border border-white/5 rounded-2xl p-4 text-sm focus:border-[#FC6100]/50 transition-colors resize-none placeholder:text-gray-700"
@@ -138,6 +141,7 @@ export const LandingPage: React.FC = () => {
                 <input 
                   type="file" 
                   accept=".pdf"
+                  data-testid="demo-resume-upload"
                   onChange={handleFileUpload}
                   className="absolute inset-0 opacity-0 cursor-pointer z-10"
                 />
@@ -178,6 +182,7 @@ export const LandingPage: React.FC = () => {
           <div className="mt-8 flex flex-col items-center gap-8">
             <button 
               onClick={handleAnalyze}
+              data-testid="demo-analyze-btn"
               disabled={!jobText || !resumeText || isAnalyzing}
               className={`px-12 py-4 bg-white text-black text-xs font-black uppercase tracking-[0.3em] rounded-full hover:bg-gray-200 transition-all tactile-press disabled:opacity-30 disabled:cursor-not-allowed`}
             >
@@ -216,6 +221,7 @@ export const LandingPage: React.FC = () => {
                    </p>
                    <Link 
                     to="/signup"
+                    data-testid="demo-signup-cta"
                     className="inline-flex items-center gap-2 text-[#FC6100] text-xs font-black uppercase tracking-widest hover:gap-4 transition-all"
                    >
                      Join the Alpha to Automate Your Search <ArrowRight className="w-4 h-4" />

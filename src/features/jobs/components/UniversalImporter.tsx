@@ -107,6 +107,7 @@ export const UniversalImporter: React.FC<UniversalImporterProps> = ({ onImportSu
             <div className="flex-1 relative">
               <input 
                 type="text" 
+                data-testid="universal-import-input"
                 placeholder="https://www.linkedin.com/jobs/view/..."
                 className="w-full pl-4 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-xs text-white placeholder-gray-600 focus:border-[#FC6100] outline-none transition-all font-bold"
                 value={url}
@@ -123,6 +124,7 @@ export const UniversalImporter: React.FC<UniversalImporterProps> = ({ onImportSu
             </div>
             <button 
               type="submit"
+              data-testid="universal-import-btn"
               disabled={isScraping || !url.trim()}
               className="px-6 py-3 bg-[#FC6100] text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-[#E35205] transition-all disabled:opacity-50 flex items-center gap-2 shadow-xl shadow-[#FC6100]/10 shrink-0"
             >
@@ -139,12 +141,13 @@ export const UniversalImporter: React.FC<UniversalImporterProps> = ({ onImportSu
         </form>
       </div>
 
-      {error && (
-        <div className="mt-8 flex items-center gap-2 text-white bg-red-500/20 p-4 rounded-xl border border-red-500/30 animate-fade-in shadow-lg shadow-red-500/5">
+        <div 
+          data-testid="universal-import-error"
+          className="mt-8 flex items-center gap-2 text-white bg-red-500/20 p-4 rounded-xl border border-red-500/30 animate-fade-in shadow-lg shadow-red-500/5"
+        >
           <AlertCircle className="w-4 h-4 text-red-500" />
           <p className="text-[10px] font-bold uppercase tracking-wider">{error}</p>
         </div>
-      )}
     </div>
   );
 };

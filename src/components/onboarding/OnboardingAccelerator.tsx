@@ -45,6 +45,7 @@ export const OnboardingAccelerator: React.FC<OnboardingAcceleratorProps> = ({
         <button
           onClick={handleSampleInjection}
           disabled={isCreating}
+          data-testid="onboarding-sample-btn"
           className="clean-card group bg-white/[0.02] hover:bg-[#FC6100]/5 border-white/10 hover:border-[#FC6100]/40 transition-all duration-500 text-left relative overflow-hidden flex flex-col justify-between h-full p-6 tactile-press"
         >
           <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-100 transition-opacity">
@@ -69,6 +70,7 @@ export const OnboardingAccelerator: React.FC<OnboardingAcceleratorProps> = ({
         {/* Option 2: The Import */}
         <button
           onClick={onImportClick}
+          data-testid="onboarding-import-btn"
           className="clean-card group bg-white/[0.02] hover:bg-emerald-500/5 border-white/10 hover:border-emerald-500/40 transition-all duration-500 text-left flex flex-col justify-between h-full p-6 tactile-press"
         >
           <div>
@@ -89,6 +91,7 @@ export const OnboardingAccelerator: React.FC<OnboardingAcceleratorProps> = ({
         {/* Option 3: The Manual */}
         <button
           onClick={onManualClick}
+          data-testid="onboarding-manual-btn"
           className="clean-card group bg-white/[0.02] hover:bg-white/5 border-white/10 hover:border-white/30 transition-all duration-500 text-left flex flex-col justify-between h-full p-6 tactile-press"
         >
           <div>

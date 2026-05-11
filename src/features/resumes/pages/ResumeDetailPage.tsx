@@ -77,7 +77,11 @@ export const ResumeDetailPage: React.FC = () => {
     <div className="space-y-8 max-w-4xl mx-auto fade-in-up">
       {/* Header */}
       <div>
-        <Link to="/resumes" className="inline-flex items-center text-sm font-bold text-gray-500 hover:text-[#FC6100] mb-6 transition-colors">
+        <Link 
+          to="/resumes" 
+          data-testid="resume-back-btn"
+          className="inline-flex items-center text-sm font-bold text-gray-500 hover:text-[#FC6100] mb-6 transition-colors"
+        >
           <ArrowLeft className="w-4 h-4 mr-2" /> Back to Resumes
         </Link>
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6 bg-[#121212] p-8 rounded-3xl border border-white/10">
@@ -95,6 +99,7 @@ export const ResumeDetailPage: React.FC = () => {
               <>
                 <button
                   onClick={() => setIsComparisonMode(true)}
+                  data-testid="resume-compare-toggle-btn"
                   className="inline-flex items-center justify-center px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-gray-400 hover:text-[#FC6100] hover:border-[#FC6100]/30 transition-all font-bold text-sm"
                 >
                   <ArrowLeftRight className="w-4 h-4 mr-2" />
@@ -103,6 +108,7 @@ export const ResumeDetailPage: React.FC = () => {
                 <button
                   onClick={handleDelete}
                   disabled={isDeleting}
+                  data-testid="resume-delete-btn"
                   className="p-3 bg-white/5 border border-white/10 rounded-xl text-gray-500 hover:text-red-500 hover:bg-red-500/10 transition-all disabled:opacity-50"
                   title="Delete Resume"
                 >
@@ -110,6 +116,7 @@ export const ResumeDetailPage: React.FC = () => {
                 </button>
                 <button
                   onClick={() => setIsUploadModalOpen(true)}
+                  data-testid="resume-upload-version-btn"
                   className="inline-flex items-center justify-center px-6 py-3 bg-[#FC6100] text-white text-sm font-bold rounded-xl shadow-lg hover:bg-[#E35205] transition-all"
                 >
                   <Upload className="w-4 h-4 mr-2" />
@@ -123,6 +130,7 @@ export const ResumeDetailPage: React.FC = () => {
                     setIsComparisonMode(false);
                     setSelectedForComparison([]);
                   }}
+                  data-testid="resume-cancel-compare-btn"
                   className="inline-flex items-center justify-center px-4 py-2 text-gray-400 hover:text-white transition-all text-sm font-bold"
                 >
                   <X className="w-4 h-4 mr-2" />
@@ -131,6 +139,7 @@ export const ResumeDetailPage: React.FC = () => {
                 <button
                   onClick={() => setIsShowingComparison(true)}
                   disabled={selectedForComparison.length < 2}
+                  data-testid="resume-start-compare-btn"
                   className="inline-flex items-center justify-center px-6 py-3 bg-[#FC6100] text-white text-sm font-bold rounded-xl shadow-lg hover:bg-[#E35205] transition-all disabled:opacity-50 disabled:bg-gray-800 disabled:text-gray-500"
                 >
                   <ArrowLeftRight className="w-4 h-4 mr-2" />

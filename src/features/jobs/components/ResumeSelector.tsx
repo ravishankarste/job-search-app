@@ -17,7 +17,7 @@ export const ResumeSelector: React.FC<ResumeSelectorProps> = ({
 
   if (isLoadingResumes) {
     return (
-      <div className="flex items-center justify-center py-12">
+      <div className="flex items-center justify-center py-12" data-testid="resume-loading">
         <Loader2 className="w-8 h-8 animate-spin text-[#FC6100]" />
       </div>
     );
@@ -35,6 +35,7 @@ export const ResumeSelector: React.FC<ResumeSelectorProps> = ({
           <button 
             onClick={() => onSelect(null)}
             disabled={isLinking}
+            data-testid="resume-unlink-btn"
             className="text-[9px] font-black uppercase tracking-widest text-red-500 hover:text-red-400 flex items-center transition-colors"
           >
             <Link2Off className="w-3 h-3 mr-1.5" /> Unlink
@@ -63,6 +64,7 @@ export const ResumeSelector: React.FC<ResumeSelectorProps> = ({
               key={resume.id}
               onClick={() => onSelect(resume.id)}
               disabled={isLinking}
+              data-testid={`resume-item-${resume.id}`}
               className="group flex items-center justify-between p-4 bg-white/2 border border-white/5 hover:border-[#FC6100]/30 hover:bg-[#FC6100]/5 rounded-2xl text-sm transition-all"
             >
               <div className="flex items-center space-x-3 text-left">

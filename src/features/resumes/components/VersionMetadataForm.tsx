@@ -34,6 +34,7 @@ export const VersionMetadataForm: React.FC<VersionMetadataFormProps> = ({
           <input
             type="number"
             id="versionNumber"
+            data-testid="resume-version-number-input"
             min="1"
             required
             value={data.versionNumber || suggestedVersionNumber}
@@ -50,6 +51,7 @@ export const VersionMetadataForm: React.FC<VersionMetadataFormProps> = ({
         <input
           type="text"
           id="label"
+          data-testid="resume-version-label-input"
           value={data.label}
           onChange={(e) => onChange({ ...data, label: e.target.value })}
           placeholder="e.g., Tailored for Google"

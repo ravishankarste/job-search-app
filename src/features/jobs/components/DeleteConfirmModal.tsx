@@ -42,6 +42,7 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
             <button
               onClick={onConfirm}
               disabled={isDeleting}
+              data-testid="confirm-delete-btn"
               className="w-full px-8 py-5 bg-red-500 text-white text-[11px] font-black uppercase tracking-[0.3em] rounded-2xl hover:bg-red-600 transition-all flex items-center justify-center disabled:opacity-50 shadow-xl shadow-red-500/20"
             >
               {isDeleting ? 'Removing...' : 'Delete Permanently'}
@@ -49,6 +50,7 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
             <button
               onClick={onClose}
               disabled={isDeleting}
+              data-testid="cancel-delete-btn"
               className="w-full px-8 py-5 bg-white/5 text-gray-500 text-[11px] font-black uppercase tracking-[0.3em] rounded-2xl hover:bg-white/10 hover:text-white transition-all"
             >
               Cancel

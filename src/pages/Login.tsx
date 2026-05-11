@@ -131,6 +131,7 @@ export const Login: React.FC = () => {
               id="email-address"
               name="email"
               type="email"
+              data-testid="login-email-input"
               autoComplete="email"
               required
               className={inputClasses}
@@ -145,6 +146,7 @@ export const Login: React.FC = () => {
               id="password"
               name="password"
               type="password"
+              data-testid="login-password-input"
               autoComplete="current-password"
               required
               className={inputClasses}
@@ -159,6 +161,7 @@ export const Login: React.FC = () => {
           <button
             type="submit"
             disabled={isLoading}
+            data-testid="login-submit-btn"
             className="w-full flex justify-center py-4 px-4 border border-transparent text-sm font-bold rounded-2xl text-white bg-[#FC6100] hover:bg-[#E35205] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FC6100] transition-all shadow-lg shadow-[#FC6100]/10 disabled:opacity-50"
           >
             {isLoading ? 'Logging in...' : 'Sign In'}
@@ -179,6 +182,7 @@ export const Login: React.FC = () => {
             type="button"
             onClick={handleGoogleSignIn}
             disabled={isLoading}
+            data-testid="login-google-btn"
             className="w-full flex justify-center items-center py-4 px-4 border border-white/10 text-sm font-bold rounded-2xl text-white bg-white/5 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white transition-all disabled:opacity-50"
           >
             <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">

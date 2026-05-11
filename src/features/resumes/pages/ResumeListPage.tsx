@@ -32,6 +32,7 @@ export const ResumeListPage: React.FC = () => {
         </div>
         <button
           onClick={() => setIsModalOpen(true)}
+          data-testid="resume-create-btn"
           className="inline-flex items-center justify-center px-6 py-2 bg-[#FC6100] text-white text-sm font-bold rounded-lg shadow-md hover:bg-[#E35205] transition-all"
         >
           <Plus className="w-5 h-5 mr-2" />
@@ -56,6 +57,7 @@ export const ResumeListPage: React.FC = () => {
           </p>
           <button
             onClick={() => setIsModalOpen(true)}
+            data-testid="resume-empty-create-btn"
             className="inline-flex items-center px-6 py-3 bg-[#FC6100] text-white text-sm font-bold rounded-xl shadow-lg hover:bg-[#E35205] transition-all"
           >
             <Plus className="w-5 h-5 mr-2" />

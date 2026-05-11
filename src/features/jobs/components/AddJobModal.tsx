@@ -91,6 +91,7 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({
               <input
                 required
                 type="text"
+                data-testid="job-company-input"
                 placeholder="e.g. Google, Stripe"
                 className={inputClasses}
                 value={formData.company_name}
@@ -104,6 +105,7 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({
               <input
                 required
                 type="text"
+                data-testid="job-title-input"
                 placeholder="e.g. Senior Frontend Engineer"
                 className={inputClasses}
                 value={formData.title}
@@ -117,6 +119,7 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({
             <label className={labelClasses}>Job Posting URL</label>
             <input
               type="url"
+              data-testid="job-url-input"
               placeholder="https://careers.company.com/..."
               className={inputClasses}
               value={formData.url}
@@ -129,6 +132,7 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({
             <label className={labelClasses}>Job Description (For ATS Match Scoring)</label>
             <textarea
               placeholder="Paste the full job description here..."
+              data-testid="job-description-textarea"
               className={`${inputClasses} h-24 resize-y`}
               value={formData.description}
               onChange={e => setFormData({ ...formData, description: e.target.value })}
@@ -171,6 +175,7 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
+              data-testid="job-discard-btn"
               className="flex-1 px-6 py-4 text-sm font-bold text-gray-400 bg-white/5 hover:bg-white/10 rounded-2xl transition-all duration-200 active:scale-95"
             >
               Discard
@@ -178,6 +183,7 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({
             <button
               type="submit"
               disabled={isSubmitting}
+              data-testid="job-save-btn"
               className="flex-[2] inline-flex items-center justify-center px-6 py-4 text-sm font-bold rounded-2xl shadow-xl shadow-[#FC6100]/10 text-white bg-[#FC6100] hover:bg-[#E35205] hover:-translate-y-0.5 active:translate-y-0 active:scale-95 transition-all duration-200 disabled:opacity-50"
             >
               {isSubmitting ? (

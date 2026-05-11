@@ -150,3 +150,15 @@ h1, h2, h3, h4, h5, h6 {
 .accelerator-gradient {
   background: linear-gradient(135deg, rgba(252, 97, 0, 0.1) 0%, rgba(252, 97, 0, 0) 100%);
 }
+
+@keyframes heartbeat {
+  0% { transform: scale(1); }
+  14% { transform: scale(1.15); }
+  28% { transform: scale(1); }
+  42% { transform: scale(1.15); }
+  70% { transform: scale(1); }
+}
+
+.animate-heartbeat {
+  animation: heartbeat 1.5s ease-in-out infinite;
+}
