@@ -23,8 +23,7 @@ Only after Steps 1, 2, and 3 have passed, push the code:
 `git commit -m "Your clear description"`
 `git push`
 
-### Step 6: Verify the GitHub Action Build
-- Go to GitHub and check the "Actions" tab.
-- Wait for the "Build and Deploy" workflow to finish.
-- If it fails, we must fix it immediately.
-- **Note**: If I (the AI) cannot see the GitHub status, I will remind you to check it and show me a screenshot so we can fix any errors together.
+### Step 6: Verify the Live Site
+- Go to GitHub and wait for the "Build and Deploy" workflow to finish (it will be much faster now).
+- Once it says "Success," open [upanita.com](https://upanita.com) and click around for 10 seconds.
+- If everything looks good, the task is DONE.
