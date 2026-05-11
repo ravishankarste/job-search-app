@@ -26,8 +26,19 @@ export const MatchScoreWidget: React.FC<MatchScoreWidgetProps> = ({
   
   const { user } = useAuth();
   const [hasVoted, setHasVoted] = React.useState(false);
+  const [isScribeReady, setIsScribeReady] = React.useState(false);
+
+  // Set the "Loaded" Switch once analysis and auth are stable
+  React.useEffect(() => {
+    if (!isLoading && user !== undefined) {
+      setIsScribeReady(true);
+    }
+  }, [isLoading, user]);
 
   const handleVote = async (isAccurate: boolean) => {
+    // BLOCK the save if the scribe isn't ready
+    if (!isScribeReady) return;
+
     setHasVoted(true);
     
     // 1. Track in PostHog
@@ -59,7 +70,7 @@ export const MatchScoreWidget: React.FC<MatchScoreWidgetProps> = ({
 
 
   return (
-    <div className="bg-[#121212] border border-white/5 rounded-[32px] p-8 md:p-10 pb-12 shadow-2xl space-y-8 relative overflow-hidden">
+    <div className="bg-[#121212] border border-white/5 rounded-[32px] p-8 md:p-10 pb-12 shadow-2xl space-y-8 relative">
       <div className="absolute top-0 right-0 w-32 h-32 bg-[#FC6100]/5 blur-[60px] -mr-16 -mt-16"></div>
       
       <div className="flex justify-between items-start relative z-10">
@@ -85,16 +96,26 @@ export const MatchScoreWidget: React.FC<MatchScoreWidgetProps> = ({
                 <div className="flex items-center gap-3">
                   <button 
                     onClick={() => handleVote(false)}
+                    disabled={!isScribeReady}
                     data-testid="match-vote-down"
-                    className="p-1.5 hover:bg-red-500/10 rounded-lg transition-colors text-gray-600 hover:text-red-500"
+                    className={`p-1.5 rounded-lg transition-colors ${
+                      !isScribeReady 
+                        ? 'text-gray-800 cursor-not-allowed opacity-50' 
+                        : 'text-gray-600 hover:bg-red-500/10 hover:text-red-500'
+                    }`}
                     title="Inaccurate"
                   >
                     <ThumbsDown className="w-4 h-4" />
                   </button>
                   <button 
                     onClick={() => handleVote(true)}
+                    disabled={!isScribeReady}
                     data-testid="match-vote-up"
-                    className="p-1.5 hover:bg-emerald-500/10 rounded-lg transition-colors text-gray-600 hover:text-emerald-500"
+                    className={`p-1.5 rounded-lg transition-colors ${
+                      !isScribeReady 
+                        ? 'text-gray-800 cursor-not-allowed opacity-50' 
+                        : 'text-gray-600 hover:bg-emerald-500/10 hover:text-emerald-500'
+                    }`}
                     title="Accurate"
                   >
                     <ThumbsUp className="w-4 h-4" />
@@ -122,12 +143,12 @@ export const MatchScoreWidget: React.FC<MatchScoreWidgetProps> = ({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
         {/* Matching Skills */}
-        <div className="space-y-4">
+        <div className="space-y-4 px-2">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-500" />
             <h4 className="text-[10px] font-black text-white uppercase tracking-widest">Matched Keywords</h4>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 pb-2">
             {matchingSkills.length > 0 ? (
               matchingSkills.map(skill => (
                 <span key={skill} className="px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-bold rounded-lg uppercase tracking-wider">
@@ -141,12 +162,12 @@ export const MatchScoreWidget: React.FC<MatchScoreWidgetProps> = ({
         </div>
 
         {/* Missing Skills */}
-        <div className="space-y-4">
+        <div className="space-y-4 px-2">
           <div className="flex items-center gap-2">
             <AlertCircle className="w-4 h-4 text-[#FC6100]" />
             <h4 className="text-[10px] font-black text-white uppercase tracking-widest">Missing Requirements</h4>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 pb-2">
             {missingSkills.length > 0 ? (
               missingSkills.map(skill => (
                 <span key={skill} className="px-3 py-1.5 bg-[#FC6100]/10 border border-[#FC6100]/20 text-[#FC6100] text-[11px] font-bold rounded-lg uppercase tracking-wider">
