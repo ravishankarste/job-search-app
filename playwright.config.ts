@@ -29,8 +29,8 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: process.env.BASE_URL ? undefined : {
-    command: 'npm run dev -- --port 5174',
-    url: 'http://localhost:5174',
+    command: process.env.CI ? 'npm run preview' : 'npm run dev -- --port 5174',
+    url: process.env.CI ? 'http://localhost:4173' : 'http://localhost:5174',
     reuseExistingServer: !process.env.CI,
   },
 });
