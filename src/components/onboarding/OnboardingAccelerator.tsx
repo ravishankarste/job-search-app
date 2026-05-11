@@ -32,9 +32,9 @@ export const OnboardingAccelerator: React.FC<OnboardingAcceleratorProps> = ({
       <div className="text-center space-y-4 mb-12">
         <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#FC6100]/10 border border-[#FC6100]/20 rounded-full mb-4 pulse-brand">
           <Zap className="w-4 h-4 text-[#FC6100]" />
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#FC6100]">Accelerator Active</span>
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#FC6100]">Get Started</span>
         </div>
-        <h2 className="text-4xl font-bold text-white tracking-tighter">The Accelerator</h2>
+        <h2 className="text-4xl font-bold text-white tracking-tighter">Pick your path</h2>
         <p className="text-gray-400 text-sm max-w-xl mx-auto font-medium">
           Your pipeline is empty. Let's get your first <strong>Match Score</strong> calculated so you can see how you stack up against the competition.
         </p>
@@ -58,7 +58,7 @@ export const OnboardingAccelerator: React.FC<OnboardingAcceleratorProps> = ({
             </div>
             <h3 className="text-lg font-bold text-white mb-2 tracking-tight">Try with Sample</h3>
             <p className="text-[11px] text-gray-500 leading-relaxed font-medium">
-              Inject a pre-filled <strong>Staff Engineer @ Netflix</strong> role to see the Match Engine in action immediately.
+              Add a sample <strong>Netflix</strong> role to see how the match scoring works immediately.
             </p>
           </div>
 
@@ -79,7 +79,7 @@ export const OnboardingAccelerator: React.FC<OnboardingAcceleratorProps> = ({
             </div>
             <h3 className="text-lg font-bold text-white mb-2 tracking-tight">LinkedIn Import</h3>
             <p className="text-[11px] text-gray-500 leading-relaxed font-medium">
-              Found a job? Paste the URL and let our <strong>Smart Scraper</strong> pull the description and salary data for you.
+              Found a job? Paste the URL and we will pull the job description and salary for you.
             </p>
           </div>
 
@@ -100,7 +100,7 @@ export const OnboardingAccelerator: React.FC<OnboardingAcceleratorProps> = ({
             </div>
             <h3 className="text-lg font-bold text-white mb-2 tracking-tight">Manual Add</h3>
             <p className="text-[11px] text-gray-500 leading-relaxed font-medium">
-              Already have the job details? Paste them directly into your pipeline to start <strong>Keyword Analysis</strong>.
+              Already have the job details? Paste them manually to see your <strong>Match Score</strong>.
             </p>
           </div>
 

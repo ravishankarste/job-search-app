@@ -34,15 +34,15 @@ export const Dashboard: React.FC = () => {
                     'User';
 
   const stats = [
-    { label: 'Total Applications', value: jobs?.length || 0, icon: Briefcase, description: 'Explore all your job opportunities in one place.' },
-    { label: 'Interviews Scheduled', value: jobs?.filter(j => j.application?.status === 'interviewing').length || 0, icon: Users, description: 'Manage your upcoming interview stages.' },
-    { label: 'Offers Received', value: jobs?.filter(j => j.application?.status === 'offered').length || 0, icon: CheckCircle2, description: 'Celebrate and review your recent job offers.' },
+    { label: 'Total Applications', value: jobs?.length || 0, icon: Briefcase, description: 'All the jobs you have added to your pipeline.' },
+    { label: 'Interviews Scheduled', value: jobs?.filter(j => j.application?.status === 'interviewing').length || 0, icon: Users, description: 'Jobs where you have upcoming interviews.' },
+    { label: 'Offers Received', value: jobs?.filter(j => j.application?.status === 'offered').length || 0, icon: CheckCircle2, description: 'Success! Your recent job offers.' },
   ];
 
   const tools = [
-    { name: 'Job Pipeline', path: '/pipeline', icon: LayoutDashboard, description: 'Track your applications through every stage of the hiring process.' },
-    { name: 'Resume Library', path: '/resumes', icon: FileText, description: 'Store and manage multiple versions of your professional resume.' },
-    { name: 'Career Analytics', path: '/analytics', icon: BarChart3, description: 'Get detailed insights into your job search performance.' },
+    { name: 'Job Pipeline', path: '/pipeline', icon: LayoutDashboard, description: 'Track all your job applications in one place.' },
+    { name: 'Resume Library', path: '/resumes', icon: FileText, description: 'Manage and upload different versions of your resume.' },
+    { name: 'Career Analytics', path: '/analytics', icon: BarChart3, description: 'See how your job search is performing over time.' },
   ];
 
   return (
