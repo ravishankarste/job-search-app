@@ -8,8 +8,8 @@ Follow these steps when adding any new code or UI elements.
 - Example: Use "Upload Resume" instead of "Ingest Professional Artifact."
 
 ### Step 2: Automation Hardening (Mandatory)
-- Every new button MUST have a `data-testid`.
-- Every new input field MUST have a `data-testid`.
+- Automation-First: Add a unique `data-testid` to every interactive element (buttons, inputs, etc.).
+- Synchronization: If you change a UI element that has a `data-testid`, you MUST immediately check `tests/sanity-decathlon.spec.ts` and update the test to match the new UI.
 - Every new page container MUST have a `data-testid`.
 - Format: `data-testid="[context]-[action]-[type]"` (e.g., `login-submit-btn`).
 
