@@ -52,7 +52,10 @@ export const LandingPage: React.FC = () => {
       const analysis = matchAnalysisService.calculateMatchScore(jobText, resumeText);
       setResult(analysis);
       setIsAnalyzing(false);
+      
+      // Critical GTM Sync: Capture this as an 'Aha! Moment' for the dashboard
       trackEvent('landing_page_analysis', { score: analysis.score });
+      trackEvent('aha_moment', { type: 'sandbox_match', score: analysis.score });
     }, 800);
   };
 

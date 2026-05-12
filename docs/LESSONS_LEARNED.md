@@ -11,3 +11,9 @@
 - **Lesson**: Never assume 'npm run dev' success equals GTM readiness. The production build (`tsc -b && vite build`) is the only source of truth for deployment.
 - **Solution**: Follow the **Sovereign Build Workflow** (`Build → Test → E2E → Push`) before every commit.
 - **Criticality**: Level 4 (Deployment Blockers).
+
+## 🎨 UX Sovereignty (2026-05-12)
+- **Insight**: Native browser alerts (`window.confirm`) break the premium immersion.
+- **Problem**: The Resume Deletion flow uses a browser alert which looks generic and unbranded.
+- **Goal**: Replace all native alerts with a custom, high-fidelity Confirmation Modal that matches the dark theme.
+- **Criticality**: Level 2 (Aesthetic Polish).

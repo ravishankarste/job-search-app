@@ -7,6 +7,7 @@ import { ResumeVersionTimeline } from '../components/ResumeVersionTimeline';
 import { UploadVersionModal } from '../components/UploadVersionModal';
 import { CompareVersionsModal } from '../components/CompareVersionsModal';
 import { ArrowLeft, Upload, Trash2, Briefcase, ArrowLeftRight, X } from 'lucide-react';
+import { DeleteConfirmationModal } from '../components/DeleteConfirmationModal';
 import type { VersionMetadata } from '../components/VersionMetadataForm';
 
 export const ResumeDetailPage: React.FC = () => {
@@ -16,6 +17,7 @@ export const ResumeDetailPage: React.FC = () => {
   const [isComparisonMode, setIsComparisonMode] = useState(false);
   const [selectedForComparison, setSelectedForComparison] = useState<string[]>([]);
   const [isShowingComparison, setIsShowingComparison] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const { data: resumes, isLoading: isLoadingResumes } = useResumes();
   const { versions, isLoadingVersions, uploadVersion, isUploading } = useResumeVersions(id || '');
@@ -41,8 +43,13 @@ export const ResumeDetailPage: React.FC = () => {
   }
 
   const handleDelete = async () => {
-    if (window.confirm('Are you sure you want to delete this resume? This cannot be undone.')) {
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (resume) {
       await deleteResume(resume.id);
+      setIsDeleteModalOpen(false);
       navigate('/resumes');
     }
   };
@@ -183,6 +190,14 @@ export const ResumeDetailPage: React.FC = () => {
         onClose={() => setIsShowingComparison(false)}
         versionA={versionA}
         versionB={versionB}
+      />
+
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title={resume.name}
+        isDeleting={isDeleting}
       />
     </div>
   );
