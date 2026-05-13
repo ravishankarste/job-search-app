@@ -80,14 +80,21 @@ export const LandingPage: React.FC = () => {
         </div>
         <div className="flex items-center gap-6">
           <Link to="/login" className="text-sm font-bold text-gray-400 hover:text-white transition-colors">Login</Link>
-          <Link 
-            to="/signup" 
-            data-testid="nav-signup-btn"
-            onClick={() => trackEvent('cta_click', { location: 'navbar' })}
-            className="px-6 py-2.5 bg-[#FC6100] text-white text-xs font-black uppercase tracking-widest rounded-lg hover:bg-[#E35205] transition-all tactile-press border border-white/10"
-          >
-            Join Alpha
-          </Link>
+                  <button 
+                    onClick={() => {
+                      if (jobText || resumeText) {
+                        localStorage.setItem('udyog_marg_sandbox_state', JSON.stringify({
+                          jobText,
+                          resumeText,
+                          timestamp: new Date().toISOString()
+                        }));
+                      }
+                      window.location.href = '/signup';
+                    }}
+                    className="px-6 py-2.5 bg-[#FC6100] text-white text-[11px] font-black uppercase tracking-widest rounded-lg hover:bg-[#E35205] transition-all border border-white/10 shadow-lg shadow-[#FC6100]/20"
+                  >
+                    Join Alpha
+                  </button>
         </div>
       </nav>
 
@@ -222,13 +229,27 @@ export const LandingPage: React.FC = () => {
                    <p className="text-sm text-gray-400 italic font-medium">
                      "Now that you know what's missing, want to track this application and generate a tailored cover letter?"
                    </p>
-                   <Link 
-                    to="/signup"
-                    data-testid="demo-signup-cta"
-                    className="inline-flex items-center gap-2 text-[#FC6100] text-xs font-black uppercase tracking-widest hover:gap-4 transition-all"
-                   >
-                     Join the Alpha to Automate Your Search <ArrowRight className="w-4 h-4" />
-                   </Link>
+                    <button 
+                     data-testid="demo-signup-cta"
+                     onClick={() => {
+                       trackEvent('cta_click', { location: 'sandbox_result' });
+                       
+                       // PERSIST SANDBOX STATE
+                       localStorage.setItem('udyog_marg_sandbox_state', JSON.stringify({
+                         jobText,
+                         resumeText,
+                         timestamp: new Date().toISOString()
+                       }));
+
+                       // Force a small delay to ensure storage write before navigation
+                       setTimeout(() => {
+                         window.location.href = '/signup';
+                       }, 50);
+                     }}
+                     className="inline-flex items-center gap-2 text-[#FC6100] text-xs font-black uppercase tracking-widest hover:gap-4 transition-all"
+                    >
+                      Join the Alpha to Automate Your Search <ArrowRight className="w-4 h-4" />
+                    </button>
                    
                    <div className="pt-4">
                      <button 
@@ -243,7 +264,7 @@ export const LandingPage: React.FC = () => {
                 {/* The Delta Scanner View (Hidden by default) */}
                 {showScanner && (
                   <div className="md:col-span-3 pt-8 space-y-6 animate-in fade-in zoom-in duration-300">
-                    <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-600 text-center">Intelligence Scanner Output</p>
+                    <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-600 text-center">Scanner Analysis</p>
                     <div className="p-8 bg-black/60 border border-white/5 rounded-3xl text-sm leading-relaxed text-gray-400 max-h-64 overflow-y-auto font-mono scrollbar-hide">
                       {(() => {
                         const allTerms = [
@@ -281,14 +302,14 @@ export const LandingPage: React.FC = () => {
         <div className="max-w-4xl mx-auto text-center space-y-20 flex flex-col items-center relative z-10">
           <div className="space-y-8 flex flex-col items-center text-center">
             <div className="inline-flex items-center gap-3 px-4 py-2 bg-[#FC6100]/10 border border-[#FC6100]/20 rounded-full mx-auto">
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#FC6100]">Intelligence Core (Live Now)</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#FC6100]">Matching System (Live Now)</span>
             </div>
             <h2 className="text-6xl md:text-8xl font-bold tracking-tighter leading-tight text-center">
               Know your fit.<br />
               Before you <span className="text-[#FC6100] italic">Apply.</span>
             </h2>
             <p className="text-2xl text-gray-400 font-medium leading-relaxed max-w-2xl mx-auto text-center">
-              Udyog Marg analyzes the delta between your resume and the job description in real-time. Get a precision match score, identify missing keywords, and engineer your application for the win.
+              Udyog Marg analyzes the difference between your resume and the job description in real-time. Get an accurate match score, identify missing keywords, and prepare your application for the win.
             </p>
           </div>
 
@@ -355,7 +376,7 @@ export const LandingPage: React.FC = () => {
             <div className="space-y-6">
               <h3 className="text-3xl font-bold tracking-tight text-center">Interview Prep Mode</h3>
               <p className="text-gray-400 leading-relaxed font-medium max-w-[320px] mx-auto text-center text-lg">
-                Personalized prep guides, "Trap" question strategies, and AI-drafted elevator pitches tailored to your specific resume delta.
+                Personalized prep guides, "Trap" question strategies, and AI-drafted elevator pitches tailored to your specific resume gaps.
               </p>
             </div>
           </div>

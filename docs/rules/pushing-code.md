@@ -10,6 +10,7 @@ Follow these steps exactly before every push. Do not skip any step.
 ### Step 2: Run the Production Build
 Run this command to make sure there are no TypeScript errors or broken code:
 `npm run build`
+- **The Founder's Escalation**: If you cannot independently verify the build status or if you are unsure if the build succeeded, you MUST stop and ask the Founder: **"Is the build green on your end?"** Never proceed without a confirmed green state.
 
 ### Step 3: Run the Logic Tests
 Run this command to make sure the core app math and logic still work:

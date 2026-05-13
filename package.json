@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:sanity": "npx playwright test tests/sanity-decathlon.spec.ts"
+    "test:sanity": "npx playwright test tests/sanity-decathlon.spec.ts",
+    "pre-flight": "npm run build && npm run test -- --run && npm run test:sanity"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.104.1",

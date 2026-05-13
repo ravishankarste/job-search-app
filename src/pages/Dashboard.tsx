@@ -19,6 +19,7 @@ import { FollowUpModal } from '../features/jobs/components/FollowUpModal';
 import { Ghost } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { OnboardingAccelerator } from '../components/onboarding/OnboardingAccelerator';
+import { OnboardingHydrator } from '../components/onboarding/OnboardingHydrator';
 
 export const Dashboard: React.FC = () => {
   const { session } = useAuth();
@@ -47,6 +48,7 @@ export const Dashboard: React.FC = () => {
 
   return (
     <div className="max-w-7xl space-y-16 fade-in-up">
+      <OnboardingHydrator />
       {/* Welcome Header - Left Aligned */}
       <div className="text-left space-y-4">
         <div className="flex items-center gap-3 mb-2">

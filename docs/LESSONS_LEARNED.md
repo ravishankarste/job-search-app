@@ -17,3 +17,9 @@
 - **Problem**: The Resume Deletion flow uses a browser alert which looks generic and unbranded.
 - **Goal**: Replace all native alerts with a custom, high-fidelity Confirmation Modal that matches the dark theme.
 - **Criticality**: Level 2 (Aesthetic Polish).
+
+## 📊 Dual-Pulse Intelligence & Nexus (2026-05-12)
+- **Insight**: Information friction is a productivity killer. Centralizing situational tools (Sheets, Make.com) in a 'Nexus Registry' is high-ROI architecture.
+- **Problem**: Separating Guest (Sandbox) vs User (App) 'Aha!' moments is non-negotiable for founder intelligence. The '7 vs 0' signal today revealed a critical onboarding bottleneck.
+- **Solution**: Implemented 'Dual-Pulse' dashboard and 'Nexus Command' portal in Persona OS.
+- **Criticality**: Level 4 (Strategy & Growth).
