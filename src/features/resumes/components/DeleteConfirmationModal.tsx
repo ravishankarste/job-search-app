@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { Trash2, AlertTriangle, X } from 'lucide-react';
 
 interface DeleteConfirmationModalProps {
@@ -18,14 +19,8 @@ export const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (
 }) => {
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/80 backdrop-blur-md animate-in fade-in duration-300"
-        onClick={onClose}
-      />
-
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
       {/* Modal Content */}
       <div className="relative w-full max-w-md bg-[#121212] border border-white/10 rounded-[32px] shadow-2xl p-8 md:p-10 animate-in zoom-in-95 fade-in duration-300">
         <button 
@@ -71,6 +66,7 @@ export const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

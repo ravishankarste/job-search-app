@@ -26,12 +26,16 @@ export const ResumeCard: React.FC<ResumeCardProps> = ({ resume }) => {
           </div>
           <div>
             <h3 className="text-lg font-bold text-white group-hover:text-[#FC6100] transition-colors leading-tight">
-              {resume.name}
+              <span className="block truncate max-w-[240px] md:max-w-[300px]">
+                {resume.name}
+              </span>
             </h3>
             {resume.target_role && (
               <div className="flex items-center text-xs font-bold text-gray-500 uppercase tracking-wider mt-1.5">
-                <Briefcase className="w-3.5 h-3.5 mr-1.5 text-[#FC6100]/50" />
-                {resume.target_role}
+                <Briefcase className="w-3.5 h-3.5 mr-1.5 text-[#FC6100]/50 shrink-0" />
+                <span className="block truncate max-w-[200px] md:max-w-[250px]">
+                  {resume.target_role}
+                </span>
               </div>
             )}
           </div>

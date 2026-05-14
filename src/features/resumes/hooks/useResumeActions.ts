@@ -20,10 +20,19 @@ export function useResumeActions() {
     },
   });
 
+  const createResumeWithFileMutation = useMutation({
+    mutationFn: ({ name, file, targetRole }: { name: string; file: File; targetRole?: string }) =>
+      resumeService.createResumeWithFile(name, file, targetRole),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: RESUMES_QUERY_KEY });
+    },
+  });
+
   return {
     createResume: createResumeMutation.mutateAsync,
-    isCreating: createResumeMutation.isPending,
-    createError: createResumeMutation.error,
+    createResumeWithFile: createResumeWithFileMutation.mutateAsync,
+    isCreating: createResumeMutation.isPending || createResumeWithFileMutation.isPending,
+    createError: createResumeMutation.error || createResumeWithFileMutation.error,
 
     deleteResume: deleteResumeMutation.mutateAsync,
     isDeleting: deleteResumeMutation.isPending,

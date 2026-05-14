@@ -20,6 +20,7 @@ import { Ghost } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { OnboardingAccelerator } from '../components/onboarding/OnboardingAccelerator';
 import { OnboardingHydrator } from '../components/onboarding/OnboardingHydrator';
+import { PioneerProgress } from '../features/dashboard/components/PioneerProgress';
 
 export const Dashboard: React.FC = () => {
   const { session } = useAuth();
@@ -29,6 +30,10 @@ export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   
   const [followUpCompany, setFollowUpCompany] = React.useState<string | null>(null);
+
+  const hasJobs = !!jobs && jobs.length > 0;
+  const hasResumes = !!resumes && resumes.length > 0;
+  const hasApplications = !!jobs && jobs.some(j => j.application?.status !== 'saved');
 
   const firstName = session?.user?.user_metadata?.full_name?.split(' ')[0] || 
                     (session?.user?.email?.split('@')[0].includes('ravishankar') ? 'Ravishankar' : session?.user?.email?.split('@')[0].split(/[._]/)[0]) || 
@@ -49,6 +54,7 @@ export const Dashboard: React.FC = () => {
   return (
     <div className="max-w-7xl space-y-16 fade-in-up">
       <OnboardingHydrator />
+      
       {/* Welcome Header - Left Aligned */}
       <div className="text-left space-y-4">
         <div className="flex items-center gap-3 mb-2">
@@ -63,6 +69,12 @@ export const Dashboard: React.FC = () => {
           Your pipeline is looking <span className="text-emerald-500 font-bold">healthy</span>.
         </p>
       </div>
+
+      <PioneerProgress 
+        hasJobs={hasJobs}
+        hasResumes={hasResumes}
+        hasApplications={hasApplications}
+      />
 
       {/* Stats Cards - Strava Dark Style */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -98,20 +110,6 @@ export const Dashboard: React.FC = () => {
         {isTasksLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[1, 2, 3].map(i => <div key={i} className="clean-card h-40 animate-pulse bg-white/5" />)}
-          </div>
-        ) : (!resumes || resumes.length === 0) ? (
-          <div className="clean-card text-center py-16 border-white/10 bg-white/[0.01] relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-20 transition-opacity">
-              <FileText className="w-32 h-32 text-[#FC6100]" />
-            </div>
-            <FileText className="w-12 h-12 text-[#FC6100] mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-white mb-2 tracking-tight">Step 1: Upload Your Resume</h3>
-            <p className="text-sm text-gray-500 max-w-sm mx-auto mb-8 font-medium leading-relaxed">
-              To activate the <strong>Match Engine</strong> and see your compatibility scores, we first need to know your skills.
-            </p>
-            <Link to="/resumes" className="px-10 py-4 bg-[#FC6100] text-white rounded-lg font-black uppercase tracking-widest text-xs hover:bg-[#E35205] transition-all inline-flex items-center tactile-press border border-white/10 shadow-2xl shadow-[#FC6100]/20">
-              Open Resume Library <ArrowRight className="w-4 h-4 ml-2" />
-            </Link>
           </div>
         ) : tasks.length === 0 ? (
           <div className="space-y-4">

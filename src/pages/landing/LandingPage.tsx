@@ -24,6 +24,8 @@ export const LandingPage: React.FC = () => {
   const [isAnalyzing, setIsAnalyzing] = React.useState(false);
   const [isExtracting, setIsExtracting] = React.useState(false);
   const [showScanner, setShowScanner] = React.useState(false);
+  const [hasAnalyzed, setHasAnalyzed] = React.useState(false);
+  const [isPastingResume, setIsPastingResume] = React.useState(false);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -52,6 +54,7 @@ export const LandingPage: React.FC = () => {
       const analysis = matchAnalysisService.calculateMatchScore(jobText, resumeText);
       setResult(analysis);
       setIsAnalyzing(false);
+      setHasAnalyzed(true);
       
       // Critical GTM Sync: Capture this as an 'Aha! Moment' for the dashboard
       trackEvent('landing_page_analysis', { score: analysis.score });
@@ -91,7 +94,12 @@ export const LandingPage: React.FC = () => {
                       }
                       window.location.href = '/signup';
                     }}
-                    className="px-6 py-2.5 bg-[#FC6100] text-white text-[11px] font-black uppercase tracking-widest rounded-lg hover:bg-[#E35205] transition-all border border-white/10 shadow-lg shadow-[#FC6100]/20"
+                    disabled={!hasAnalyzed}
+                    className={`px-6 py-2.5 text-white text-[11px] font-black uppercase tracking-widest rounded-lg transition-all border border-white/10 shadow-lg ${
+                      hasAnalyzed 
+                        ? 'bg-[#FC6100] hover:bg-[#E35205] shadow-[#FC6100]/20' 
+                        : 'bg-white/5 text-gray-500 cursor-not-allowed grayscale opacity-50'
+                    }`}
                   >
                     Join Alpha
                   </button>
@@ -135,57 +143,103 @@ export const LandingPage: React.FC = () => {
         {/* The Match Widget - Radical Value */}
         <div id="demo-widget" className="mt-24 w-full max-w-4xl mx-auto bg-white/[0.03] border border-white/10 rounded-[32px] p-8 md:p-12 backdrop-blur-xl relative z-10 animate-in fade-in zoom-in duration-1000 delay-500">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Step 1 */}
             <div className="space-y-4">
-              <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Paste Job Description</label>
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 rounded-full bg-[#FC6100]/20 border border-[#FC6100]/40 flex items-center justify-center text-[#FC6100] text-[10px] font-black">1</div>
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Paste Job Description</label>
+              </div>
               <textarea 
                 value={jobText}
                 data-testid="demo-job-textarea"
                 onChange={(e) => setJobText(e.target.value)}
                 placeholder="Paste the requirements section here..."
-                className="w-full h-48 bg-black/40 border border-white/5 rounded-2xl p-4 text-sm focus:border-[#FC6100]/50 transition-colors resize-none placeholder:text-gray-700"
+                className="w-full h-48 bg-black/40 border border-white/5 rounded-2xl p-4 text-sm focus:border-[#FC6100]/50 transition-colors resize-none placeholder:text-gray-700 scrollbar-hide"
               />
             </div>
+            
+            {/* Step 2 */}
             <div className="space-y-4">
-              <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Upload Your Resume (PDF)</label>
-              <div className="relative group/upload h-48 bg-black/40 border-2 border-dashed border-white/5 rounded-2xl flex flex-col items-center justify-center gap-4 transition-all hover:border-[#FC6100]/30 overflow-hidden">
-                <input 
-                  type="file" 
-                  accept=".pdf"
-                  data-testid="demo-resume-upload"
-                  onChange={handleFileUpload}
-                  className="absolute inset-0 opacity-0 cursor-pointer z-10"
-                />
-                
-                {isExtracting ? (
-                  <div className="flex flex-col items-center gap-3">
-                    <div className="w-8 h-8 border-2 border-[#FC6100] border-t-transparent rounded-full animate-spin"></div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Extracting Data...</p>
-                  </div>
-                ) : resumeFileName ? (
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="p-3 bg-green-500/10 rounded-xl">
-                      <Target className="w-6 h-6 text-green-500" />
-                    </div>
-                    <p className="text-xs font-bold text-white truncate max-w-[200px]">{resumeFileName}</p>
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); setResumeFileName(null); setResumeText(''); }}
-                      className="text-[9px] font-black uppercase tracking-widest text-red-500/60 hover:text-red-500"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                ) : (
-                  <>
-                    <div className="p-3 bg-white/5 rounded-xl group-hover/upload:bg-[#FC6100]/10 transition-colors">
-                      <Layers className="w-6 h-6 text-gray-500 group-hover/upload:text-[#FC6100] transition-colors" />
-                    </div>
-                    <div className="text-center">
-                      <p className="text-xs font-bold text-white">Drag or Click to Upload</p>
-                      <p className="text-[9px] font-medium text-gray-600 uppercase tracking-widest mt-1">PDF Resumes Only</p>
-                    </div>
-                  </>
-                )}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-6 h-6 rounded-full bg-[#FC6100]/20 border border-[#FC6100]/40 flex items-center justify-center text-[#FC6100] text-[10px] font-black">2</div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">
+                    {isPastingResume ? 'Paste Your Resume' : 'Upload Your Resume (PDF)'}
+                  </label>
+                </div>
+                <button 
+                  onClick={() => {
+                    setIsPastingResume(!isPastingResume);
+                    setResumeText('');
+                    setResumeFileName(null);
+                  }}
+                  className="text-[9px] font-black uppercase tracking-widest text-[#FC6100] hover:underline"
+                >
+                  {isPastingResume ? 'Switch to PDF Upload' : 'Don\'t have a PDF? Paste Text'}
+                </button>
               </div>
+
+              {isPastingResume ? (
+                <textarea 
+                  value={resumeText}
+                  onChange={(e) => setResumeText(e.target.value)}
+                  placeholder="Paste your resume or LinkedIn profile text here..."
+                  className="w-full h-48 bg-black/40 border border-white/5 rounded-2xl p-4 text-sm focus:border-[#FC6100]/50 transition-colors resize-none placeholder:text-gray-700 scrollbar-hide"
+                />
+              ) : (
+                <div className="relative group/upload h-48 bg-black/40 border-2 border-dashed border-white/5 rounded-2xl flex flex-col items-center justify-center gap-4 transition-all hover:border-[#FC6100]/30 overflow-hidden">
+                  <input 
+                    type="file" 
+                    accept=".pdf"
+                    data-testid="demo-resume-upload"
+                    onChange={handleFileUpload}
+                    className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                  />
+                  
+                  {isExtracting ? (
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-8 h-8 border-2 border-[#FC6100] border-t-transparent rounded-full animate-spin"></div>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Extracting Data...</p>
+                    </div>
+                  ) : resumeFileName ? (
+                    <div className="flex flex-col items-center gap-2 animate-in zoom-in duration-300">
+                      <div className="p-3 bg-green-500/20 rounded-xl border border-green-500/30">
+                        <Target className="w-6 h-6 text-green-500" />
+                      </div>
+                      <p className="text-xs font-bold text-white truncate max-w-[200px]">{resumeFileName}</p>
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); setResumeFileName(null); setResumeText(''); }}
+                        className="text-[9px] font-black uppercase tracking-widest text-red-500/60 hover:text-red-500 relative z-20"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="p-3 bg-white/5 rounded-xl group-hover/upload:bg-[#FC6100]/10 transition-colors">
+                        <Layers className="w-6 h-6 text-gray-500 group-hover/upload:text-[#FC6100] transition-colors" />
+                      </div>
+                      <div className="text-center px-4">
+                        <p className="text-xs font-bold text-white">Drag or Click to Upload</p>
+                        <p className="text-[9px] font-medium text-gray-600 uppercase tracking-widest mt-1">PDF Resumes Only</p>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+              
+              {!resumeText && !resumeFileName && !isPastingResume && (
+                <button 
+                  onClick={() => {
+                    setResumeText("Standard Software Engineer with expertise in React, Node.js, and Cloud Infrastructure.");
+                    setResumeFileName("Sample_Engineer_Resume.pdf");
+                    trackEvent('demo_sample_resume_used');
+                  }}
+                  className="w-full py-2 bg-white/5 border border-white/5 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] text-gray-500 hover:text-white hover:bg-white/10 transition-all"
+                >
+                  Or Try with Sample Resume
+                </button>
+              )}
             </div>
           </div>
 
@@ -200,11 +254,17 @@ export const LandingPage: React.FC = () => {
             </button>
 
             {result && (
-              <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-8 animate-in fade-in slide-in-from-top-4 duration-500">
-                <div className="bg-white/5 border border-white/10 rounded-[24px] p-8 text-center flex flex-col items-center justify-center space-y-2">
-                  <p className="text-6xl font-bold text-[#FC6100] tracking-tighter">{result.score}%</p>
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500">Match Accuracy</p>
+              <div className="w-full space-y-8 animate-in fade-in slide-in-from-top-4 duration-500">
+                <div className="flex items-center gap-3 justify-center">
+                  <div className="w-6 h-6 rounded-full bg-[#FC6100]/20 border border-[#FC6100]/40 flex items-center justify-center text-[#FC6100] text-[10px] font-black">3</div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">The Verdict</label>
                 </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  <div className="bg-white/5 border border-white/10 rounded-[24px] p-8 text-center flex flex-col items-center justify-center space-y-2">
+                    <p className="text-6xl font-bold text-[#FC6100] tracking-tighter">{result.score}%</p>
+                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500">Match Accuracy</p>
+                  </div>
                 
                 <div className="bg-white/5 border border-white/10 rounded-[24px] p-8 space-y-4">
                   <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#00FF00]">Matching Skills</p>
@@ -223,6 +283,8 @@ export const LandingPage: React.FC = () => {
                     )) : <span className="text-xs text-gray-600 italic">None! Ready to apply.</span>}
                   </div>
                 </div>
+
+              </div>
 
                 {/* The Conversion Hook */}
                 <div className="md:col-span-3 pt-6 text-center space-y-6 border-t border-white/5 mt-4">

@@ -240,4 +240,21 @@ export const resumeService = {
       return null;
     }
   },
+
+  /**
+   * 9. createResumeWithFile (Atomic Creation)
+   */
+  async createResumeWithFile(name: string, file: File, target_role?: string): Promise<{ resume: Resume; version: ResumeVersion }> {
+    try {
+      // 1. Create the base record
+      const resume = await this.createResume(name, target_role);
+      
+      // 2. Create the first version
+      const version = await this.createResumeVersion(resume.id, 1, file, "Initial Version");
+      
+      return { resume, version };
+    } catch (error) {
+      return handleApiError(error);
+    }
+  }
 };

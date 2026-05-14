@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { X, UploadCloud } from 'lucide-react';
 import { VersionMetadataForm } from './VersionMetadataForm';
 import type { VersionMetadata } from './VersionMetadataForm';
@@ -65,9 +66,9 @@ export const UploadVersionModal: React.FC<UploadVersionModalProps> = ({
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div className="bg-[#121212] border border-white/10 rounded-3xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95">
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
+      <div className="relative w-full max-w-md bg-[#121212] border border-white/10 rounded-3xl shadow-xl overflow-hidden animate-in zoom-in-95 duration-300">
         <div className="px-6 py-4 border-b border-white/5 flex justify-between items-center">
           <h2 className="text-lg font-bold text-white">Upload New Version</h2>
           <button
@@ -85,7 +86,7 @@ export const UploadVersionModal: React.FC<UploadVersionModalProps> = ({
               className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-2xl transition-all cursor-pointer ${
                 file 
                   ? 'border-[#FC6100] bg-[#FC6100]/5' 
-                  : 'border-white/10 hover:border-white/20 bg-white/2 hover:bg-white/5'
+                  : 'border-white/5 hover:border-white/20 bg-white/2 hover:bg-white/5'
               }`}
               onDragOver={(e) => e.preventDefault()}
               onDrop={handleDrop}
@@ -150,6 +151,7 @@ export const UploadVersionModal: React.FC<UploadVersionModalProps> = ({
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

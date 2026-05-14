@@ -33,12 +33,12 @@ describe('OnboardingAccelerator', () => {
       />
     );
 
-    expect(screen.getByText(/Try with Sample/i)).toBeInTheDocument();
-    expect(screen.getByText(/LinkedIn Import/i)).toBeInTheDocument();
-    expect(screen.getByText(/Manual Add/i)).toBeInTheDocument();
+    expect(screen.getByText(/Try with Sample Job/i)).toBeInTheDocument();
+    expect(screen.getByText(/LinkedIn URL Import/i)).toBeInTheDocument();
+    expect(screen.getByText(/Add Job Manually/i)).toBeInTheDocument();
   });
 
-  it('triggers sample injection when "Try with Sample" is clicked', async () => {
+  it('triggers sample injection when "Try with Sample Job" is clicked', async () => {
     render(
       <OnboardingAccelerator 
         onManualClick={mockOnManualClick} 
@@ -46,7 +46,7 @@ describe('OnboardingAccelerator', () => {
       />
     );
 
-    const sampleButton = screen.getByText(/Try with Sample/i);
+    const sampleButton = screen.getByText(/Try with Sample Job/i);
     fireEvent.click(sampleButton);
 
     expect(mockCreateJob).toHaveBeenCalledWith(expect.objectContaining({
@@ -63,7 +63,7 @@ describe('OnboardingAccelerator', () => {
       />
     );
 
-    const importButton = screen.getByText(/LinkedIn Import/i);
+    const importButton = screen.getByText(/LinkedIn URL Import/i);
     fireEvent.click(importButton);
 
     expect(mockOnImportClick).toHaveBeenCalled();

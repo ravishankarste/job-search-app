@@ -23,3 +23,21 @@
 - **Problem**: Separating Guest (Sandbox) vs User (App) 'Aha!' moments is non-negotiable for founder intelligence. The '7 vs 0' signal today revealed a critical onboarding bottleneck.
 - **Solution**: Implemented 'Dual-Pulse' dashboard and 'Nexus Command' portal in Persona OS.
 - **Criticality**: Level 4 (Strategy & Growth).
+
+## 🏛️ UI Sovereignty & Portal Teleportation (2026-05-14)
+- **Insight**: Parent animations (transforms) create "CSS Traps" for fixed elements.
+- **Problem**: The `fade-in-up` animation on the `ResumeDetailPage` trapped modals, shifting them to the top of the content area instead of the viewport center.
+- **Solution**: Implement **React Portals** for all modals to teleport them to `document.body`, bypassing all parent stacking contexts.
+- **Criticality**: Level 3 (Visual Stability).
+
+## 🛡️ The Truncation Shield (2026-05-14)
+- **Insight**: User trust is brittle; UI layout must be physically impossible to break.
+- **Problem**: Messy or "Monster" data (entire paragraphs as titles) can expand cards vertically and destroy the grid.
+- **Solution**: Always enforce **`line-clamp-1`** and **`block truncate`** on user-generated fields (Name, Role). This ensures "Sovereign Alignment" even if the underlying data is poisoned.
+- **Criticality**: Level 4 (Grid Resiliency).
+
+## ⚖️ Baseline Naming Sovereignty (2026-05-14)
+- **Insight**: Predictability is a feature. Heuristic-based naming is high-risk.
+- **Problem**: Attempting to "Intelligently" extract roles for naming caused noisy, unpredictable titles.
+- **Lesson**: Default to the **Filename** (Ravi Shankar P) as the "Sovereign Baseline." It is 100% predictable and maintains user authority.
+- **Criticality**: Level 3 (User Trust & Stability).
