@@ -27,7 +27,8 @@ export const JobDetailPage: React.FC = () => {
   const { updateStatus, linkResume, deleteJob, isUpdatingStatus, isLinkingResume, isDeleting } = useJobActions();
   
   const { data: resumes } = useResumes();
-  const matchResult = useMatchScore(job?.title || "", job?.description || "");
+  const application = job?.application;
+  const matchResult = useMatchScore(job?.title || "", job?.description || "", application?.resume_id);
 
   if (isLoading) return <div className="p-10 animate-pulse bg-white/5 border border-white/10 rounded-3xl h-96"></div>;
   if (error || !job) return (
@@ -38,8 +39,6 @@ export const JobDetailPage: React.FC = () => {
       </Link>
     </div>
   );
-
-  const application = job.application;
 
   const handleStatusChange = async (newStatus: ApplicationStatus) => {
     if (application) {

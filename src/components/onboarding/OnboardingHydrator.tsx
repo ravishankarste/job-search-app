@@ -29,7 +29,18 @@ export const OnboardingHydrator: React.FC = () => {
       try {
         const { jobText, resumeText } = JSON.parse(savedState);
         
-        if (!jobText) return;
+        console.log("[OnboardingHydrator] Sandbox state detected:", { 
+          hasJob: !!jobText, 
+          hasResume: !!resumeText,
+          jobLength: jobText?.length,
+          resumeLength: resumeText?.length 
+        });
+
+        if (!jobText || !resumeText) {
+          console.warn("[OnboardingHydrator] Incomplete sandbox data. Aborting hydration.");
+          setIsHydrating(false);
+          return;
+        }
 
         setIsHydrating(true);
 
@@ -77,8 +88,10 @@ export const OnboardingHydrator: React.FC = () => {
         // Track the success
         trackEvent('sandbox_data_hydrated', { hasResume: !!resumeText, fullHydration: true });
         
-        // Refresh the jobs list
+        // Refresh the jobs and resumes list to ensure Match Engine sees the new data
         queryClient.invalidateQueries({ queryKey: JOBS_QUERY_KEY });
+        queryClient.invalidateQueries({ queryKey: ['resumes'] });
+        queryClient.invalidateQueries({ queryKey: ['resume-version'] });
         
         setSuccess(true);
         setTimeout(() => setSuccess(false), 5000);
