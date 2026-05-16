@@ -58,6 +58,13 @@ export const CreateResumeModal: React.FC<CreateResumeModalProps> = ({
     
     try {
       await onSubmit({ name, file, targetRole: targetRole || undefined });
+      
+      // Instant Victory Celebration
+      import('../../../lib/confetti').then(({ triggerConfetti }) => triggerConfetti());
+      
+      // Scribe the Success Signal for the Dashboard (Safety Valve)
+      sessionStorage.setItem('celebrate_resume', 'true');
+      
       setName('');
       setTargetRole('');
       setFile(null);

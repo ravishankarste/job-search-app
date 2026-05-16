@@ -148,24 +148,36 @@ export const apifyService = {
     const details: { title?: string, company?: string } = {};
     
     if (url.includes('linkedin.com')) {
-      // Catch slugs like 'software-engineer-at-google-3893322131'
-      const slugMatch = url.match(/\/view\/([^\/]+)/) || url.match(/\/jobs\/([^\/]+)/);
+      // 1. Catch direct job view slugs
+      const slugMatch = url.match(/\/view\/([^\/]+)/) || url.match(/\/jobs\/view\/([^\/]+)/) || url.match(/\/jobs\/([^\/]+)/);
       const slug = slugMatch ? slugMatch[1].split('?')[0] : "";
       
       if (slug && !/^\d+$/.test(slug)) {
+        // Handle common LinkedIn slug patterns
         const parts = slug.split('-');
         
-        // Pattern: "title-title-at-company-company-ID"
+        // Pattern: "software-engineer-at-google"
         const atIndex = parts.indexOf('at');
         if (atIndex > 0) {
           details.title = parts.slice(0, atIndex).map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
-          // Strip the trailing numeric ID from the company name
           details.company = parts.slice(atIndex + 1).filter(p => !/^\d+$/.test(p)).map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
         } else if (parts.length > 2) {
           // Pattern: "software-engineer-google-123"
-          details.title = parts.slice(0, -2).map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
-          details.company = parts.slice(-2, -1).map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
+          // Usually the last part is a number ID, the part before is company
+          const lastPartIsId = /^\d+$/.test(parts[parts.length - 1]);
+          const companyIndex = lastPartIsId ? parts.length - 2 : parts.length - 1;
+          
+          details.title = parts.slice(0, companyIndex).map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
+          details.company = parts[companyIndex].charAt(0).toUpperCase() + parts[companyIndex].slice(1);
         }
+      }
+    }
+
+    if (url.includes('indeed.com') && url.includes('jk=')) {
+      // Indeed usually doesn't put titles in URLs, but we can check if it's there
+      const parts = url.split('/').filter(p => p.includes('-jobs'));
+      if (parts.length > 0) {
+        details.title = parts[0].replace('-jobs', '').split('-').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
       }
     }
 
@@ -173,18 +185,59 @@ export const apifyService = {
   },
 
   /**
+   * High-Speed Metadata Peek (2-4s)
+   * Uses a lightweight scraper to grab OG tags if the primary scrape is pending or failing.
+   */
+  async peekOgMetadata(url: string): Promise<{ title?: string, company?: string, description?: string }> {
+    const actorId = 'apify~web-scraper'; // Configured for meta-only
+    const input = {
+      startUrls: [{ url }],
+      maxPagesPerCrawl: 1,
+      pageFunction: `async function pageFunction(context) {
+        const { $ } = context;
+        return {
+          title: $('meta[property="og:title"]').attr('content') || $('title').text(),
+          site: $('meta[property="og:site_name"]').attr('content'),
+          description: $('meta[property="og:description"]').attr('content')
+        };
+      }`
+    };
+
+    try {
+      const results = await this.runActorAndGetResults(actorId, input);
+      if (results && results[0]) {
+        const rawTitle = results[0].title || "";
+        const rawSite = results[0].site || "";
+        
+        // Use our existing parser to clean the OG title (e.g. "Software Engineer at Google | LinkedIn")
+        const parsed = this.parseTitleFromSnippet(rawTitle);
+        
+        // If site_name is LinkedIn but company was missing from title, we can't do much, 
+        // but if site_name is something like "Netflix Jobs", we use that.
+        if (!parsed.company && rawSite && !rawSite.toLowerCase().includes('linkedin')) {
+          parsed.company = rawSite;
+        }
+        
+        return {
+          ...parsed,
+          description: results[0].description
+        };
+      }
+    } catch (e) {
+      console.warn("[apifyService] OG Peek failed", e);
+    }
+    return {};
+  },
+
+  /**
    * Search the web for a URL to peek at its title/metadata
    */
   async peekUrlMetadata(url: string): Promise<{ title?: string, company?: string }> {
-    
-    // First, try a Zero-Cost Direct Fetch (if allowed by CORS/Target)
-    try {
-      const direct = await this.directFetchMetadata(url);
-      if (direct.title) return direct;
-    } catch (e) {
-    }
+    // 1. Try High-Speed OG Peek First (More reliable than Google snippet)
+    const ogData = await this.peekOgMetadata(url);
+    if (ogData.title && ogData.company) return ogData;
 
-    // Fallback to Google Search Peek (Apify)
+    // 2. Fallback to Google Search Peek (Apify) - Only if OG fails
     let query = url;
     if (url.includes('linkedin.com/jobs/view/')) {
       const id = url.split('/view/')[1]?.split('/')[0]?.split('?')[0];

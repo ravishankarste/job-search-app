@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageCircle, X, Sparkles, Briefcase, Target, Mic, Send } from 'lucide-react';
+import { MessageCircle, X, Sparkles, Briefcase, Target, Mic, Send, ExternalLink } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface Message {
   id: string;
@@ -15,11 +16,40 @@ const QUICK_QUESTIONS = [
 ];
 
 const BOT_RESPONSES: Record<string, string> = {
-  import: "To import a job, go to the **Job Pipeline** page and paste any LinkedIn or Indeed URL into the **'Universal Job Importer'** box at the top. I'll automatically scrape the details for you!",
-  score: "The **ATS Match Score** compares your resume PDF against a job description. We look for matching skills (Green) and missing gaps (Orange) to give you a compatibility % from 0 to 100.",
-  prep: "In the **Job Detail** page, use the **'Interview Prep Mode'** widget. I'll generate a custom strategy including your 'Elevator Pitch' and tips for handling your specific skill gaps.",
-  start: "Welcome to Udyog Marg! 🚀 Start by uploading your resume in the **Resumes** tab, then use the **Importer** in the **Job Pipeline** to add your first job. The magic happens when you **Link** them!",
-  default: "I'm still learning, but I can help you with: \n• Importing Jobs \n• ATS Match Scoring \n• Interview Preparation \n• Navigating the Pipeline"
+  import: "To import a job, go to the [[Job Pipeline|/pipeline]] page and paste any LinkedIn or Indeed URL into the **'Universal Job Importer'** box at the top. I'll automatically scrape the details for you!",
+  score: "The **ATS Match Score** compares your resume PDF against a job description. We look for matching skills (Green) and missing gaps (Orange) to give you a compatibility % from 0 to 100. View your metrics in [[Analytics|/analytics]].",
+  prep: "In the **Job Detail** page (inside [[Job Pipeline|/pipeline]]), use the **'Interview Prep Mode'** widget. I'll generate a custom strategy including your 'Elevator Pitch' and tips for handling your specific skill gaps.",
+  start: "Welcome to Udyog Marg! 🚀 Start by uploading your resume in the [[Resumes|/resumes]] tab, then use the **Importer** in the [[Job Pipeline|/pipeline]] to add your first job. The magic happens when you **Link** them!",
+  default: "I'm still learning, but I can help you with: \n• [[Importing Jobs|/pipeline]] \n• [[ATS Match Scoring|/analytics]] \n• [[Interview Preparation|/pipeline]] \n• [[Resume Management|/resumes]]"
+};
+
+const FormattedText: React.FC<{ text: string }> = ({ text }) => {
+  // Split by internal links [[Text|Path]] and bold **Text**
+  const parts = text.split(/(\[\[.*?\]\]|\*\*.*?\*\*)/g);
+
+  return (
+    <>
+      {parts.map((part, i) => {
+        if (part.startsWith('[[') && part.endsWith(']]')) {
+          const [label, path] = part.slice(2, -2).split('|');
+          return (
+            <Link 
+              key={i} 
+              to={path} 
+              className="text-[#FC6100] font-black hover:underline inline-flex items-center gap-1 group"
+            >
+              {label}
+              <ExternalLink className="w-2.5 h-2.5 opacity-50 group-hover:opacity-100 transition-opacity" />
+            </Link>
+          );
+        }
+        if (part.startsWith('**') && part.endsWith('**')) {
+          return <span key={i} className="font-black text-white">{part.slice(2, -2)}</span>;
+        }
+        return part;
+      })}
+    </>
+  );
 };
 
 export const SupportBot: React.FC = () => {
@@ -68,6 +98,8 @@ export const SupportBot: React.FC = () => {
       addBotResponse(BOT_RESPONSES.prep);
     } else if (lowerText.includes('hello') || lowerText.includes('hi')) {
       addBotResponse(BOT_RESPONSES.start);
+    } else if (lowerText.includes('resume') || lowerText.includes('upload')) {
+      addBotResponse(BOT_RESPONSES.start);
     } else {
       addBotResponse(BOT_RESPONSES.default);
     }
@@ -110,10 +142,12 @@ export const SupportBot: React.FC = () => {
                 <div className={`max-w-[85%] p-4 rounded-2xl text-xs leading-relaxed font-medium ${
                   msg.sender === 'user' 
                     ? 'bg-[#FC6100] text-white rounded-tr-none' 
-                    : 'bg-white/5 text-gray-300 border border-white/5 rounded-tl-none'
+                    : 'bg-white/5 text-gray-300 border border-white/5 rounded-tl-none shadow-sm'
                 }`}>
                   {msg.text.split('\n').map((line, i) => (
-                    <p key={i} className={i > 0 ? 'mt-2' : ''}>{line}</p>
+                    <div key={i} className={i > 0 ? 'mt-2' : ''}>
+                      <FormattedText text={line} />
+                    </div>
                   ))}
                 </div>
               </div>

@@ -41,3 +41,10 @@
 - **Problem**: Attempting to "Intelligently" extract roles for naming caused noisy, unpredictable titles.
 - **Lesson**: Default to the **Filename** (Ravi Shankar P) as the "Sovereign Baseline." It is 100% predictable and maintains user authority.
 - **Criticality**: Level 3 (User Trust & Stability).
+
+### 🏛️ Mission 0: "Aha!" Rescue & Spacial Sovereignty
+- **The "Import Audit" Protocol**: Every icon or component added to JSX MUST be cross-referenced with the import block. Failure to do so results in `ReferenceError` fractures.
+- **The "Tag Balance" Mandate**: When introducing new structural wrappers (like `section` for Airflow), verify the closing tags immediately. Mismatched tags break the Vite build pipeline.
+- **The "Session Guard" Rule**: Milestone celebrations (Confetti) must use explicit state-change guards (e.g., `prevValue === false && newValue === true`) to prevent "Celebration Loops" on page refreshes or data hydration.
+- **The "Nuclear Airflow" Rule**: For complex, overlapping components, use `flex flex-col` with explicit `gap-X` instead of `space-y-X`. Flex is more robust against layout-escaping children.
+- **"Direct English" over "Fancy Language"**: "Materialize" and "Sovereign" are for architecture; "Upload" and "Import" are for users. Zero cognitive load is the requirement for the "Aha!" moment.

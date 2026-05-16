@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { authService } from '../services/authService';
-import { env } from '../config/env';
 
 export const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -11,55 +10,19 @@ export const Login: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const message = (location.state as any)?.message;
-  const nonceRef = React.useRef('');
 
   React.useEffect(() => {
-    // Generate a secure, URL-safe hex nonce
-    const array = new Uint8Array(16);
-    window.crypto.getRandomValues(array);
-    const rawNonce = Array.from(array).map(b => b.toString(16).padStart(2, '0')).join('');
-    nonceRef.current = rawNonce;
-
-    // Initialize Google Identity Services
-    const initializeGoogle = () => {
-      const google = (window as any).google;
-      if (google) {
-        try {
-          google.accounts.id.initialize({
-            client_id: env.VITE_GOOGLE_CLIENT_ID,
-            callback: handleGoogleResponse,
-            nonce: rawNonce,
-            auto_select: false,
-            use_fedcm_for_prompt: true, // Crucial for modern browser support
-            cancel_on_tap_outside: true,
-            context: 'signin',
-            ux_mode: 'popup'
-          });
-          console.log('Google Identity initialized with FedCM support.');
-        } catch (e) {
-          console.error('Failed to initialize Google Identity:', e);
-        }
-      }
-    };
-
-    const timer = setTimeout(initializeGoogle, 500);
-    return () => clearTimeout(timer);
+    // Standard Redirect Flow doesn't require manual initialization of the GSI client
   }, []);
 
-  const handleGoogleResponse = async (response: any) => {
+  const handleGoogleSignIn = async () => {
     setIsLoading(true);
     setError(null);
     try {
-      console.log('Received Google response, signing in with IdToken...');
-      const { session, error: authError } = await authService.signInWithIdToken(response.credential, nonceRef.current);
-      if (authError) throw authError;
-      if (session) {
-        navigate('/dashboard');
-      }
+      await authService.signInWithGoogle();
     } catch (err: any) {
       console.error('Google Auth Error:', err);
-      setError(err.message || 'Google sign in failed. Please ensure your account is verified.');
-    } finally {
+      setError(err.message || 'Google sign in failed.');
       setIsLoading(false);
     }
   };
@@ -83,28 +46,6 @@ export const Login: React.FC = () => {
     }
   };
 
-  const handleGoogleSignIn = () => {
-    const google = (window as any).google;
-    if (google) {
-      google.accounts.id.prompt((notification: any) => {
-        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-          console.warn('Google native prompt failed/skipped. Falling back to standard OAuth.');
-          setIsLoading(true);
-          authService.signInWithGoogle().catch(err => {
-            setError(err.message || 'Google sign in failed');
-            setIsLoading(false);
-          });
-        }
-      });
-    } else {
-      // Fallback to standard OAuth if script failed
-      setIsLoading(true);
-      authService.signInWithGoogle().catch(err => {
-        setError(err.message || 'Google sign in failed');
-        setIsLoading(false);
-      });
-    }
-  };
 
   const inputClasses = "appearance-none block w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-[#FC6100] focus:border-[#FC6100] transition-all sm:text-sm";
 

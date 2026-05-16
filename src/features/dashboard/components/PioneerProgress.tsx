@@ -33,7 +33,7 @@ export const PioneerProgress: React.FC<PioneerProgressProps> = ({
     },
     {
       id: 'resume',
-      label: 'Materialize Resume',
+      label: 'Upload Resume',
       description: 'Upload your PDF to unlock the ATS Match Engine.',
       isCompleted: hasResumes,
       link: '/resumes',
@@ -61,7 +61,7 @@ export const PioneerProgress: React.FC<PioneerProgressProps> = ({
   const progressPercent = (completedCount / steps.length) * 100;
 
   return (
-    <div className="bg-white/[0.02] border border-white/10 rounded-[32px] p-8 md:p-10 relative overflow-hidden group">
+    <div className="bg-white/[0.02] border border-white/10 rounded-[32px] p-8 md:p-10 relative group">
       <div className="absolute top-0 right-0 w-64 h-64 bg-[#FC6100]/5 blur-[100px] -mr-32 -mt-32"></div>
       
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 relative z-10">
@@ -101,18 +101,18 @@ export const PioneerProgress: React.FC<PioneerProgressProps> = ({
                 {step.isCompleted ? <CheckCircle2 className="w-5 h-5" /> : <span className="text-[10px] font-black">{idx + 1}</span>}
               </div>
             </div>
-            <h4 className={`text-xs font-black uppercase tracking-widest mb-2 ${step.isCompleted ? 'text-white' : 'text-gray-500'}`}>
+            <h4 className={`text-[10px] font-black uppercase tracking-[0.15em] mb-2 leading-snug ${step.isCompleted ? 'text-white' : 'text-gray-500'}`}>
               {step.label}
             </h4>
-            <p className="text-[10px] text-gray-600 leading-relaxed mb-6 font-medium">
+            <p className="text-[9px] text-gray-500 leading-relaxed mb-6 font-medium">
               {step.description}
             </p>
             {!step.isCompleted && (
               <Link 
                 to={step.link}
-                className="text-[10px] font-black uppercase tracking-widest text-[#FC6100] hover:gap-3 flex items-center gap-2 transition-all"
+                className="text-[9px] font-black uppercase tracking-widest text-[#FC6100] hover:gap-3 flex items-center gap-2 transition-all mt-auto"
               >
-                {step.linkText} <ArrowRight className="w-3 h-3" />
+                {step.linkText} <ArrowRight className="w-2.5 h-2.5" />
               </Link>
             )}
           </div>

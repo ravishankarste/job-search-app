@@ -21,9 +21,9 @@ serve(async (req) => {
       throw new Error("Missing Authorization header")
     }
 
-    // 1. Initialize Supabase to verify the user
-    const supabaseClient = createClient(SUPABASE_URL!, SUPABASE_ANON_KEY!)
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(authHeader.replace('Bearer ', ''))
+    // 1. Initialize Supabase with Service Role to bypass RLS for internal checks
+    const supabaseAdmin = createClient(SUPABASE_URL!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!)
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(authHeader.replace('Bearer ', ''))
     
     if (authError || !user) {
       throw new Error("Unauthorized: You must be logged in to use the discovery engine.")
@@ -31,11 +31,51 @@ serve(async (req) => {
 
     const { action, actorId, input } = await req.json()
 
+    // 2. SOVEREIGN SHIELD: Rate Limiting & Caching (Only for Discovery searches)
+    if (action === "run-sync" && actorId.includes('scraper')) {
+      const { searchQuery, location, f_TPR } = input;
+      const daysAgo = f_TPR ? parseInt(f_TPR.replace('r', '')) / (24*60*60) : 7;
+
+      // A. Check Rate Limit (10 searches per hour)
+      const { count, error: countError } = await supabaseAdmin
+        .from('usage_logs')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('action_type', 'discovery')
+        .gt('created_at', new Date(Date.now() - 3600000).toISOString());
+
+      if (count !== null && count >= 10) {
+        return new Response(JSON.stringify({ error: "Sovereign Shield Active: You have reached your hourly limit for market scans. Please wait a while before searching again to protect project credits." }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 429,
+        });
+      }
+
+      // B. Check Discovery Cache (Last 24 hours)
+      const { data: cacheData } = await supabaseAdmin
+        .from('discovery_cache')
+        .select('results')
+        .eq('query', searchQuery.toLowerCase())
+        .eq('location', location.toLowerCase())
+        .eq('days_ago', daysAgo)
+        .gt('created_at', new Date(Date.now() - 86400000).toISOString())
+        .maybeSingle();
+
+      if (cacheData) {
+        console.log(`[Sovereign Shield] Serving cached results for: ${searchQuery}`);
+        return new Response(JSON.stringify(cacheData.results), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        });
+      }
+    }
+
     if (!APIFY_API_TOKEN) {
       throw new Error("APIFY_API_TOKEN is not set in Edge Function secrets")
     }
 
     let url = ""
+    // ... (rest of URL logic stays same)
     if (action === "run-sync") {
       const formattedActorId = actorId.replace('/', '~')
       url = `https://api.apify.com/v2/acts/${formattedActorId}/run-sync-get-dataset-items?token=${APIFY_API_TOKEN}`
@@ -59,6 +99,22 @@ serve(async (req) => {
     })
 
     const data = await response.json()
+
+    // 3. Post-Success: Log Usage & Update Cache
+    if (response.ok && action === "run-sync" && actorId.includes('scraper')) {
+      const { searchQuery, location, f_TPR } = input;
+      const daysAgo = f_TPR ? parseInt(f_TPR.replace('r', '')) / (24*60*60) : 7;
+
+      await Promise.all([
+        supabaseAdmin.from('usage_logs').insert({ user_id: user.id, action_type: 'discovery' }),
+        supabaseAdmin.from('discovery_cache').insert({
+          query: searchQuery.toLowerCase(),
+          location: location.toLowerCase(),
+          days_ago: daysAgo,
+          results: data
+        })
+      ]);
+    }
 
     return new Response(JSON.stringify(data), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

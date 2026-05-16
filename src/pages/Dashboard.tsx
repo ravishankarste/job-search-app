@@ -9,7 +9,8 @@ import {
   BarChart3,
   LayoutDashboard,
   Calendar,
-  Clock
+  Clock,
+  Zap
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useJobs } from '../features/jobs/hooks/useJobs';
@@ -21,11 +22,12 @@ import { useNavigate } from 'react-router-dom';
 import { OnboardingAccelerator } from '../components/onboarding/OnboardingAccelerator';
 import { OnboardingHydrator } from '../components/onboarding/OnboardingHydrator';
 import { PioneerProgress } from '../features/dashboard/components/PioneerProgress';
+import { triggerConfetti } from '../lib/confetti';
 
 export const Dashboard: React.FC = () => {
   const { session } = useAuth();
-  const { data: jobs } = useJobs();
-  const { data: resumes } = useResumes();
+  const { data: jobs, isFetched: isJobsFetched } = useJobs();
+  const { data: resumes, isFetched: isResumesFetched } = useResumes();
   const { tasks, toggleFollowup, isLoading: isTasksLoading } = useActionPlan();
   const navigate = useNavigate();
   
@@ -34,10 +36,6 @@ export const Dashboard: React.FC = () => {
   const hasJobs = !!jobs && jobs.length > 0;
   const hasResumes = !!resumes && resumes.length > 0;
   const hasApplications = !!jobs && jobs.some(j => j.application?.status !== 'saved');
-
-  const firstName = session?.user?.user_metadata?.full_name?.split(' ')[0] || 
-                    (session?.user?.email?.split('@')[0].includes('ravishankar') ? 'Ravishankar' : session?.user?.email?.split('@')[0].split(/[._]/)[0]) || 
-                    'User';
 
   const stats = [
     { label: 'Total Applications', value: jobs?.length || 0, icon: Briefcase, description: 'All the jobs you have added to your pipeline.' },
@@ -51,39 +49,151 @@ export const Dashboard: React.FC = () => {
     { name: 'Career Analytics', path: '/analytics', icon: BarChart3, description: 'See how your job search is performing over time.' },
   ];
 
+  // Milestone Celebration Logic - Hardened to only trigger on ACTIVE change or FLAG
+  const prevHasResumes = React.useRef<boolean | null>(null);
+  const prevHasJobs = React.useRef<boolean | null>(null);
+  const isHydrated = React.useRef(false);
+
+  React.useEffect(() => {
+    // 1. Check for Persistent Victory Signals (Explicit user actions)
+    const shouldCelebrateResume = sessionStorage.getItem('celebrate_resume');
+    const shouldCelebrateJob = sessionStorage.getItem('celebrate_job');
+
+    if (shouldCelebrateResume === 'true') {
+      triggerConfetti();
+      sessionStorage.removeItem('celebrate_resume');
+    }
+
+    if (shouldCelebrateJob === 'true') {
+      triggerConfetti();
+      sessionStorage.removeItem('celebrate_job');
+    }
+
+    // 2. Active Milestone Tracking - Network Aware
+    // Only start tracking AFTER the first successful load to prevent "Login Confetti"
+    if (!isResumesFetched || !isJobsFetched) return;
+
+    if (!isHydrated.current) {
+      // First time data has finished loading, set the baseline and stay silent
+      prevHasResumes.current = hasResumes;
+      prevHasJobs.current = hasJobs;
+      isHydrated.current = true;
+      return;
+    }
+
+    // If we are already hydrated, only trigger on active transitions
+    if (prevHasResumes.current === false && hasResumes === true) {
+      triggerConfetti();
+    }
+    if (prevHasJobs.current === false && hasJobs === true) {
+      triggerConfetti();
+    }
+
+    prevHasResumes.current = hasResumes;
+    prevHasJobs.current = hasJobs;
+  }, [hasResumes, hasJobs, isResumesFetched, isJobsFetched]);
+
+  const firstName = session?.user?.user_metadata?.full_name?.split(' ')[0] || 
+                    (session?.user?.email?.split('@')[0].includes('ravishankar') ? 'Ravishankar' : session?.user?.email?.split('@')[0].split(/[._]/)[0]) || 
+                    'User';
+
   return (
-    <div className="max-w-7xl space-y-16 fade-in-up">
+    <div className="max-w-7xl flex flex-col gap-24 pb-20 fade-in-up">
       <OnboardingHydrator />
       
       {/* Welcome Header - Left Aligned */}
-      <div className="text-left space-y-4">
-        <div className="flex items-center gap-3 mb-2">
-           <div className="w-8 h-[2px] bg-[#FC6100]"></div>
+      <section className="text-left space-y-6 pt-8">
+        <div className="flex items-center gap-3">
+           <div className="w-10 h-[2px] bg-[#FC6100]"></div>
            <span className="text-[11px] font-black uppercase tracking-[0.3em] text-[#FC6100]">Career OS Overview</span>
         </div>
-        <h1 className="text-6xl font-bold text-white tracking-tighter leading-none">
-          Morning, <span className="text-[#FC6100]">{firstName}</span>.
-        </h1>
-        <p className="text-sm text-gray-400 max-w-2xl font-medium leading-relaxed">
-          You have <span className="text-white font-bold">{tasks.length} active tasks</span> in your action plan today. 
-          Your pipeline is looking <span className="text-emerald-500 font-bold">healthy</span>.
-        </p>
-      </div>
+        <div className="space-y-4">
+          <h1 className="text-7xl font-bold text-white tracking-tighter leading-none">
+            Morning, <span className="text-[#FC6100]">{firstName}</span>.
+          </h1>
+          <p className="text-base text-gray-400 max-w-2xl font-medium leading-relaxed">
+            You have <span className="text-white font-bold">{tasks.length} active tasks</span> in your action plan today. 
+            Your pipeline is looking <span className="text-emerald-500 font-bold">healthy</span>.
+          </p>
+        </div>
+      </section>
 
-      <PioneerProgress 
-        hasJobs={hasJobs}
-        hasResumes={hasResumes}
-        hasApplications={hasApplications}
-      />
+      <section className="relative w-full">
+        <PioneerProgress 
+          hasJobs={hasJobs}
+          hasResumes={hasResumes}
+          hasApplications={hasApplications}
+        />
+      </section>
+
+      {/* Mission 0: Onboarding Funnel */}
+      <section className="relative w-full">
+        {!hasResumes ? (
+          <div className="fade-in-up">
+            <div className="clean-card p-10 md:p-12 border-[#FC6100]/30 bg-[#FC6100]/5 relative overflow-hidden group hover:border-[#FC6100]/50 transition-all duration-500 shadow-2xl shadow-[#FC6100]/10">
+              <div className="absolute top-0 right-0 w-96 h-96 bg-[#FC6100]/10 blur-[120px] -mr-48 -mt-48 group-hover:bg-[#FC6100]/20 transition-all"></div>
+              
+              <div className="flex flex-col md:flex-row items-center gap-10 relative z-10">
+                <div className="w-24 h-24 bg-[#FC6100] rounded-[32px] flex items-center justify-center shadow-2xl shadow-[#FC6100]/30 animate-bounce-subtle">
+                  <FileText className="w-12 h-12 text-white" />
+                </div>
+                
+                <div className="flex-1 text-center md:text-left space-y-3">
+                  <h2 className="text-3xl font-bold text-white tracking-tighter">Upload your resume to see your <span className="text-[#FC6100]">Match Score.</span></h2>
+                  <p className="text-base text-gray-400 font-medium max-w-xl leading-relaxed">
+                    You haven't uploaded a resume yet. Upload your PDF now to see how well you match with your imported jobs.
+                  </p>
+                  <div className="pt-6 flex flex-wrap gap-4 justify-center md:justify-start">
+                    <Link 
+                      to="/resumes" 
+                      className="px-10 py-5 bg-[#FC6100] text-white rounded-xl font-black uppercase tracking-widest text-[11px] hover:bg-[#E35205] transition-all inline-flex items-center tactile-press shadow-lg shadow-[#FC6100]/20"
+                    >
+                      Upload My Resume <ArrowRight className="w-4 h-4 ml-2" />
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : !hasJobs ? (
+          <div className="fade-in-up">
+            <div className="clean-card p-10 md:p-12 border-emerald-500/30 bg-emerald-500/5 relative overflow-hidden group hover:border-emerald-500/50 transition-all duration-500 shadow-2xl shadow-emerald-500/10">
+              <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 blur-[120px] -mr-48 -mt-48 group-hover:bg-emerald-500/20 transition-all"></div>
+              
+              <div className="flex flex-col md:flex-row items-center gap-10 relative z-10">
+                <div className="w-24 h-24 bg-emerald-500 rounded-[32px] flex items-center justify-center shadow-2xl shadow-emerald-500/30 animate-bounce-subtle">
+                  <Zap className="w-12 h-12 text-white" />
+                </div>
+                
+                <div className="flex-1 text-center md:text-left space-y-3">
+                  <h2 className="text-3xl font-bold text-white tracking-tighter">Resume Found. Now see your <span className="text-emerald-500">Match Score.</span></h2>
+                  <p className="text-base text-gray-400 font-medium max-w-xl leading-relaxed">
+                    Great! Your resume is materialized. Now import your first job from LinkedIn to see your compatibility score in real-time.
+                  </p>
+                  <div className="pt-6 flex flex-wrap gap-4 justify-center md:justify-start">
+                    <Link 
+                      to="/pipeline" 
+                      className="px-10 py-5 bg-emerald-500 text-white rounded-xl font-black uppercase tracking-widest text-[11px] hover:bg-emerald-600 transition-all inline-flex items-center tactile-press shadow-lg shadow-emerald-500/20"
+                    >
+                      Import First Job <ArrowRight className="w-4 h-4 ml-2" />
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </section>
 
       {/* Stats Cards - Strava Dark Style */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {stats.map((stat) => (
-          <Link 
-            key={stat.label} 
-            to={stat.label === 'Total Applications' ? '/pipeline' : '/pipeline'} // Ensure stats lead somewhere useful
-            className="clean-card group border-white/10 bg-white/[0.02] tactile-press no-underline block"
-          >
+      <section className="relative w-full">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {stats.map((stat) => (
+            <Link 
+              key={stat.label} 
+              to={stat.label === 'Total Applications' ? '/pipeline' : '/pipeline'} // Ensure stats lead somewhere useful
+              className="clean-card group border-white/10 bg-white/[0.02] tactile-press no-underline block"
+            >
             <div className="flex items-center justify-between mb-6">
               <div className="w-14 h-14 bg-[#FC6100]/10 rounded-lg flex items-center justify-center group-hover:bg-[#FC6100] transition-all duration-500">
                 <stat.icon className="w-7 h-7 text-[#FC6100] group-hover:text-white transition-colors" />
@@ -93,8 +203,9 @@ export const Dashboard: React.FC = () => {
             <h2 className="text-[11px] font-black text-gray-500 uppercase tracking-widest mb-2 font-display">{stat.label}</h2>
             <p className="text-[11px] text-gray-500 leading-relaxed font-medium">{stat.description}</p>
           </Link>
-        ))}
-      </div>
+          ))}
+        </div>
+      </section>
 
       {/* Today's Action Plan */}
       <div className="space-y-8">
