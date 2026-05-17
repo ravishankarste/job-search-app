@@ -9,9 +9,9 @@
 - [ ] **LinkedIn Automation**: Finalize Google Sheet + Make.com bridge with Image URL support.
 - [ ] **Content Engine**: Schedule 10 "Journey" posts for optimal India/UK timing.
 - [ ] **The "173 to 500" Surge**: Actively track conversion from LinkedIn clicks to Dashboard hydration.
-- [ ] **Guided Landing Page**: Implement "Step 1-2-3" numbering and lock the "Join Alpha" button behind a successful match.
-- [ ] **Dashboard Checklist**: Add a "Pioneer's Progress" sticky checklist to drive retention.
-- [ ] **PWA Materialization**: Implement manifest and service workers to make Udyog Marg "Installable" (Psychological Trust).
+- [x] **Guided Landing Page**: Implement "Step 1-2-3" numbering and lock the "Join Alpha" button behind a successful match.
+- [x] **Dashboard Checklist**: Add a "Pioneer's Progress" sticky checklist to drive retention.
+- [x] **PWA Materialization**: Implement manifest and service workers to make Udyog Marg "Installable" (Psychological Trust).
 
 ### 🛡️ Phase 2: Product Hardening
 - [ ] **The "Immediate Value" CTA**: Add a "Generate Cover Letter" button directly to the Dashboard after sandbox hydration.

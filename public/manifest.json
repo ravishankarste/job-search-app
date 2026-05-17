@@ -1,0 +1,30 @@
+{
+  "name": "Udyog Marg",
+  "short_name": "Udyog Marg",
+  "description": "Your Job Search OS — Beat the ATS with real-time Match Intelligence.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#121212",
+  "theme_color": "#FC6100",
+  "icons": [
+    {
+      "src": "/udyog_marg_logo_official_1777803670639.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/udyog_marg_logo_official_1777803670639.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/udyog_marg_logo_official_1777803670639.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { CheckCircle2, ArrowRight, Zap } from 'lucide-react';
+import { CheckCircle2, ArrowRight, Zap, X, Monitor } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface ProgressStep {
@@ -9,6 +9,7 @@ interface ProgressStep {
   isCompleted: boolean;
   link: string;
   linkText: string;
+  action?: (e: React.MouseEvent) => void;
 }
 
 interface PioneerProgressProps {
@@ -22,6 +23,60 @@ export const PioneerProgress: React.FC<PioneerProgressProps> = ({
   hasResumes,
   hasApplications 
 }) => {
+  const [deferredPrompt, setDeferredPrompt] = React.useState<any>(null);
+  const [isInstalled, setIsInstalled] = React.useState(false);
+  const [showGuide, setShowGuide] = React.useState(false);
+
+  React.useEffect(() => {
+    // 1. Detect standalone (PWA) display mode
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                         (window.navigator as any).standalone === true;
+    
+    if (isStandalone || localStorage.getItem('pwa_installed') === 'true') {
+      setIsInstalled(true);
+    }
+
+    // 2. Capture Chrome/Edge browser PWA installation trigger
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    // 3. Mark as installed when process completes
+    const handleAppInstalled = () => {
+      setDeferredPrompt(null);
+      setIsInstalled(true);
+      localStorage.setItem('pwa_installed', 'true');
+      
+      // Trigger instant victory celebration confetti
+      import('../../../lib/confetti').then(({ triggerConfetti }) => triggerConfetti());
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
+
+  const handleInstallClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setIsInstalled(true);
+        localStorage.setItem('pwa_installed', 'true');
+        import('../../../lib/confetti').then(({ triggerConfetti }) => triggerConfetti());
+      }
+      setDeferredPrompt(null);
+    } else {
+      setShowGuide(true);
+    }
+  };
+
   const steps: ProgressStep[] = [
     {
       id: 'import',
@@ -34,10 +89,10 @@ export const PioneerProgress: React.FC<PioneerProgressProps> = ({
     {
       id: 'resume',
       label: 'Upload Resume',
-      description: 'Upload your PDF to unlock the ATS Match Engine.',
+      description: 'Upload your PDF or Word document to unlock the ATS Match Engine.',
       isCompleted: hasResumes,
       link: '/resumes',
-      linkText: 'Upload PDF'
+      linkText: 'Upload Resume'
     },
     {
       id: 'apply',
@@ -50,10 +105,13 @@ export const PioneerProgress: React.FC<PioneerProgressProps> = ({
     {
       id: 'pwa',
       label: 'Install App',
-      description: 'Add Udyog Marg to your dock for psychological trust.',
-      isCompleted: false, // Future PWA logic
+      description: isInstalled 
+        ? 'App successfully added to your desktop/dock!'
+        : 'Add Udyog Marg to your dock for psychological trust.',
+      isCompleted: isInstalled,
       link: '#',
-      linkText: 'Coming Soon'
+      linkText: isInstalled ? 'Installed 🚀' : 'Install Now',
+      action: !isInstalled ? handleInstallClick : undefined
     }
   ];
 
@@ -88,36 +146,96 @@ export const PioneerProgress: React.FC<PioneerProgressProps> = ({
         {steps.map((step, idx) => (
           <div 
             key={step.id}
-            className={`p-6 rounded-2xl border transition-all ${
+            className={`p-6 rounded-2xl border transition-all flex flex-col justify-between h-full min-h-[160px] ${
               step.isCompleted 
                 ? 'bg-[#FC6100]/5 border-[#FC6100]/20' 
                 : 'bg-white/[0.01] border-white/5 hover:border-white/10'
             }`}
           >
-            <div className="flex items-start justify-between mb-4">
-              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                step.isCompleted ? 'bg-[#FC6100] text-white' : 'bg-white/5 text-gray-600'
-              }`}>
-                {step.isCompleted ? <CheckCircle2 className="w-5 h-5" /> : <span className="text-[10px] font-black">{idx + 1}</span>}
+            <div>
+              <div className="flex items-start justify-between mb-4">
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                  step.isCompleted ? 'bg-[#FC6100] text-white' : 'bg-white/5 text-gray-600'
+                }`}>
+                  {step.isCompleted ? <CheckCircle2 className="w-5 h-5" /> : <span className="text-[10px] font-black">{idx + 1}</span>}
+                </div>
               </div>
+              <h4 className={`text-[10px] font-black uppercase tracking-[0.15em] mb-2 leading-snug ${step.isCompleted ? 'text-white' : 'text-gray-500'}`}>
+                {step.label}
+              </h4>
+              <p className="text-[9px] text-gray-500 leading-relaxed mb-4 font-medium">
+                {step.description}
+              </p>
             </div>
-            <h4 className={`text-[10px] font-black uppercase tracking-[0.15em] mb-2 leading-snug ${step.isCompleted ? 'text-white' : 'text-gray-500'}`}>
-              {step.label}
-            </h4>
-            <p className="text-[9px] text-gray-500 leading-relaxed mb-6 font-medium">
-              {step.description}
-            </p>
             {!step.isCompleted && (
-              <Link 
-                to={step.link}
-                className="text-[9px] font-black uppercase tracking-widest text-[#FC6100] hover:gap-3 flex items-center gap-2 transition-all mt-auto"
-              >
-                {step.linkText} <ArrowRight className="w-2.5 h-2.5" />
-              </Link>
+              step.action ? (
+                <button 
+                  onClick={step.action}
+                  className="text-[9px] font-black uppercase tracking-widest text-[#FC6100] hover:gap-3 flex items-center gap-2 transition-all mt-auto cursor-pointer self-start"
+                >
+                  {step.linkText} <ArrowRight className="w-2.5 h-2.5" />
+                </button>
+              ) : (
+                <Link 
+                  to={step.link}
+                  className="text-[9px] font-black uppercase tracking-widest text-[#FC6100] hover:gap-3 flex items-center gap-2 transition-all mt-auto self-start"
+                >
+                  {step.linkText} <ArrowRight className="w-2.5 h-2.5" />
+                </Link>
+              )
             )}
           </div>
         ))}
       </div>
+
+      {/* Premium Install Guide Modal */}
+      {showGuide && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="relative w-full max-w-md bg-[#121212] border border-white/10 rounded-[32px] p-8 shadow-2xl animate-in zoom-in-95 duration-300">
+            <button
+              onClick={() => setShowGuide(false)}
+              className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/5 text-gray-500 hover:text-white transition-all"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="space-y-6">
+              <div className="w-14 h-14 bg-[#FC6100]/10 rounded-2xl flex items-center justify-center border border-[#FC6100]/20">
+                <Monitor className="w-7 h-7 text-[#FC6100]" />
+              </div>
+              
+              <div className="space-y-2">
+                <h3 className="text-xl font-bold text-white tracking-tight">App Installation Guide</h3>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#FC6100]">Sovereign App Launcher</p>
+              </div>
+
+              <div className="space-y-4 text-xs text-gray-400 font-medium leading-relaxed">
+                <p>Udyog Marg runs natively on your machine as an installable desktop or mobile app.</p>
+                
+                <div className="p-4 bg-white/[0.02] border border-white/5 rounded-xl space-y-3">
+                  <div className="flex gap-3">
+                    <span className="w-5 h-5 bg-[#FC6100]/20 border border-[#FC6100]/30 rounded flex items-center justify-center text-[10px] font-black text-[#FC6100] shrink-0">1</span>
+                    <p><strong>For Chrome, Edge, or Brave:</strong> Look for the <strong>Install Udyog Marg</strong> computer icon in your URL address bar, or click your browser's menu button `(⋮)` and select <strong>Save and share &rarr; Install page</strong>.</p>
+                  </div>
+                  <div className="flex gap-3 border-t border-white/5 pt-3">
+                    <span className="w-5 h-5 bg-[#FC6100]/20 border border-[#FC6100]/30 rounded flex items-center justify-center text-[10px] font-black text-[#FC6100] shrink-0">2</span>
+                    <p><strong>For iOS Safari:</strong> Tap the <strong>Share</strong> icon in your mobile browser toolbar, scroll down, and tap <strong>Add to Home Screen</strong>.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-2 flex gap-4">
+                <button
+                  onClick={() => setShowGuide(false)}
+                  className="w-full py-4 text-[10px] font-black uppercase tracking-widest text-white bg-[#FC6100] border border-transparent rounded-xl hover:bg-[#E35205] transition-all tactile-press flex items-center justify-center shadow-lg shadow-[#FC6100]/20"
+                >
+                  Got It, Thanks!
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
