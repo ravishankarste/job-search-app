@@ -21,7 +21,7 @@ test.describe('🛡️ Sovereign Shield: Hydration & The Aha! Moment', () => {
       await expect(page.locator('text=The Verdict')).toBeVisible({ timeout: 15000 });
 
       // 4. Click the conversion CTA
-      await page.click('button:has-text("Join the Alpha")');
+      await page.click('[data-testid="demo-signup-cta"]');
       
       // 5. Complete signup
       await expect(page).toHaveURL(/.*signup/);

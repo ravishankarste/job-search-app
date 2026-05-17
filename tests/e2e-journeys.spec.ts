@@ -4,7 +4,7 @@ test.describe('Udyog Marg - Golden Journeys', () => {
   
   test.beforeEach(async ({ page }) => {
     // 1. Navigate to Login
-    await page.goto('http://localhost:5173/login');
+    await page.goto('/login');
     
     // 2. Perform Login
     await page.fill('input[type="email"]', 'ravishankarpatro@gmail.com');
@@ -20,11 +20,11 @@ test.describe('Udyog Marg - Golden Journeys', () => {
   test('Journey 1: Smart Job Discovery (Resilience Check)', async ({ page }) => {
     // 1. Navigate to Job Pipeline (where the Universal Importer lives)
     await page.click('nav >> text=Job Pipeline');
-    await page.waitForURL(/.*jobs/);
+    await page.waitForURL(/.*pipeline/);
 
     // 2. Enter a URL in the discovery box
     const discoveryInput = page.locator('input[placeholder*="linkedin.com/jobs/view"]');
-    await expect(page.locator('text=UNIVERSAL JOB IMPORTER')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('text=Universal Importer')).toBeVisible({ timeout: 10000 });
     await discoveryInput.fill('https://www.linkedin.com/jobs/view/123456789');
     
     // 3. Click Analyze
@@ -58,7 +58,7 @@ test.describe('Udyog Marg - Golden Journeys', () => {
     
     // 3. Go back to Pipeline
     await page.click('nav >> text=Job Pipeline');
-    await page.waitForURL(/.*jobs/);
+    await page.waitForURL(/.*pipeline/);
     
     // 4. Open a REAL Job Detail
     const card = page.locator('.clean-card').filter({ hasNotText: 'Import Failed' }).first();
@@ -75,7 +75,7 @@ test.describe('Udyog Marg - Golden Journeys', () => {
       console.log("Navigation timeout, attempting manual goto...");
       // If click failed, we'll try to find any link and go there
       const href = await card.getAttribute('href');
-      if (href) await page.goto(`http://localhost:5173${href}`);
+      if (href) await page.goto(`${href}`);
     }
     
     await expect(page.locator('h3:has-text("ATS Match Score")')).toBeVisible({ timeout: 25000 });
@@ -83,7 +83,7 @@ test.describe('Udyog Marg - Golden Journeys', () => {
 
   test('Journey 3: Interview Coaching', async ({ page }) => {
     // 1. Go directly to a job detail
-    await page.goto('http://localhost:5173/jobs');
+    await page.goto('/pipeline');
     await page.waitForLoadState('networkidle');
     
     const card = page.locator('.clean-card').filter({ hasNotText: 'Import Failed' }).first();
@@ -95,7 +95,7 @@ test.describe('Udyog Marg - Golden Journeys', () => {
       await page.waitForURL(/\/jobs\/.+/, { timeout: 10000 });
     } catch (e) {
       const href = await card.getAttribute('href');
-      if (href) await page.goto(`http://localhost:5173${href}`);
+      if (href) await page.goto(`${href}`);
     }
     
     // 2. Wait for Prep Mode to be visible

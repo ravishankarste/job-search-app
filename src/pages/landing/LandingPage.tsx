@@ -85,23 +85,24 @@ export const LandingPage: React.FC = () => {
           <Link to="/login" className="text-sm font-bold text-gray-400 hover:text-white transition-colors">Login</Link>
                   <button 
                     onClick={() => {
-                      if (jobText || resumeText) {
+                      if (hasAnalyzed) {
                         localStorage.setItem('udyog_marg_sandbox_state', JSON.stringify({
                           jobText,
                           resumeText,
                           timestamp: new Date().toISOString()
                         }));
+                        window.location.href = '/signup';
                       }
-                      window.location.href = '/signup';
                     }}
                     disabled={!hasAnalyzed}
-                    className={`px-6 py-2.5 text-white text-[11px] font-black uppercase tracking-widest rounded-lg transition-all border border-white/10 shadow-lg ${
+                    className={`px-5 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all border shadow-lg flex items-center gap-2 ${
                       hasAnalyzed 
-                        ? 'bg-[#FC6100] hover:bg-[#E35205] shadow-[#FC6100]/20' 
-                        : 'bg-white/5 text-gray-500 cursor-not-allowed grayscale opacity-50'
+                        ? 'bg-[#FC6100] hover:bg-[#E35205] border-[#FC6100]/30 text-white shadow-[#FC6100]/20 hover:scale-[1.02]' 
+                        : 'bg-white/5 border-white/5 text-gray-600 cursor-not-allowed'
                     }`}
+                    title={!hasAnalyzed ? "Calculate match score below to unlock alpha registration" : "Click to claim your account"}
                   >
-                    Join Alpha
+                    {hasAnalyzed ? 'Join Alpha 🚀' : '🔒 Locked: Try Demo'}
                   </button>
         </div>
       </nav>
@@ -140,13 +141,46 @@ export const LandingPage: React.FC = () => {
           </div>
         </div>
 
+        {/* Visual Stepper Pathway */}
+        <div className="w-full max-w-4xl mx-auto mt-24 mb-12 grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10 px-4">
+          <div className={`p-6 rounded-2xl border transition-all duration-500 ${jobText ? 'bg-[#FC6100]/5 border-[#FC6100]/30 shadow-[0_0_15px_rgba(252,97,0,0.05)]' : 'bg-white/[0.02] border-white/5'}`}>
+            <div className="flex items-center gap-3">
+              <span className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black transition-all ${jobText ? 'bg-[#FC6100] text-white shadow-[0_0_8px_rgba(252,97,0,0.4)]' : 'bg-white/10 text-gray-500'}`}>01</span>
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#FC6100]">Step 1</p>
+                <p className="text-xs font-bold text-white mt-0.5">Paste Job Details</p>
+              </div>
+            </div>
+          </div>
+
+          <div className={`p-6 rounded-2xl border transition-all duration-500 ${resumeText ? 'bg-[#FC6100]/5 border-[#FC6100]/30 shadow-[0_0_15px_rgba(252,97,0,0.05)]' : 'bg-white/[0.02] border-white/5'}`}>
+            <div className="flex items-center gap-3">
+              <span className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black transition-all ${resumeText ? 'bg-[#FC6100] text-white' : 'bg-white/10 text-gray-500'}`}>02</span>
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#FC6100]">Step 2</p>
+                <p className="text-xs font-bold text-white mt-0.5">Provide Resume</p>
+              </div>
+            </div>
+          </div>
+
+          <div className={`p-6 rounded-2xl border transition-all duration-500 ${hasAnalyzed ? 'bg-green-500/5 border-green-500/30 shadow-[0_0_15px_rgba(34,197,94,0.05)]' : 'bg-white/[0.02] border-white/5'}`}>
+            <div className="flex items-center gap-3">
+              <span className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black transition-all ${hasAnalyzed ? 'bg-green-500 text-black' : 'bg-white/10 text-gray-500'}`}>03</span>
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-green-500">Step 3</p>
+                <p className="text-xs font-bold text-white mt-0.5">Unlock & Customize</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* The Match Widget - Radical Value */}
-        <div id="demo-widget" className="mt-24 w-full max-w-4xl mx-auto bg-white/[0.03] border border-white/10 rounded-[32px] p-8 md:p-12 backdrop-blur-xl relative z-10 animate-in fade-in zoom-in duration-1000 delay-500">
+        <div id="demo-widget" className="w-full max-w-4xl mx-auto bg-white/[0.03] border border-white/10 rounded-[32px] p-8 md:p-12 backdrop-blur-xl relative z-10 animate-in fade-in zoom-in duration-1000 delay-500">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Step 1 */}
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <div className="w-6 h-6 rounded-full bg-[#FC6100]/20 border border-[#FC6100]/40 flex items-center justify-center text-[#FC6100] text-[10px] font-black">1</div>
+                <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-black border transition-all ${jobText ? 'bg-[#FC6100]/20 border-[#FC6100]/50 text-[#FC6100]' : 'bg-white/5 border-white/10 text-gray-500'}`}>01</span>
                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Paste Job Description</label>
               </div>
               <textarea 
@@ -162,7 +196,7 @@ export const LandingPage: React.FC = () => {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-full bg-[#FC6100]/20 border border-[#FC6100]/40 flex items-center justify-center text-[#FC6100] text-[10px] font-black">2</div>
+                  <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-black border transition-all ${resumeText ? 'bg-[#FC6100]/20 border-[#FC6100]/50 text-[#FC6100]' : 'bg-white/5 border-white/10 text-gray-500'}`}>02</span>
                   <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">
                     {isPastingResume ? 'Paste Your Resume' : 'Upload Your Resume (PDF)'}
                   </label>
@@ -256,7 +290,7 @@ export const LandingPage: React.FC = () => {
             {result && (
               <div className="w-full space-y-8 animate-in fade-in slide-in-from-top-4 duration-500">
                 <div className="flex items-center gap-3 justify-center">
-                  <div className="w-6 h-6 rounded-full bg-[#FC6100]/20 border border-[#FC6100]/40 flex items-center justify-center text-[#FC6100] text-[10px] font-black">3</div>
+                  <span className="w-7 h-7 rounded-lg bg-green-500/20 border border-green-500/50 flex items-center justify-center text-green-500 text-[10px] font-black">03</span>
                   <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">The Verdict</label>
                 </div>
 
@@ -287,9 +321,12 @@ export const LandingPage: React.FC = () => {
               </div>
 
                 {/* The Conversion Hook */}
-                <div className="md:col-span-3 pt-6 text-center space-y-6 border-t border-white/5 mt-4">
-                   <p className="text-sm text-gray-400 italic font-medium">
-                     "Now that you know what's missing, want to track this application and generate a tailored cover letter?"
+                <div className="md:col-span-3 pt-10 text-center space-y-6 border-t border-white/5 mt-6 bg-[#FC6100]/5 rounded-3xl p-8 border border-[#FC6100]/20 max-w-2xl mx-auto shadow-[0_0_30px_rgba(252,97,0,0.02)]">
+                   <p className="text-xs font-black uppercase tracking-[0.2em] text-[#FC6100]">
+                     Match Solved. What's Next?
+                   </p>
+                   <p className="text-sm text-gray-300 font-medium max-w-md mx-auto leading-relaxed">
+                     Your sandbox matches are saved! Claim your account now to inject this job into your tracking pipeline, resolve missing skills, and auto-draft a tailored cover letter instantly.
                    </p>
                     <button 
                      data-testid="demo-signup-cta"
@@ -302,21 +339,21 @@ export const LandingPage: React.FC = () => {
                          resumeText,
                          timestamp: new Date().toISOString()
                        }));
-
+ 
                        // Force a small delay to ensure storage write before navigation
                        setTimeout(() => {
                          window.location.href = '/signup';
                        }, 50);
                      }}
-                     className="inline-flex items-center gap-2 text-[#FC6100] text-xs font-black uppercase tracking-widest hover:gap-4 transition-all"
+                     className="px-8 py-4 bg-[#FC6100] hover:bg-[#E35205] text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all border border-white/10 shadow-lg shadow-[#FC6100]/10 flex items-center gap-2 mx-auto hover:scale-[1.02]"
                     >
-                      Join the Alpha to Automate Your Search <ArrowRight className="w-4 h-4" />
+                      Claim Your Free Account & Tailor Now <ArrowRight className="w-4 h-4" />
                     </button>
                    
-                   <div className="pt-4">
+                   <div className="pt-6">
                      <button 
                        onClick={() => setShowScanner(!showScanner)}
-                       className="text-[9px] font-black uppercase tracking-[0.3em] text-white/50 hover:text-white transition-colors flex items-center gap-2 mx-auto"
+                       className="text-[9px] font-black uppercase tracking-[0.3em] text-white/40 hover:text-white transition-colors flex items-center gap-2 mx-auto"
                      >
                        {showScanner ? 'Hide Technical Scan' : 'View Intelligence Scanner Output'}
                      </button>
