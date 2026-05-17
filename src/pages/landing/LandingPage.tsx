@@ -198,7 +198,7 @@ export const LandingPage: React.FC = () => {
                 <div className="flex items-center gap-3">
                   <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-black border transition-all ${resumeText ? 'bg-[#FC6100]/20 border-[#FC6100]/50 text-[#FC6100]' : 'bg-white/5 border-white/10 text-gray-500'}`}>02</span>
                   <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">
-                    {isPastingResume ? 'Paste Your Resume' : 'Upload Your Resume (PDF)'}
+                    {isPastingResume ? 'Paste Your Resume' : 'Upload Your Resume (PDF or Word)'}
                   </label>
                 </div>
                 <button 
@@ -209,7 +209,7 @@ export const LandingPage: React.FC = () => {
                   }}
                   className="text-[9px] font-black uppercase tracking-widest text-[#FC6100] hover:underline"
                 >
-                  {isPastingResume ? 'Switch to PDF Upload' : 'Don\'t have a PDF? Paste Text'}
+                  {isPastingResume ? 'Switch to Document Upload' : 'Don\'t have a PDF or Word file? Paste Text'}
                 </button>
               </div>
 
@@ -224,7 +224,7 @@ export const LandingPage: React.FC = () => {
                 <div className="relative group/upload h-48 bg-black/40 border-2 border-dashed border-white/5 rounded-2xl flex flex-col items-center justify-center gap-4 transition-all hover:border-[#FC6100]/30 overflow-hidden">
                   <input 
                     type="file" 
-                    accept=".pdf"
+                    accept=".pdf,.docx"
                     data-testid="demo-resume-upload"
                     onChange={handleFileUpload}
                     className="absolute inset-0 opacity-0 cursor-pointer z-10"
@@ -255,7 +255,7 @@ export const LandingPage: React.FC = () => {
                       </div>
                       <div className="text-center px-4">
                         <p className="text-xs font-bold text-white">Drag or Click to Upload</p>
-                        <p className="text-[9px] font-medium text-gray-600 uppercase tracking-widest mt-1">PDF Resumes Only</p>
+                        <p className="text-[9px] font-medium text-gray-600 uppercase tracking-widest mt-1">PDF or Word (.docx)</p>
                       </div>
                     </>
                   )}

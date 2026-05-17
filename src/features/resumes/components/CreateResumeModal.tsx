@@ -27,13 +27,15 @@ export const CreateResumeModal: React.FC<CreateResumeModalProps> = ({
     setError(null);
     if (e.target.files && e.target.files.length > 0) {
       const selectedFile = e.target.files[0];
-      if (selectedFile.type !== 'application/pdf') {
-        setError('Please upload a PDF file.');
+      const isPDF = selectedFile.type === 'application/pdf' || selectedFile.name.endsWith('.pdf');
+      const isDOCX = selectedFile.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || selectedFile.name.endsWith('.docx');
+      if (!isPDF && !isDOCX) {
+        setError('Please upload a PDF or Word (.docx) file.');
         return;
       }
       setFile(selectedFile);
       if (!name) {
-        setName(selectedFile.name.replace('.pdf', ''));
+        setName(selectedFile.name.replace(/\.(pdf|docx)$/i, ''));
       }
     }
   };
@@ -43,11 +45,13 @@ export const CreateResumeModal: React.FC<CreateResumeModalProps> = ({
     setError(null);
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const droppedFile = e.dataTransfer.files[0];
-      if (droppedFile.type === 'application/pdf') {
+      const isPDF = droppedFile.type === 'application/pdf' || droppedFile.name.endsWith('.pdf');
+      const isDOCX = droppedFile.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || droppedFile.name.endsWith('.docx');
+      if (isPDF || isDOCX) {
         setFile(droppedFile);
-        if (!name) setName(droppedFile.name.replace('.pdf', ''));
+        if (!name) setName(droppedFile.name.replace(/\.(pdf|docx)$/i, ''));
       } else {
-        setError('Please upload a PDF file.');
+        setError('Please upload a PDF or Word (.docx) file.');
       }
     }
   };
@@ -95,7 +99,7 @@ export const CreateResumeModal: React.FC<CreateResumeModalProps> = ({
 
         <form onSubmit={handleSubmit} className="p-8 space-y-8">
           <div className="space-y-3">
-            <label className={labelClasses}>Resume File (PDF)</label>
+            <label className={labelClasses}>Resume File (PDF or Word)</label>
             <div
               className={`relative group/upload h-40 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center gap-4 transition-all cursor-pointer overflow-hidden ${
                 file 
@@ -110,7 +114,7 @@ export const CreateResumeModal: React.FC<CreateResumeModalProps> = ({
                 type="file"
                 ref={fileInputRef}
                 onChange={handleFileChange}
-                accept=".pdf"
+                accept=".pdf,.docx"
                 className="hidden"
               />
               
@@ -129,7 +133,7 @@ export const CreateResumeModal: React.FC<CreateResumeModalProps> = ({
                   </div>
                   <div className="text-center px-4">
                     <p className="text-xs font-bold text-white">Drag or Click to Upload</p>
-                    <p className="text-[9px] font-medium text-gray-600 uppercase tracking-widest mt-1">PDF Version 1.0</p>
+                    <p className="text-[9px] font-medium text-gray-600 uppercase tracking-widest mt-1">PDF or Word (.docx)</p>
                   </div>
                 </>
               )}

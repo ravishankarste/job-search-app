@@ -34,7 +34,14 @@ export const UploadVersionModal: React.FC<UploadVersionModalProps> = ({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLocalError(null);
     if (e.target.files && e.target.files.length > 0) {
-      setFile(e.target.files[0]);
+      const selectedFile = e.target.files[0];
+      const isPDF = selectedFile.type === 'application/pdf' || selectedFile.name.endsWith('.pdf');
+      const isDOCX = selectedFile.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || selectedFile.name.endsWith('.docx');
+      if (!isPDF && !isDOCX) {
+        setLocalError('Please upload a PDF or Word (.docx) file.');
+        return;
+      }
+      setFile(selectedFile);
     }
   };
 
@@ -43,10 +50,12 @@ export const UploadVersionModal: React.FC<UploadVersionModalProps> = ({
     setLocalError(null);
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const droppedFile = e.dataTransfer.files[0];
-      if (droppedFile.type === 'application/pdf') {
+      const isPDF = droppedFile.type === 'application/pdf' || droppedFile.name.endsWith('.pdf');
+      const isDOCX = droppedFile.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || droppedFile.name.endsWith('.docx');
+      if (isPDF || isDOCX) {
         setFile(droppedFile);
       } else {
-        setLocalError('Please upload a PDF file.');
+        setLocalError('Please upload a PDF or Word (.docx) file.');
       }
     }
   };
@@ -105,14 +114,14 @@ export const UploadVersionModal: React.FC<UploadVersionModalProps> = ({
                     name="file-upload"
                     type="file"
                     data-testid="resume-file-input"
-                    accept=".pdf"
+                    accept=".pdf,.docx"
                     className="sr-only"
                     ref={fileInputRef}
                     onChange={handleFileChange}
                   />
                 </div>
                 <p className="text-xs text-gray-500 font-medium">
-                  {file ? file.name : 'PDF up to 10MB'}
+                  {file ? file.name : 'PDF or Word (.docx) up to 10MB'}
                 </p>
               </div>
             </div>
