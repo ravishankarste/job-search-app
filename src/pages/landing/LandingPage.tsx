@@ -13,12 +13,103 @@ import { trackEvent } from '../../lib/analytics';
 import { matchAnalysisService, SYNONYMS } from '../../features/jobs/services/matchAnalysisService';
 import { pdfExtractionService } from '../../features/resumes/services/pdfExtractionService';
 
+const LIVE_JOBS = [
+  {
+    id: 'razorpay-sde2',
+    title: 'Senior Software Engineer (React / TypeScript)',
+    company: 'Razorpay',
+    location: 'Bengaluru, India (Hybrid)',
+    compensation: '₹28L - ₹36L',
+    tags: ['React', 'TypeScript', 'Node.js', 'Redux', 'AWS'],
+    jd: `Requirements:
+- 4+ years of professional software engineering experience.
+- Deep expertise in React.js, TypeScript, and state management (Redux/Zustand).
+- Strong command of web performance, browser rendering path, and CSS architectures.
+- Experience with Node.js, RESTful APIs, and integration with AWS cloud systems.
+- Proven experience engineering responsive, clean, and highly scalable user interfaces.`
+  },
+  {
+    id: 'swiggy-staff-ai',
+    title: 'Staff Frontend Engineer (AI Platform)',
+    company: 'Swiggy',
+    location: 'Bengaluru, India (Remote / Hybrid)',
+    compensation: '₹40L - ₹52L',
+    tags: ['React', 'Next.js', 'TailwindCSS', 'AI Agents', 'OpenAI'],
+    jd: `Requirements:
+- 6+ years of frontend engineering experience.
+- Expertise in React, Next.js, and server-side rendering (SSR) paradigms.
+- Experience building AI-driven UI features, LLM integration, and interactive agents.
+- Strong knowledge of TailwindCSS, framer-motion, and rich micro-animations.
+- Experience with client-side state, API orchestration, and real-time streaming interfaces.`
+  },
+  {
+    id: 'cred-devops',
+    title: 'DevOps & Platform Architect',
+    company: 'Cred',
+    location: 'Hyderabad, India (Hybrid)',
+    compensation: '₹35L - ₹48L',
+    tags: ['Docker', 'Kubernetes', 'CI/CD', 'AWS', 'Terraform'],
+    jd: `Requirements:
+- 5+ years of DevOps or Platform Engineering experience.
+- Expertise with Docker containerization and Kubernetes orchestration.
+- Deep experience in AWS cloud infrastructure management and Terraform (IaC).
+- Strong knowledge of building resilient CI/CD pipelines (GitHub Actions, Jenkins).
+- Solid understanding of network security, scaling bottlenecks, and log monitoring.`
+  },
+  {
+    id: 'stripe-fullstack',
+    title: 'Fullstack Engineer (API & Integrations)',
+    company: 'Stripe',
+    location: 'Hyderabad, India (Remote)',
+    compensation: '₹45L - ₹60L',
+    tags: ['Ruby on Rails', 'React', 'PostgreSQL', 'API Design', 'Security'],
+    jd: `Requirements:
+- 5+ years of software engineering experience.
+- Proficiency in Ruby on Rails, Node.js, or similar robust backend stacks.
+- Expertise in React, TypeScript, and semantic HTML5.
+- Deep experience in PostgreSQL databases, indexing, and complex SQL query design.
+- Passion for API security, encryption, and third-party payment system integrations.`
+  }
+];
+
 export const LandingPage: React.FC = () => {
   const { session, isLoading } = useAuth();
   
   // Widget State
   const [jobText, setJobText] = React.useState('');
   const [resumeText, setResumeText] = React.useState('');
+  
+  // Value-First Geolocation & Select Job state
+  const [detectedLocation, setDetectedLocation] = React.useState('Hyderabad, India');
+  const [loadedJobToast, setLoadedJobToast] = React.useState<{ title: string; company: string } | null>(null);
+
+  React.useEffect(() => {
+    if (
+      navigator.language.includes('in') || 
+      Intl.DateTimeFormat().resolvedOptions().timeZone.includes('Calcutta') || 
+      Intl.DateTimeFormat().resolvedOptions().timeZone.includes('Asia')
+    ) {
+      setDetectedLocation('Hyderabad/Bengaluru, India');
+    } else {
+      setDetectedLocation('London, UK');
+    }
+  }, []);
+
+  const handleSelectJob = (jobJd: string, jobTitle: string, jobCompany: string) => {
+    setJobText(jobJd);
+    setLoadedJobToast({ title: jobTitle, company: jobCompany });
+    trackEvent('landing_job_card_selected', { title: jobTitle, company: jobCompany });
+
+    // Smooth scroll down to the match widget
+    setTimeout(() => {
+      document.getElementById('demo-widget')?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+
+    // Automatically dismiss after 5 seconds
+    setTimeout(() => {
+      setLoadedJobToast(null);
+    }, 5000);
+  };
   const [resumeFileName, setResumeFileName] = React.useState<string | null>(null);
   const [result, setResult] = React.useState<{ score: number, matchingSkills: string[], missingSkills: string[], warnings?: string[] } | null>(null);
   const [isAnalyzing, setIsAnalyzing] = React.useState(false);
@@ -138,6 +229,84 @@ export const LandingPage: React.FC = () => {
             >
               Try the Live Demo <ArrowRight className="w-5 h-5" />
             </button>
+          </div>
+        </div>
+
+        {/* Global Floating Loaded Notification */}
+        {loadedJobToast && (
+          <div className="fixed bottom-10 right-10 z-[100] bg-black/90 border-2 border-green-500/30 text-white px-6 py-5 rounded-[24px] shadow-[0_10px_50px_rgba(0,255,0,0.15)] flex items-center gap-4 animate-in slide-in-from-bottom-8 duration-300 backdrop-blur-xl max-w-sm">
+            <div className="w-8 h-8 rounded-full bg-green-500/20 border border-green-500/50 flex items-center justify-center text-green-500 font-bold shrink-0 animate-pulse">✓</div>
+            <div>
+              <p className="text-xs font-black uppercase tracking-wider text-green-400">Tactical Match Ready</p>
+              <p className="text-[11px] font-bold text-gray-300 mt-1 leading-normal">
+                {loadedJobToast.title} JD loaded. Drop your resume in Step 2 to calculate match accuracy!
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Value-First: Ultra-Fresh Tech Opportunities Grid */}
+        <div className="w-full max-w-6xl mx-auto mt-36 relative z-10 px-4 flex flex-col items-center">
+          <div className="text-center space-y-4 mb-16 flex flex-col items-center">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#FC6100]/10 border border-[#FC6100]/30 rounded-md">
+              <span className="w-1.5 h-1.5 bg-[#FC6100] rounded-full animate-ping"></span>
+              <span className="text-[8px] font-black uppercase tracking-widest text-[#FC6100]">Live Target Grid</span>
+            </div>
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight">Active Tech Radar</h2>
+            <p className="text-xs font-black uppercase tracking-[0.3em] text-gray-500">
+              Prioritizing roles in your region: <span className="text-white bg-white/5 px-2.5 py-1 rounded border border-white/10 font-bold">{detectedLocation}</span>
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
+            {LIVE_JOBS.map((job) => (
+              <div 
+                key={job.id}
+                className="bg-white/[0.02] border border-white/5 hover:border-[#FC6100]/30 hover:bg-[#FC6100]/[0.01] p-8 rounded-[24px] transition-all duration-300 flex flex-col justify-between group/card relative overflow-hidden"
+              >
+                <div className="absolute top-0 right-0 w-24 h-24 bg-[#FC6100]/5 blur-2xl rounded-full opacity-0 group-hover/card:opacity-100 transition-opacity"></div>
+                
+                <div className="space-y-6">
+                  {/* Card Header */}
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-sm font-black text-[#FC6100] group-hover/card:bg-[#FC6100] group-hover/card:text-white transition-all uppercase shadow-md">
+                        {job.company.substring(0, 2)}
+                      </div>
+                      <div>
+                        <p className="text-xs font-black text-gray-500 uppercase tracking-widest leading-none">{job.company}</p>
+                        <h3 className="text-lg font-bold text-white mt-2 group-hover/card:text-[#FC6100] transition-colors leading-tight">{job.title}</h3>
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-black text-white/40 bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg shrink-0 tracking-widest">{job.compensation}</span>
+                  </div>
+
+                  {/* Location & Tags */}
+                  <div className="space-y-4">
+                    <p className="text-[10px] font-bold text-gray-400 flex items-center gap-2 uppercase tracking-wider leading-none">
+                      <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                      {job.location}
+                    </p>
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      {job.tags.map((tag) => (
+                        <span key={tag} className="text-[9px] font-black text-gray-500 bg-white/5 border border-white/5 px-2.5 py-1 rounded-md uppercase tracking-wider">{tag}</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card Action */}
+                <div className="pt-8 border-t border-white/5 mt-8 flex items-center justify-between">
+                  <span className="text-[9px] font-black text-gray-600 uppercase tracking-widest group-hover/card:text-[#FC6100] transition-colors">Verify ATS Fit & Gaps</span>
+                  <button 
+                    onClick={() => handleSelectJob(job.jd, job.title, job.company)}
+                    className="px-6 py-3 bg-[#FC6100] hover:bg-[#E35205] text-white text-[9px] font-black uppercase tracking-widest rounded-lg transition-all border border-white/10 shadow-lg shadow-[#FC6100]/5 flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    Calculate Match ⚡
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
