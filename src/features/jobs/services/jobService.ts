@@ -176,6 +176,29 @@ export const jobService = {
   },
 
   /**
+   * Find a job by its URL (used for de-duplication and caching)
+   */
+  async findJobByUrl(url: string): Promise<Job | null> {
+    try {
+      // Normalize URL for comparison
+      const cleanUrl = url.split('?')[0].replace(/\/$/, '');
+      
+      const { data, error } = await supabase
+        .from('jobs')
+        .select('*')
+        .or(`url.eq.${cleanUrl},url.eq.${cleanUrl}/`)
+        .limit(1)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.warn("[jobService] URL lookup failed:", error);
+      return null;
+    }
+  },
+
+  /**
    * Update job details (used for background scraping)
    */
   async updateJobDetails(jobId: string, details: Partial<Job>): Promise<void> {

@@ -1,4 +1,5 @@
 import { supabase } from '../../../lib/supabaseClient';
+import { jobService } from '../../jobs/services/jobService';
 
 export interface DiscoveredJob {
   id: string;
@@ -188,33 +189,63 @@ export const apifyService = {
    * High-Speed Metadata Peek (2-4s)
    * Uses a lightweight scraper to grab OG tags if the primary scrape is pending or failing.
    */
-  async peekOgMetadata(url: string): Promise<{ title?: string, company?: string, description?: string }> {
-    const actorId = 'apify~web-scraper'; // Configured for meta-only
+  async peekOgMetadata(url: string): Promise<any> {
+    const actorId = 'apify~web-scraper'; 
     const input = {
       startUrls: [{ url }],
       maxPagesPerCrawl: 1,
       pageFunction: `async function pageFunction(context) {
         const { $ } = context;
+        const publicTitle = $('.top-card-layout__title').text().trim();
+        const publicCompany = $('.topcard__org-name-link').text().trim() || $('.topcard__org-name').text().trim();
+        const publicLocation = $('.topcard__flavor--bullet').first().text().trim();
+        const publicDescription = $('.description__text').text().trim();
+
         return {
-          title: $('meta[property="og:title"]').attr('content') || $('title').text(),
+          title: publicTitle || $('meta[property="og:title"]').attr('content') || $('title').text(),
+          company: publicCompany,
+          location: publicLocation,
           site: $('meta[property="og:site_name"]').attr('content'),
-          description: $('meta[property="og:description"]').attr('content')
+          description: publicDescription || $('meta[property="og:description"]').attr('content')
         };
       }`
     };
 
     try {
-      const results = await this.runActorAndGetResults(actorId, input);
+      // Manual Fetch Bypass: Avoids the automatic broken JWT from supabase-js
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/apify-proxy`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+        },
+        body: JSON.stringify({
+          action: 'run-sync',
+          actorId,
+          input
+        })
+      });
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || `Gateway Error: ${response.status}`);
+      }
+
+      const results = await response.json();
       if (results && results[0]) {
         const rawTitle = results[0].title || "";
         const rawSite = results[0].site || "";
+        const scrapedCompany = results[0].company;
         
-        // Use our existing parser to clean the OG title (e.g. "Software Engineer at Google | LinkedIn")
+        // 1. Start with our snippet parser (e.g. "Software Engineer at Google | LinkedIn")
         const parsed = this.parseTitleFromSnippet(rawTitle);
         
-        // If site_name is LinkedIn but company was missing from title, we can't do much, 
-        // but if site_name is something like "Netflix Jobs", we use that.
-        if (!parsed.company && rawSite && !rawSite.toLowerCase().includes('linkedin')) {
+        // 2. Override with explicitly scraped company if found
+        if (scrapedCompany && scrapedCompany !== 'Unknown Company') {
+          parsed.company = scrapedCompany;
+        } else if (!parsed.company && rawSite && !rawSite.toLowerCase().includes('linkedin')) {
+          // 3. Fallback to site_name (e.g. "Netflix Jobs")
           parsed.company = rawSite;
         }
         
@@ -300,17 +331,94 @@ export const apifyService = {
   async scrapeJobUrl(url: string): Promise<DiscoveredJob> {
     const cleanUrl = this.normalizeJobUrl(url);
 
+    // 0. Sovereign Shield: Check Database Cache First (Rule 3)
     try {
-      if (cleanUrl.includes('linkedin.com')) {
-        return await this.scrapeSingleLinkedIn(cleanUrl);
-      } else if (cleanUrl.includes('indeed.com')) {
-        return await this.scrapeSingleIndeed(cleanUrl);
+      const existingJob = await jobService.findJobByUrl(cleanUrl);
+      if (existingJob) {
+        console.info("[apifyService] Sovereign Cache Hit. Serving from Vault.");
+        return {
+          id: existingJob.id,
+          title: existingJob.title,
+          company_name: existingJob.company_name,
+          location: existingJob.location || 'Remote',
+          url: existingJob.url || cleanUrl,
+          description: existingJob.description || '',
+          posted_at: existingJob.created_at || new Date().toISOString(),
+          source: (existingJob.url || '').includes('indeed') ? 'indeed' : 'linkedin',
+        };
       }
-    } catch (err) {
-      console.warn("[apifyService] Direct scrape failed/timed out. Falling back to modal.", err);
-      throw new Error("LinkedIn is taking too long to respond. Please fill in the title and company manually—we've saved the link for you!");
+    } catch (e) {
+      console.warn("[apifyService] Cache lookup skipped:", e);
     }
-    throw new Error("Unsupported URL");
+
+    try {
+      let job: any = null;
+
+      // 1. Try Direct Scrape First
+      if (cleanUrl.includes('linkedin.com')) {
+        job = await this.scrapeSingleLinkedIn(cleanUrl).catch(() => null);
+      } else if (cleanUrl.includes('indeed.com')) {
+        job = await this.scrapeSingleIndeed(cleanUrl).catch(() => null);
+      }
+
+      // 2. High-Speed Fallback: Meta-Pulse (Heuristic Recovery)
+      if (!job || !job.title || job.title === 'Unknown Title' || !job.description || job.description === 'No description provided.') {
+        const meta = await this.peekOgMetadata(cleanUrl);
+        
+        // Update job with meta data if it was missing
+        if (meta.title && meta.title !== 'Unknown Title') {
+          job = {
+            id: job?.id || cleanUrl,
+            title: meta.title,
+            company_name: meta.company || 'Unknown Company',
+            location: meta.location || job?.location || 'Remote',
+            url: cleanUrl,
+            description: meta.description || job?.description || 'No description provided.',
+            posted_at: job?.posted_at || new Date().toISOString(),
+            source: 'linkedin',
+          };
+        }
+
+        // 3. The Indeed Pivot: If we still have no description, search Indeed for this job
+        if (job && job.title && job.company_name && (!job.description || job.description === 'No description provided.')) {
+          console.info(`[apifyService] LinkedIn Void confirmed. Pivoting to Indeed for: ${job.title} at ${job.company_name}`);
+          try {
+            const indeedResults = await this.fetchIndeed(job.title, job.company_name, 30);
+            if (indeedResults && indeedResults.length > 0) {
+              // Find the best match on Indeed (simplified)
+              const match = indeedResults[0]; 
+              job.description = match.description;
+              job.location = job.location || match.location;
+              console.info("[apifyService] Indeed Recovery Successful.");
+            }
+          } catch (indeedErr) {
+            console.warn("[apifyService] Indeed Pivot failed.", indeedErr);
+          }
+        }
+      }
+
+      if (job && job.title && job.title !== 'Unknown Title') return job;
+      
+    } catch (err) {
+      console.warn("[apifyService] Discovery Void detected. Trying URL heuristics...", err);
+    }
+
+    // 3. Last Resort: URL Slug Heuristics (Zero Wait)
+    const parsed = this.parseJobDetailsFromUrl(cleanUrl);
+    if (parsed.title) {
+      return {
+        id: cleanUrl,
+        title: parsed.title,
+        company_name: parsed.company || 'Unknown Company',
+        location: 'Remote',
+        url: cleanUrl,
+        description: 'Auto-extracted from URL.',
+        posted_at: new Date().toISOString(),
+        source: cleanUrl.includes('linkedin.com') ? 'linkedin' : 'indeed',
+      };
+    }
+
+    throw new Error("LinkedIn is taking too long to respond. Please fill in the title and company manually—we've saved the link for you!");
   },
 
   async scrapeSingleLinkedIn(url: string): Promise<DiscoveredJob> {
@@ -388,12 +496,26 @@ export const apifyService = {
   },
 
   mapLinkedInItem(item: any, index: number): DiscoveredJob {
+    const url = item.url || item.jobUrl || '';
+    
+    // 1. Start with the scraper's direct output
+    let title = item.title || item.position;
+    let company = item.company || item.companyName;
+
+    // 2. Fallback: If missing, attempt to parse from URL slug (Heuristic Recovery)
+    if (!title || !company || title === 'Unknown Title' || company === 'Unknown Company') {
+      const parsed = this.parseJobDetailsFromUrl(url);
+      if (!title || title === 'Unknown Title') title = parsed.title;
+      if (!company || company === 'Unknown Company') company = parsed.company;
+    }
+
+    // 3. Final Fallback: Ensure no "Unknown" labels reach the UI
     return {
-      id: item.id || item.url || `linkedin-${index}`,
-      title: item.title || item.position || 'Unknown Title',
-      company_name: item.company || item.companyName || 'Unknown Company',
+      id: item.id || url || `linkedin-${index}`,
+      title: title || 'Unknown Title',
+      company_name: company || 'Unknown Company',
       location: item.location || 'Remote',
-      url: item.url || item.jobUrl || '',
+      url: url,
       description: item.description || item.jobDescription || 'No description provided.',
       posted_at: item.postedAt || item.publishedAt || new Date().toISOString(),
       source: 'linkedin',

@@ -20,6 +20,12 @@ Run this command to make sure the core app math and logic still work:
 Run this command to make sure the actual app screens work in the browser:
 `npm run test:sanity`
 
+### Step 4.1: The After-Action Cleanup (Resource Sovereignty)
+- **Problem**: Test runners (like Playwright) often leave "Zombie Processes" that slow down the computer.
+- **Action**: Immediately after Step 4, run a command to kill lingering test processes:
+`pkill -f playwright || true`
+- **Goal**: Maintain 100% workstation speed for the Founder.
+
 ### Step 5: The Human Confirmation Gate (MANDATORY)
 - After all tests pass, the AI MUST NOT push automatically.
 - The AI must present the test results and ask: **"Validation Success. Do you have anything to add, or shall I push this chunk now?"**
