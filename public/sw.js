@@ -1,4 +1,4 @@
-const CACHE_NAME = 'udyog-marg-v2';
+const CACHE_NAME = 'udyog-marg-v3';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -34,7 +34,7 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch Event - Cache First with Network Fallback
+// Fetch Event - Network First with Cache Fallback to prevent update locks
 self.addEventListener('fetch', (event) => {
   // Only cache GET requests
   if (event.request.method !== 'GET') return;
@@ -45,13 +45,9 @@ self.addEventListener('fetch', (event) => {
   }
 
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      
-      return fetch(event.request).then((networkResponse) => {
-        // Check if we received a valid response
+    fetch(event.request)
+      .then((networkResponse) => {
+        // Check if we received a valid response to cache
         if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
           return networkResponse;
         }
@@ -63,14 +59,18 @@ self.addEventListener('fetch', (event) => {
         });
 
         return networkResponse;
-      }).catch(() => {
-        // Offline Fallback for HTML pages
-        if (event.request.headers.get('accept')?.includes('text/html')) {
-          return caches.match('/index.html');
-        }
-        // Safe fallback Response object instead of undefined to avoid browser TypeErrors
-        return new Response('Network error occurred', { status: 408, statusText: 'Network Error' });
-      });
-    })
+      })
+      .catch(() => {
+        // Offline fallback: try cache, then return default HTML shell
+        return caches.match(event.request).then((cachedResponse) => {
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+          if (event.request.headers.get('accept')?.includes('text/html')) {
+            return caches.match('/index.html');
+          }
+          return new Response('Network error occurred', { status: 408, statusText: 'Network Error' });
+        });
+      })
   );
 });

@@ -190,7 +190,7 @@ export const apifyService = {
    * Uses a lightweight scraper to grab OG tags if the primary scrape is pending or failing.
    */
   async peekOgMetadata(url: string): Promise<any> {
-    const actorId = 'apify~web-scraper'; 
+    const actorId = 'apify~cheerio-scraper'; 
     const input = {
       startUrls: [{ url }],
       maxPagesPerCrawl: 1,
@@ -229,7 +229,20 @@ export const apifyService = {
 
       if (!response.ok) {
         const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error || `Gateway Error: ${response.status}`);
+        let errMsg = `Gateway Error: ${response.status}`;
+        
+        if (errData.error) {
+          if (typeof errData.error === 'object') {
+            if (errData.error.type === 'full-permission-actor-not-approved') {
+              errMsg = `Apify Actor Authorization Required: Please open ${errData.error.data?.approvalUrl || 'https://console.apify.com'} in your browser to approve permissions for this scraper under your Apify account.`;
+            } else {
+              errMsg = errData.error.message || JSON.stringify(errData.error);
+            }
+          } else {
+            errMsg = errData.error;
+          }
+        }
+        throw new Error(errMsg);
       }
 
       const results = await response.json();

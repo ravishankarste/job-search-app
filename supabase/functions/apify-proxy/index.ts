@@ -21,7 +21,12 @@ serve(async (req) => {
     const { action, actorId, input } = await req.json()
 
     // 0. Permission Check: Allow metadata peeks without full auth to ensure resilience
-    const isMetadataPeek = (action === "run-actor" || action === "run-sync") && (actorId === "apify/web-scraper" || actorId === "apify~web-scraper");
+    const isMetadataPeek = (action === "run-actor" || action === "run-sync") && (
+      actorId === "apify/web-scraper" || 
+      actorId === "apify~web-scraper" ||
+      actorId === "apify/cheerio-scraper" || 
+      actorId === "apify~cheerio-scraper"
+    );
     
     let user: any = null;
     if (!isMetadataPeek) {
@@ -37,8 +42,8 @@ serve(async (req) => {
       user = authedUser;
     }
 
-    // 2. SOVEREIGN SHIELD: Rate Limiting & Caching (Only for Discovery searches)
-    if (action === "run-sync" && actorId.includes('scraper')) {
+    // 2. SOVEREIGN SHIELD: Rate Limiting & Caching (Only for Discovery searches, skip for guest metadata peeks)
+    if (action === "run-sync" && actorId.includes('scraper') && !isMetadataPeek) {
       const { searchQuery, location, f_TPR } = input;
       const daysAgo = f_TPR ? parseInt(f_TPR.replace('r', '')) / (24*60*60) : 7;
 
@@ -106,8 +111,8 @@ serve(async (req) => {
 
     const data = await response.json()
 
-    // 3. Post-Success: Log Usage & Update Cache
-    if (response.ok && action === "run-sync" && actorId.includes('scraper')) {
+    // 3. Post-Success: Log Usage & Update Cache (Skip for guest metadata peeks)
+    if (response.ok && action === "run-sync" && actorId.includes('scraper') && !isMetadataPeek) {
       const { searchQuery, location, f_TPR } = input;
       const daysAgo = f_TPR ? parseInt(f_TPR.replace('r', '')) / (24*60*60) : 7;
 
