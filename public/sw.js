@@ -39,12 +39,8 @@ self.addEventListener('fetch', (event) => {
   // Only cache GET requests
   if (event.request.method !== 'GET') return;
   
-  // Skip caching Supabase/External API calls
-  if (
-    event.request.url.includes('supabase') || 
-    event.request.url.includes('google') ||
-    event.request.url.includes('posthog')
-  ) {
+  // Skip caching Supabase/External API calls and only handle same-origin requests
+  if (!event.request.url.startsWith(self.location.origin)) {
     return;
   }
 
@@ -69,9 +65,11 @@ self.addEventListener('fetch', (event) => {
         return networkResponse;
       }).catch(() => {
         // Offline Fallback for HTML pages
-        if (event.request.headers.get('accept').includes('text/html')) {
+        if (event.request.headers.get('accept')?.includes('text/html')) {
           return caches.match('/index.html');
         }
+        // Safe fallback Response object instead of undefined to avoid browser TypeErrors
+        return new Response('Network error occurred', { status: 408, statusText: 'Network Error' });
       });
     })
   );
