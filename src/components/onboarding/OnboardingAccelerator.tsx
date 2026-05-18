@@ -56,9 +56,16 @@ export const OnboardingAccelerator: React.FC<OnboardingAcceleratorProps> = ({
               <LinkIcon className="w-10 h-10 text-white" />
             </div>
             <div className="space-y-2">
-              <h3 className="text-2xl font-bold text-white tracking-tight">LinkedIn URL Import</h3>
+              <div className="flex items-center gap-3 flex-wrap">
+                <h3 className="text-2xl font-bold text-white tracking-tight">Universal Job Importer</h3>
+                <div className="flex gap-1.5">
+                  <span className="px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[8px] font-black uppercase tracking-wider">LinkedIn</span>
+                  <span className="px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 text-[8px] font-black uppercase tracking-wider">Indeed</span>
+                  <span className="px-2 py-0.5 rounded bg-[#FC6100]/10 text-[#FC6100] border border-[#FC6100]/20 text-[8px] font-black uppercase tracking-wider">Sovereign Fallback</span>
+                </div>
+              </div>
               <p className="text-xs text-gray-400 leading-relaxed font-medium max-w-sm">
-                Paste any LinkedIn job URL. We'll automatically pull the requirements, company details, and salary.
+                Paste any LinkedIn or Indeed job URL. We'll automatically extract the job requirements, company details, and salary.
               </p>
             </div>
           </div>
