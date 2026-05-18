@@ -7,11 +7,75 @@ import {
   Zap, 
   Target, 
   Cpu, 
-  Globe
+  Globe,
+  MapPin
 } from 'lucide-react';
 import { trackEvent } from '../../lib/analytics';
 import { matchAnalysisService, SYNONYMS } from '../../features/jobs/services/matchAnalysisService';
 import { pdfExtractionService } from '../../features/resumes/services/pdfExtractionService';
+
+const LONDON_JOBS = [
+  {
+    id: 'ldn-1',
+    company: 'Revolut',
+    title: 'Lead Frontend Engineer (Wealth & Trading)',
+    location: 'London, UK (Hybrid)',
+    compensation: '£95,000 - £130,000',
+    tags: ['React', 'TypeScript', 'Redux', 'FinTech', 'AWS'],
+    jd: 'Join our Wealth & Trading team in London. Seeking a Lead Frontend Engineer to architect trading dashboards and manage high-performance data streams with React and TypeScript. FinTech experience is a big plus.'
+  },
+  {
+    id: 'ldn-2',
+    company: 'Deliveroo',
+    title: 'Staff Platform Engineer',
+    location: 'London, UK (Remote / Hybrid)',
+    compensation: '£110,000 - £145,000',
+    tags: ['Docker', 'Kubernetes', 'Go', 'AWS', 'Terraform'],
+    jd: 'Looking for a Staff Platform Engineer to scale our core delivery dispatch networks. Must have expertise in Go, Kubernetes, and AWS infrastructure. Scale and high concurrency experience required.'
+  }
+];
+
+const HYDERABAD_JOBS = [
+  {
+    id: 'hyd-1',
+    company: 'CRED',
+    title: 'DevOps & Platform Architect',
+    location: 'Hyderabad, India (Hybrid)',
+    compensation: '₹35L - ₹48L',
+    tags: ['Docker', 'Kubernetes', 'CI/CD', 'AWS', 'Terraform'],
+    jd: 'Seeking a seasoned DevOps Architect to scale our cloud infrastructure. Must be an expert in Kubernetes, AWS, and Infrastructure as Code (Terraform). Strong background in building robust CI/CD pipelines and ensuring high availability for financial systems.'
+  },
+  {
+    id: 'hyd-2',
+    company: 'Stripe',
+    title: 'Fullstack Engineer (API & Integrations)',
+    location: 'Hyderabad, India (Remote)',
+    compensation: '₹45L - ₹60L',
+    tags: ['Ruby on Rails', 'React', 'PostgreSQL', 'API Design', 'Security'],
+    jd: 'Looking for a Fullstack Engineer to build world-class APIs. You will work across the stack with Ruby on Rails and React. Deep understanding of relational databases (PostgreSQL), RESTful API design, and web security principles is critical.'
+  }
+];
+
+const BENGALURU_JOBS = [
+  {
+    id: 'blr-1',
+    company: 'Razorpay',
+    title: 'Senior Software Engineer (React / TypeScript)',
+    location: 'Bengaluru, India (Hybrid)',
+    compensation: '₹28L - ₹36L',
+    tags: ['React', 'TypeScript', 'Node.js', 'Redux', 'AWS'],
+    jd: 'Looking for a Senior Frontend Engineer with deep expertise in React and TypeScript. Must have experience building scalable payment interfaces, managing complex state with Redux, and working closely with backend teams (Node.js). AWS experience is a plus.'
+  },
+  {
+    id: 'blr-2',
+    company: 'Swiggy',
+    title: 'Staff Frontend Engineer (AI Platform)',
+    location: 'Bengaluru, India (Remote / Hybrid)',
+    compensation: '₹40L - ₹52L',
+    tags: ['React', 'Next.js', 'TailwindCSS', 'AI Agents', 'OpenAI'],
+    jd: 'Join the AI platform team. Looking for a Staff Engineer to lead the development of our LLM-powered internal tools. Requires mastery of React, Next.js, and modern CSS (Tailwind). Experience integrating with OpenAI APIs and building conversational interfaces is highly desired.'
+  }
+];
 
 export const LandingPage: React.FC = () => {
   const { session, isLoading } = useAuth();
@@ -20,6 +84,389 @@ export const LandingPage: React.FC = () => {
   const [jobText, setJobText] = React.useState('');
   const [resumeText, setResumeText] = React.useState('');
   const [resumeFileName, setResumeFileName] = React.useState<string | null>(null);
+  
+  // Value-First Geolocation & Select Job state
+  const [searchRole, setSearchRole] = React.useState('');
+  const isSearching = searchRole.trim().length >= 2;
+  const [detectedLocation, setDetectedLocation] = React.useState('London, UK');
+  const [showMatchModal, setShowMatchModal] = React.useState(false);
+
+  // Postcode/Pincode Override States
+  const [isChangingLocation, setIsChangingLocation] = React.useState(false);
+  const [postalInput, setPostalInput] = React.useState('');
+  const [postalError, setPostalError] = React.useState('');
+  const [isLoadingPostal, setIsLoadingPostal] = React.useState(false);
+
+  React.useEffect(() => {
+    // 1. Silent IP Geolocation Lookup
+    fetch('https://ipapi.co/json/')
+      .then((res) => {
+        if (!res.ok) throw new Error('IP lookup failed');
+        return res.json();
+      })
+      .then((data) => {
+        const city = data.city || '';
+        const country = data.country_code || '';
+        if (city.toLowerCase().includes('london') || country.toLowerCase() === 'gb') {
+          setDetectedLocation('London, UK');
+        } else if (city.toLowerCase().includes('hyderabad')) {
+          setDetectedLocation('Hyderabad, India');
+        } else if (city.toLowerCase().includes('bengaluru') || city.toLowerCase().includes('bangalore') || country.toLowerCase() === 'in') {
+          if (city.toLowerCase().includes('hyderabad')) {
+            setDetectedLocation('Hyderabad, India');
+          } else {
+            setDetectedLocation('Bengaluru, India');
+          }
+        } else {
+          setDetectedLocation('London, UK');
+        }
+      })
+      .catch(() => {
+        // 2. Fallback Timezone/Language Heuristics
+        if (
+          navigator.language.includes('in') || 
+          Intl.DateTimeFormat().resolvedOptions().timeZone.includes('Calcutta') || 
+          Intl.DateTimeFormat().resolvedOptions().timeZone.includes('Asia')
+        ) {
+          setDetectedLocation('Bengaluru, India');
+        } else {
+          setDetectedLocation('London, UK');
+        }
+      });
+  }, []);
+
+  const handlePostalLookup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const query = postalInput.trim().toUpperCase();
+    if (!query) return;
+
+    setIsLoadingPostal(true);
+    setPostalError('');
+
+    const lowerQuery = query.toLowerCase();
+
+    // 1. Direct City Name Check with spelling-tolerant fuzzy matches
+    if (lowerQuery.includes('bang') || lowerQuery.includes('beng') || lowerQuery.includes('blr')) {
+      setDetectedLocation('Bengaluru, India');
+      setIsChangingLocation(false);
+      setPostalInput('');
+      setIsLoadingPostal(false);
+      return;
+    }
+    if (lowerQuery.includes('hyd')) {
+      setDetectedLocation('Hyderabad, India');
+      setIsChangingLocation(false);
+      setPostalInput('');
+      setIsLoadingPostal(false);
+      return;
+    }
+    if (lowerQuery.includes('lon') || lowerQuery.includes('ldn') || lowerQuery.includes('uk')) {
+      setDetectedLocation('London, UK');
+      setIsChangingLocation(false);
+      setPostalInput('');
+      setIsLoadingPostal(false);
+      return;
+    }
+
+    // 2. Postcode/Pincode API Fallback
+    const isNumeric = /^\d+$/.test(query);
+
+    try {
+      if (isNumeric) {
+        // India Pincode lookup
+        if (query.length !== 6) {
+          throw new Error('Indian Pincode must be exactly 6 digits.');
+        }
+        const res = await fetch(`https://api.postalpincode.in/pincode/${query}`);
+        const data = await res.json();
+        
+        if (data && data[0]?.Status === 'Success' && data[0]?.PostOffice?.length > 0) {
+          const postOffices = data[0].PostOffice;
+          let isHyderabad = false;
+          let isBengaluru = false;
+          
+          for (const po of postOffices) {
+            const district = (po.District || '').toLowerCase();
+            const state = (po.State || '').toLowerCase();
+            const poName = (po.Name || '').toLowerCase();
+            
+            if (
+              district.includes('hyderabad') || 
+              state.includes('hyderabad') || 
+              poName.includes('hyderabad')
+            ) {
+              isHyderabad = true;
+              break;
+            }
+            if (
+              district.includes('bangalore') || 
+              district.includes('bengaluru') || 
+              state.includes('karnataka') ||
+              poName.includes('bangalore') ||
+              poName.includes('bengaluru')
+            ) {
+              isBengaluru = true;
+              break;
+            }
+          }
+          
+          if (isHyderabad) {
+            setDetectedLocation('Hyderabad, India');
+            setIsChangingLocation(false);
+            setPostalInput('');
+          } else if (isBengaluru) {
+            setDetectedLocation('Bengaluru, India');
+            setIsChangingLocation(false);
+            setPostalInput('');
+          } else {
+            setDetectedLocation('Bengaluru, India');
+            setIsChangingLocation(false);
+            setPostalInput('');
+          }
+        } else {
+          throw new Error('Invalid pincode. No region found.');
+        }
+      } else {
+        // Heuristic: Check if it resembles a UK postcode (length 3 to 8 characters)
+        const cleanQuery = query.replace(/\s+/g, '');
+        const isUKPostcodeHeuristic = cleanQuery.length >= 3 && cleanQuery.length <= 8 && /[A-Z]/.test(cleanQuery) && /[0-9]/.test(cleanQuery);
+        
+        if (!isUKPostcodeHeuristic) {
+          throw new Error("Please enter a valid UK postcode, Indian pincode, or city name (e.g. 'Bengaluru', 'London').");
+        }
+
+        // UK Postcode lookup using api.postcodes.io
+        const res = await fetch(`https://api.postcodes.io/postcodes/${encodeURIComponent(query)}`);
+        const data = await res.json();
+        
+        if (res.ok && data.status === 200 && data.result) {
+          setDetectedLocation('London, UK');
+          setIsChangingLocation(false);
+          setPostalInput('');
+        } else {
+          const outcodeRes = await fetch(`https://api.postcodes.io/outcodes/${encodeURIComponent(query)}`);
+          const outcodeData = await outcodeRes.json();
+          if (outcodeRes.ok && outcodeData.status === 200 && outcodeData.result) {
+            setDetectedLocation('London, UK');
+            setIsChangingLocation(false);
+            setPostalInput('');
+          } else {
+            throw new Error('Invalid UK postcode. Please check your spelling.');
+          }
+        }
+      }
+    } catch (err: any) {
+      setPostalError(err.message || 'Location resolution failed. Try again.');
+    } finally {
+      setIsLoadingPostal(false);
+    }
+  };
+
+  const generateDynamicJobs = (query: string, passedLocation: string) => {
+    let activeLocation = passedLocation;
+    let resolvedRole = query;
+    let normalizedQuery = query.toLowerCase().trim();
+
+    // Smart fallback if they type a city/location instead of a job role
+    if (normalizedQuery.includes('bang') || normalizedQuery.includes('beng') || normalizedQuery.includes('blr') || normalizedQuery.includes('india')) {
+      activeLocation = 'Bengaluru, India';
+      resolvedRole = 'Software Engineer';
+    } else if (normalizedQuery.includes('hyd')) {
+      activeLocation = 'Hyderabad, India';
+      resolvedRole = 'DevOps & Platform Architect';
+    } else if (normalizedQuery.includes('lon') || normalizedQuery.includes('ldn') || normalizedQuery.includes('uk')) {
+      activeLocation = 'London, UK';
+      resolvedRole = 'Frontend Engineer';
+    }
+
+    const location = activeLocation;
+    const isUK = location.includes('London');
+    const isHyd = location.includes('Hyderabad');
+    
+    // 1. Normalization & Abbreviations parsing
+    let normalized = resolvedRole.toLowerCase().trim();
+    
+    normalized = normalized.replace(/\bsr\.?\b/g, 'senior');
+    normalized = normalized.replace(/\bjr\.?\b/g, 'junior');
+    normalized = normalized.replace(/\bfront\s*end\b/g, 'frontend');
+    normalized = normalized.replace(/\bback\s*end\b/g, 'backend');
+    normalized = normalized.replace(/\bdev\s*ops\b/g, 'devops');
+    normalized = normalized.replace(/\bprogrammer\b/g, 'software developer');
+    normalized = normalized.replace(/\bjs\s+developer\b/g, 'javascript frontend developer');
+    normalized = normalized.replace(/\bjavascript\s+developer\b/g, 'javascript frontend developer');
+    
+    if (normalized === 'pm') normalized = 'product manager';
+    else if (normalized === 'swe') normalized = 'software engineer';
+    else if (normalized === 'sde') normalized = 'software development engineer';
+    else if (normalized === 'qa') normalized = 'quality assurance engineer';
+    else if (normalized === 'hr') normalized = 'hr specialist';
+    else if (normalized === 'bdr' || normalized === 'sdr') normalized = 'sales development representative';
+    else if (normalized === 'sre') normalized = 'site reliability engineer';
+
+    const cleanQuery = normalized
+      .split(/\s+/)
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
+
+    // 2. Classify Sector to customize details
+    let sector = 'tech';
+    const qLower = normalized;
+    
+    if (qLower.includes('nurse') || qLower.includes('doctor') || qLower.includes('physician') || qLower.includes('dentist') || qLower.includes('pharmacist') || qLower.includes('health') || qLower.includes('medical')) {
+      sector = 'healthcare';
+    } else if (qLower.includes('sales') || qLower.includes('account executive') || qLower.includes('bd') || qLower.includes('development representative') || qLower.includes('partnerships')) {
+      sector = 'sales';
+    } else if (qLower.includes('marketing') || qLower.includes('seo') || qLower.includes('sem') || qLower.includes('growth') || qLower.includes('content') || qLower.includes('writer') || qLower.includes('copywriter') || qLower.includes('brand')) {
+      sector = 'marketing';
+    } else if (qLower.includes('accountant') || qLower.includes('finance') || qLower.includes('auditor') || qLower.includes('tax') || qLower.includes('controller') || qLower.includes('bookkeeper') || qLower.includes('cfo') || qLower.includes('treasury')) {
+      sector = 'finance';
+    } else if (qLower.includes('recruiter') || qLower.includes('talent') || qLower.includes('generalist') || qLower.includes('people ops') || qLower.includes('hr')) {
+      sector = 'hr';
+    } else if (qLower.includes('teacher') || qLower.includes('lecturer') || qLower.includes('professor') || qLower.includes('tutor') || qLower.includes('instructional') || qLower.includes('education')) {
+      sector = 'education';
+    } else if (qLower.includes('support') || qLower.includes('customer service') || qLower.includes('help desk') || qLower.includes('success')) {
+      sector = 'support';
+    } else if (qLower.includes('electrician') || qLower.includes('plumber') || qLower.includes('mechanic') || qLower.includes('driver') || qLower.includes('warehouse') || qLower.includes('logistic') || qLower.includes('supply chain')) {
+      sector = 'trades';
+    }
+
+    // Curated details per sector
+    let companies: string[] = [];
+    let comp = '';
+    let tags: string[] = [];
+    let jd1 = '';
+    let jd2 = '';
+
+    switch (sector) {
+      case 'healthcare':
+        companies = isUK 
+          ? ['NHS Trust (Royal London)', 'Bupa Health Centre', 'King\'s College Hospital']
+          : (isHyd ? ['Apollo Hospitals', 'Yashoda Hospitals', 'Care Hospitals'] : ['Manipal Hospitals', 'Fortis Hospital', 'Narayana Health']);
+        comp = isUK ? `£38k - £54k` : `₹6L - ₹12L`;
+        tags = [cleanQuery, 'Healthcare', 'Clinical Care', 'Patient Safety'];
+        jd1 = `We are seeking a dedicated and experienced Senior ${cleanQuery} to deliver high-quality patient care in ${location}. You will lead clinical procedures, maintain strict safety standards, and collaborate with medical specialists.`;
+        jd2 = `Looking for a Lead ${cleanQuery} to manage operational workflows and coordinate staff inside our premier health center in ${location}. Focuses on patient-centric protocols and compliance.`;
+        break;
+
+      case 'sales':
+        companies = isUK
+          ? ['Salesforce UK', 'Oracle London', 'HubSpot UK']
+          : (isHyd ? ['Microsoft India', 'Tech Mahindra', 'GMR Group'] : ['Flipkart Sales', 'Zoho Corp', 'Infosys BD']);
+        comp = isUK ? `£45k - £85k` : `₹8L - ₹18L`;
+        tags = [cleanQuery, 'Sales', 'Negotiation', 'Revenue Growth'];
+        jd1 = `Seeking a high-velocity Senior ${cleanQuery} to expand our corporate client footprint in ${location}. You will own the full sales cycle, prepare premium proposals, and meet aggressive quarterly revenue goals.`;
+        jd2 = `Looking for a Lead ${cleanQuery} to manage and scale regional sales pipelines. Direct experience running client relations and closing major commercial contracts in ${location} is highly preferred.`;
+        break;
+
+      case 'marketing':
+        companies = isUK
+          ? ['WPP Group London', 'Publicis UK', 'Dentsu International']
+          : (isHyd ? ['Tata Interactive', 'Genpact Marketing', 'ValueLabs'] : ['Razorpay Growth', 'InMobi', 'Byju\'s Marketing']);
+        comp = isUK ? `£42k - £72k` : `₹7L - ₹15L`;
+        tags = [cleanQuery, 'Marketing', 'Brand Strategy', 'Analytics'];
+        jd1 = `We are hiring a creative Senior ${cleanQuery} to spearhead multi-channel campaigns in ${location}. You will drive organic/paid traffic acquisition, orchestrate user activation, and optimize advertising spend.`;
+        jd2 = `Seeking a Lead ${cleanQuery} to run full-funnel customer acquisition campaigns in ${location}. Requires strong proficiency in Google Analytics, content strategy, and SEO optimization frameworks.`;
+        break;
+
+      case 'finance':
+        companies = isUK
+          ? ['Deloitte UK', 'PwC London', 'EY UK']
+          : (isHyd ? ['KPMG India', 'State Bank of India', 'ICICI Bank'] : ['HDFC Finance', 'Goldman Sachs Bengaluru', 'PhonePe Corporate']);
+        comp = isUK ? `£50k - £95k` : `₹10L - ₹24L`;
+        tags = [cleanQuery, 'Finance', 'Auditing', 'Compliance'];
+        jd1 = `Seeking a Senior ${cleanQuery} to manage asset valuation, direct corporate tax structuring, and run financial audits in ${location}. Must hold active professional licensing (ACA/ACCA/CA).`;
+        jd2 = `Looking for a Lead ${cleanQuery} to lead corporate financial planning, direct quarterly reporting, and optimize cost structures in ${location}. Requires robust experience in financial forecasting.`;
+        break;
+
+      case 'hr':
+        companies = isUK
+          ? ['Randstad London', 'Michael Page UK', 'Adecco Group']
+          : (isHyd ? ['Cognizant HR', 'Infosys Talent', 'Wipro Careers'] : ['Flipkart People Ops', 'TCS Talent Acquisition', 'Swiggy People Team']);
+        comp = isUK ? `£35k - £65k` : `₹6L - ₹14L`;
+        tags = [cleanQuery, 'Talent Ops', 'HR Strategy', 'Relations'];
+        jd1 = `We are seeking a Senior ${cleanQuery} to drive end-to-end recruitment pipelines and manage employee experience initiatives in ${location}. Focuses on employee retention and onboarding.`;
+        jd2 = `Looking for a Lead ${cleanQuery} to direct people strategy, implement structural performance metrics, and foster inclusive workplace initiatives at our regional site in ${location}.`;
+        break;
+
+      case 'education':
+        companies = isUK
+          ? ['University College London', 'Imperial College London', 'King\'s College London']
+          : (isHyd ? ['Osmania University', 'IIIT Hyderabad', 'BITS Pilani Hyderabad'] : ['IISc Bengaluru', 'R.V. College of Engineering', 'PES University']);
+        comp = isUK ? `£36k - £60k` : `₹5L - ₹12L`;
+        tags = [cleanQuery, 'Education', 'Instructional', 'Pedagogy'];
+        jd1 = `Seeking a Senior ${cleanQuery} to craft curriculum structures, deliver interactive modules, and mentor aspiring students in ${location}. Strong communication skills are absolute prerequisites.`;
+        jd2 = `Looking for a Lead ${cleanQuery} to direct department-wide academic frameworks and oversee research collaborations in ${location}. Solid background in pedagogy is highly desirable.`;
+        break;
+
+      case 'support':
+        companies = isUK
+          ? ['Zendesk London', 'Freshworks UK', 'Concentric Support']
+          : (isHyd ? ['Teleperformance India', 'Sutherland Global', 'Tech Mahindra Support'] : ['Freshworks Bengaluru', 'Swiggy Support Ops', 'Razorpay Support']);
+        comp = isUK ? `£30k - £52k` : `₹5L - ₹10L`;
+        tags = [cleanQuery, 'Support Ops', 'Zendesk', 'Client Success'];
+        jd1 = `We are seeking a Senior ${cleanQuery} to manage complex client support tickets and drive resolution rates in ${location}. Direct experience working with Zendesk or Salesforce is preferred.`;
+        jd2 = `Looking for a Lead ${cleanQuery} to lead support operations, establish service level agreements (SLAs), and coordinate escalation response teams in ${location}.`;
+        break;
+
+      case 'trades':
+        companies = isUK
+          ? ['DHL Express London', 'Royal Mail', 'British Gas Services']
+          : (isHyd ? ['Gati Logistics', 'Blue Dart Hyderabad', 'TSRTC Logistics'] : ['Delhivery Bengaluru', 'VRL Logistics', 'Flipkart Supply Chain']);
+        comp = isUK ? `£28k - £48k` : `₹4L - ₹9L`;
+        tags = [cleanQuery, 'Logistics', 'Operations', 'Safety Protocols'];
+        jd1 = `We are seeking a highly reliable Senior ${cleanQuery} to coordinate physical inventory operations, verify incoming deliveries, and maintain strict equipment protocols in ${location}.`;
+        jd2 = `Looking for a Lead ${cleanQuery} to manage operational teams, optimize routing logistics, and enforce safety compliance frameworks at our hub in ${location}.`;
+        break;
+
+      default: // Tech & Engineering default
+        companies = isUK
+          ? ['HSBC Tech London', 'Barclays Investment', 'British Telecom Dev']
+          : (isHyd ? ['Tata Consultancy', 'Dr. Reddy\'s Digital', 'Cyient Labs'] : ['Flipkart Engineering', 'Infosys R&D', 'Wipro Digital']);
+        comp = isUK ? `£65k - £110k` : `₹16L - ₹32L`;
+        tags = [cleanQuery, 'Engineering', 'Software', 'Architecture'];
+        jd1 = `We are seeking a dedicated Senior ${cleanQuery} to join our flagship engineering team in ${location}. In this role, you will lead high-impact technical initiatives, design resilient systems, and mentor junior colleagues.`;
+        jd2 = `Seeking a Lead ${cleanQuery} to spearhead architecture and drive execution of highly scalable systems in ${location}. Focuses on React, Node.js, and cloud native architectures.`;
+        break;
+    }
+
+    return [
+      {
+        id: `dyn-1-${cleanQuery.toLowerCase().replace(/\s+/g, '-')}`,
+        company: companies[0] || 'Global Enterprise',
+        title: `Senior ${cleanQuery}`,
+        location: `${location} (Hybrid)`,
+        compensation: comp,
+        tags: tags,
+        jd: jd1
+      },
+      {
+        id: `dyn-2-${cleanQuery.toLowerCase().replace(/\s+/g, '-')}`,
+        company: companies[1] || 'Regional Leader',
+        title: `Lead ${cleanQuery}`,
+        location: `${location} (Remote)`,
+        compensation: comp,
+        tags: tags,
+        jd: jd2
+      }
+    ];
+  };
+
+  const getRegionalJobs = () => {
+    if (detectedLocation.includes('London')) {
+      return LONDON_JOBS;
+    } else if (detectedLocation.includes('Hyderabad')) {
+      return HYDERABAD_JOBS;
+    } else {
+      return BENGALURU_JOBS;
+    }
+  };
+  const activeJobs = getRegionalJobs();
+
+  const handleSelectJob = (jobJd: string, jobTitle: string, jobCompany: string) => {
+    setJobText(jobJd);
+    setShowMatchModal(true);
+    trackEvent('landing_job_card_selected', { title: jobTitle, company: jobCompany });
+  };
   const [result, setResult] = React.useState<{ score: number, matchingSkills: string[], missingSkills: string[], warnings?: string[] } | null>(null);
   const [isAnalyzing, setIsAnalyzing] = React.useState(false);
   const [isExtracting, setIsExtracting] = React.useState(false);
@@ -108,31 +555,30 @@ export const LandingPage: React.FC = () => {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative pt-24 pb-32 px-6 overflow-hidden flex flex-col items-center justify-center min-h-[80vh]">
+      <section className={`relative px-6 overflow-hidden flex flex-col items-center justify-start transition-all duration-500 ease-in-out ${isSearching ? 'pt-6 pb-2' : 'pt-10 pb-4'}`}>
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-6xl h-full opacity-20 pointer-events-none">
           <div className="absolute top-0 right-0 w-96 h-96 bg-[#FC6100]/30 blur-[120px] -mr-48 -mt-24"></div>
           <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#FC6100]/20 blur-[120px] -ml-48 -mb-24"></div>
         </div>
 
-        <div className="max-w-5xl mx-auto text-center relative z-10 space-y-10 flex flex-col items-center">
-          <div className="inline-flex items-center gap-3 px-4 py-2 bg-white/5 border border-white/10 rounded-full animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="max-w-5xl mx-auto text-center relative z-10 space-y-4 flex flex-col items-center">
+          <div className={`inline-flex items-center gap-3 px-4 py-2 bg-white/5 border border-white/10 rounded-full transition-all duration-500 ease-in-out overflow-hidden ${isSearching ? 'opacity-0 max-h-0 py-0 border-none mb-0' : 'opacity-100 max-h-12'}`}>
              <div className="w-2 h-2 bg-[#FC6100] rounded-full animate-pulse"></div>
              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#FC6100]">The Job Search OS v1.0</span>
           </div>
 
-          <h1 className="text-5xl md:text-8xl font-bold tracking-tighter leading-[0.9] animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
-            Stop searching.<br />
-            Start <span className="text-[#FC6100] italic">Engineering.</span>
+          <h1 className={`font-bold tracking-tighter leading-[0.95] transition-all duration-500 ease-in-out ${isSearching ? 'text-2xl md:text-3xl' : 'text-4xl md:text-6xl'}`}>
+            Stop searching.{!isSearching && <br />} Start <span className="text-[#FC6100] italic">Engineering.</span>
           </h1>
 
-          <p className="text-lg md:text-xl text-gray-400 max-w-2xl font-medium leading-relaxed animate-in fade-in slide-in-from-bottom-12 duration-700 delay-200">
+          <p className={`text-gray-400 max-w-2xl font-medium leading-relaxed transition-all duration-500 ease-in-out ${isSearching ? 'opacity-0 max-h-0 text-[0px] overflow-hidden mt-0' : 'opacity-100 max-h-24 text-sm md:text-base'}`}>
             Udyog Marg is the high-performance execution engine for your career. 
             Automate the boring, master the interview, and dominate your pipeline.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6 animate-in fade-in slide-in-from-bottom-16 duration-700 delay-300 w-full sm:w-auto">
+          <div className={`flex flex-col sm:flex-row items-center justify-center gap-4 transition-all duration-500 ease-in-out ${isSearching ? 'opacity-0 max-h-0 overflow-hidden pt-0 mt-0' : 'opacity-100 max-h-16 pt-1'}`}>
             <button 
-              onClick={() => document.getElementById('demo-widget')?.scrollIntoView({ behavior: 'smooth' })}
+              onClick={() => document.getElementById('demo-scanner-section')?.scrollIntoView({ behavior: 'smooth' })}
               data-testid="hero-demo-cta"
               className="w-full sm:w-auto px-10 py-5 bg-[#FC6100] text-white text-sm font-black uppercase tracking-[0.2em] rounded-lg hover:bg-[#E35205] transition-all tactile-press border border-white/10 flex items-center justify-center gap-2"
             >
@@ -140,9 +586,177 @@ export const LandingPage: React.FC = () => {
             </button>
           </div>
         </div>
+ 
+        {/* Value-First: Ultra-Fresh Tech Opportunities Grid */}
+        <div className="w-full max-w-6xl mx-auto relative z-10 px-4 flex flex-col items-center" style={{ marginTop: '16px' }}>
+          <div className="text-center flex flex-col items-center w-full max-w-2xl mx-auto mb-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#FC6100]/10 border border-[#FC6100]/30 rounded-md mb-2">
+              <span className="w-1.5 h-1.5 bg-[#FC6100] rounded-full animate-ping"></span>
+              <span className="text-[8px] font-black uppercase tracking-widest text-[#FC6100]">Local Job Feed</span>
+            </div>
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight" style={{ marginBottom: '12px' }}>Live Job Matches</h2>
+            
+            <div className="w-full relative" style={{ marginBottom: '12px' }}>
+              <input 
+                type="text"
+                placeholder="E.g. Frontend Engineer, DevOps, Product Manager..."
+                value={searchRole}
+                onChange={(e) => setSearchRole(e.target.value)}
+                className="w-full px-6 py-4 h-16 bg-black/40 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:border-[#FC6100]/50 transition-colors text-base leading-normal align-middle shadow-inner animate-in fade-in zoom-in-95 duration-500"
+              />
+            </div>
 
-        {/* Visual Stepper Pathway */}
-        <div className="w-full max-w-4xl mx-auto mt-24 mb-12 grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10 px-4">
+            <div className="flex flex-wrap items-center justify-center gap-3 text-xs md:text-sm font-semibold tracking-wide text-gray-400 animate-in fade-in slide-in-from-bottom-2 duration-500" style={{ marginTop: '16px', marginBottom: '20px' }}>
+              <span>Prioritizing roles in your region:</span>
+              {!isChangingLocation ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-[#FC6100] bg-[#FC6100]/10 border border-[#FC6100]/30 px-3.5 py-1.5 rounded-full font-black flex items-center gap-2 shadow-sm text-xs">
+                    <MapPin className="w-3.5 h-3.5 text-[#FC6100] animate-bounce" />
+                    {detectedLocation}
+                  </span>
+                  <button 
+                    onClick={() => {
+                      setIsChangingLocation(true);
+                      setPostalError('');
+                    }}
+                    className="px-3.5 py-1.5 bg-white/5 hover:bg-[#FC6100]/20 hover:text-white border border-white/10 hover:border-[#FC6100]/40 rounded-full text-[10px] text-gray-300 font-bold uppercase tracking-wider transition-all duration-300 shadow-sm cursor-pointer"
+                  >
+                    change
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handlePostalLookup} className="flex items-center gap-2 tracking-normal lowercase font-bold">
+                  <input 
+                    type="text"
+                    placeholder="Enter city, pincode, or postcode..."
+                    value={postalInput}
+                    onChange={(e) => setPostalInput(e.target.value)}
+                    disabled={isLoadingPostal}
+                    className="px-3 py-1.5 bg-black/60 border border-[#FC6100]/30 focus:border-[#FC6100] rounded text-xs text-white placeholder-gray-600 focus:outline-none w-56 tracking-normal normal-case"
+                    autoFocus
+                  />
+                  <button 
+                    type="submit"
+                    disabled={isLoadingPostal}
+                    className="px-3 py-1.5 bg-[#FC6100] hover:bg-[#E35205] text-white text-[10px] font-black uppercase tracking-wider rounded transition-all shadow-sm"
+                  >
+                    {isLoadingPostal ? '...' : 'Verify'}
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      setIsChangingLocation(false);
+                      setPostalInput('');
+                      setPostalError('');
+                    }}
+                    className="text-[10px] text-gray-400 hover:text-white uppercase tracking-wider transition-colors ml-1 font-bold"
+                  >
+                    cancel
+                  </button>
+                </form>
+              )}
+              {postalError && (
+                <span className="text-red-500 lowercase tracking-normal normal-case font-medium ml-2">{postalError}</span>
+              )}
+            </div>
+          </div>
+
+          {searchRole.trim().length < 2 ? (
+            <div className="w-full flex flex-col items-center justify-center py-20 px-8 bg-white/[0.01] border border-white/5 rounded-[32px] text-center max-w-2xl mx-auto space-y-6" style={{ marginTop: '20px' }}>
+              <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[#FC6100]">
+                <Globe className="w-8 h-8 animate-pulse" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-xl font-bold tracking-tight">Discover Regional Targets</h3>
+                <p className="text-sm text-gray-400 max-w-md leading-relaxed">
+                  Type your target role or key skills above to retrieve live matches matching your background in <span className="text-white font-semibold">{detectedLocation}</span>.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full animate-in fade-in duration-300" style={{ marginTop: '12px' }}>
+              {(() => {
+                const filtered = activeJobs.filter(job => 
+                  job.title.toLowerCase().includes(searchRole.toLowerCase()) || 
+                  job.tags.some(t => t.toLowerCase().includes(searchRole.toLowerCase()))
+                );
+                const displayedJobs = filtered.length > 0 
+                  ? filtered 
+                  : generateDynamicJobs(searchRole, detectedLocation);
+
+                return displayedJobs.map((job) => (
+                  <div 
+                    key={job.id}
+                    className="bg-white/[0.02] border border-white/5 hover:border-[#FC6100]/30 hover:bg-[#FC6100]/[0.01] p-6 rounded-[20px] transition-all duration-300 flex flex-col justify-between group/card relative overflow-hidden"
+                  >
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-[#FC6100]/5 blur-2xl rounded-full opacity-0 group-hover/card:opacity-100 transition-opacity"></div>
+                    
+                    <div className="space-y-4 relative z-10">
+                      {/* Card Header */}
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-xs font-black text-[#FC6100] group-hover/card:bg-[#FC6100] group-hover/card:text-white transition-all uppercase shadow-md shrink-0">
+                            {job.company.substring(0, 2)}
+                          </div>
+                          <div>
+                            <p className="text-xs font-black text-gray-500 uppercase tracking-widest leading-none">{job.company}</p>
+                            <h3 className="text-base font-bold text-white mt-1.5 group-hover/card:text-[#FC6100] transition-colors leading-tight">{job.title}</h3>
+                          </div>
+                        </div>
+                        <span className="text-[9px] font-black text-white/40 bg-white/5 border border-white/10 px-2.5 py-1 rounded-md shrink-0 tracking-widest">{job.compensation}</span>
+                      </div>
+
+                      {/* Location & Tags */}
+                      <div className="space-y-3">
+                        <p className="text-[9px] font-bold text-gray-400 flex items-center gap-2 uppercase tracking-wider leading-none">
+                          <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                          {job.location}
+                        </p>
+                        <div className="flex flex-wrap gap-2 pt-0.5">
+                          {job.tags.map((tag) => (
+                            <span key={tag} className="text-[8px] font-black text-gray-500 bg-white/5 border border-white/5 px-2 py-0.5 rounded uppercase tracking-wider">{tag}</span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Card Action */}
+                    <div className="pt-4 border-t border-white/5 mt-4 flex items-center justify-between relative z-10">
+                      <span className="text-[8px] font-black text-gray-600 uppercase tracking-widest group-hover/card:text-[#FC6100] transition-colors">Verify ATS Fit & Gaps</span>
+                      <button 
+                        onClick={() => handleSelectJob(job.jd, job.title, job.company)}
+                        className="px-5 py-2.5 bg-[#FC6100] hover:bg-[#E35205] text-white text-[8px] font-black uppercase tracking-widest rounded-md transition-all border border-white/10 shadow-lg shadow-[#FC6100]/5 flex items-center gap-1.5 hover:scale-[1.02] active:scale-[0.98]"
+                      >
+                        Calculate Match ⚡
+                      </button>
+                    </div>
+                  </div>
+                ));
+              })()}
+            </div>
+          )}
+        </div>
+
+        {/* Match Scanner Modal */}
+        {showMatchModal && (
+          <div className="fixed inset-0 z-50 bg-[#0D0D0D]/95 backdrop-blur-xl flex items-center justify-center p-4 md:p-6 overflow-y-auto">
+            <div className="w-full max-w-5xl bg-[#0D0D0D] border border-white/10 rounded-[32px] p-8 md:p-12 relative shadow-[0_20px_50px_rgba(252,97,0,0.15)] animate-in zoom-in-95 duration-300 my-auto">
+              
+              <button 
+                onClick={() => setShowMatchModal(false)}
+                className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 transition-all z-[60] font-black text-sm hover:scale-110"
+                title="Close Scanner"
+              >
+                ✕
+              </button>
+
+              <div className="text-center space-y-2 mb-8">
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#FC6100]">Sovereign Sandbox</p>
+                <h3 className="text-2xl md:text-4xl font-bold tracking-tight">Match Intelligence Scanner</h3>
+              </div>
+
+              {/* Visual Stepper Pathway */}
+              <div id="demo-scanner-section" className="w-full max-w-4xl mx-auto mb-12 grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
           <div className={`p-6 rounded-2xl border transition-all duration-500 ${jobText ? 'bg-[#FC6100]/5 border-[#FC6100]/30 shadow-[0_0_15px_rgba(252,97,0,0.05)]' : 'bg-white/[0.02] border-white/5'}`}>
             <div className="flex items-center gap-3">
               <span className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black transition-all ${jobText ? 'bg-[#FC6100] text-white shadow-[0_0_8px_rgba(252,97,0,0.4)]' : 'bg-white/10 text-gray-500'}`}>01</span>
@@ -393,7 +1007,10 @@ export const LandingPage: React.FC = () => {
               </div>
             )}
           </div>
-        </div>
+              </div>
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Intelligence Core - Visual Demo */}

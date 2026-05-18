@@ -1,4 +1,4 @@
-const CACHE_NAME = 'udyog-marg-v1';
+const CACHE_NAME = 'udyog-marg-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',

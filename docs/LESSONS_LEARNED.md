@@ -48,3 +48,9 @@
 - **The "Session Guard" Rule**: Milestone celebrations (Confetti) must use explicit state-change guards (e.g., `prevValue === false && newValue === true`) to prevent "Celebration Loops" on page refreshes or data hydration.
 - **The "Nuclear Airflow" Rule**: For complex, overlapping components, use `flex flex-col` with explicit `gap-X` instead of `space-y-X`. Flex is more robust against layout-escaping children.
 - **"Direct English" over "Fancy Language"**: "Materialize" and "Sovereign" are for architecture; "Upload" and "Import" are for users. Zero cognitive load is the requirement for the "Aha!" moment.
+
+## 🗺️ Regional & Inclusive Discovery UX (2026-05-18)
+*   **The "Strict Regional Separation" Mandate**: Mixing regions or displaying cross-contamination (e.g., Bengaluru jobs to a London user) completely breaks the credibility of a localized discovery feed. Always partition regional datasets (`LONDON_JOBS`, `HYDERABAD_JOBS`, `BENGALURU_JOBS`) mutually-exclusively.
+*   **The "Forgot Pincode" Fallback**: Postcode/pincode API lookup is great, but forcing it creates high friction. Always build instant, client-side city-name matching (e.g. typing "Bengaluru" resolves immediately without hitting APIs) as a seamless exit-route when users forget their code.
+*   **The "Universal Audience" Mandate**: A platform like Udyog Marg is for *everyone*, not just software engineers. A search system must accommodate any role (Sales, Chef, Teacher, Doctor) without dead-ends. A Dynamic Job Generator (our target tomorrow) ensures any query generates realistic local matches, keeping the demo 100% inclusive.
+
