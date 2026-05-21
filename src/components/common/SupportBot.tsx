@@ -16,11 +16,11 @@ const QUICK_QUESTIONS = [
 ];
 
 const BOT_RESPONSES: Record<string, string> = {
-  import: "To import a job, go to the [[Job Pipeline|/pipeline]] page and paste any LinkedIn or Indeed URL into the **'Universal Job Importer'** box at the top. I'll automatically scrape the details for you!",
+  import: "To compare a job, go to the [[Job Pipeline|/pipeline]] page and paste any job posting link (such as Indeed or a company careers page) into the **'Compare Job Link'** box at the top. We'll automatically analyze the details for you!",
   score: "The **ATS Match Score** compares your resume PDF against a job description. We look for matching skills (Green) and missing gaps (Orange) to give you a compatibility % from 0 to 100. View your metrics in [[Analytics|/analytics]].",
   prep: "In the **Job Detail** page (inside [[Job Pipeline|/pipeline]]), use the **'Interview Prep Mode'** widget. I'll generate a custom strategy including your 'Elevator Pitch' and tips for handling your specific skill gaps.",
-  start: "Welcome to Udyog Marg! 🚀 Start by uploading your resume in the [[Resumes|/resumes]] tab, then use the **Importer** in the [[Job Pipeline|/pipeline]] to add your first job. The magic happens when you **Link** them!",
-  default: "I'm still learning, but I can help you with: \n• [[Importing Jobs|/pipeline]] \n• [[ATS Match Scoring|/analytics]] \n• [[Interview Preparation|/pipeline]] \n• [[Resume Management|/resumes]]"
+  start: "Welcome to Udyog Marg! 🚀 Start by uploading your resume in the [[Resumes|/resumes]] tab, then use the **Compare Job Link** box in the [[Job Pipeline|/pipeline]] to analyze your first job. The magic happens when we score your match!",
+  default: "I'm still learning, but I can help you with: \n• [[Comparing Jobs|/pipeline]] \n• [[ATS Match Scoring|/analytics]] \n• [[Interview Preparation|/pipeline]] \n• [[Resume Management|/resumes]]"
 };
 
 const FormattedText: React.FC<{ text: string }> = ({ text }) => {

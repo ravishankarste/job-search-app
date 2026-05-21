@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Compass, Loader2, Sparkles, AlertCircle } from 'lucide-react';
 import { useDiscovery } from '../hooks/useDiscovery';
 import { DiscoveryCard } from '../components/DiscoveryCard';
+import { trackEvent } from '../../../lib/analytics';
 
 export const DiscoveryPage: React.FC = () => {
   const [query, setQuery] = useState('');
@@ -18,6 +19,7 @@ export const DiscoveryPage: React.FC = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
+    trackEvent('search_initiated', { query, location, daysAgo });
     setActiveSearch({ query, location, daysAgo });
   };
 
@@ -115,7 +117,7 @@ export const DiscoveryPage: React.FC = () => {
             </div>
             <div className="space-y-2">
               <h3 className="text-xl font-bold text-white tracking-tight">Scanning Market Nodes...</h3>
-              <p className="text-sm text-gray-500 font-medium">Extracting live data from LinkedIn and Indeed. This usually takes 10-15 seconds.</p>
+              <p className="text-sm text-gray-500 font-medium">Scanning the market for matching nodes. This usually takes 10-15 seconds.</p>
             </div>
           </div>
         ) : error ? (

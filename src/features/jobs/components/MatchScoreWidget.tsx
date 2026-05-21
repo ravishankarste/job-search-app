@@ -66,6 +66,11 @@ export const MatchScoreWidget: React.FC<MatchScoreWidgetProps> = ({
         score: score,
         company: jobTitle // Use title as proxy for context
       });
+      trackEvent('aha_moment', {
+        type: 'app_match',
+        score: score,
+        job_id: jobId
+      });
     }
   }, [isLoading, score, jobId, jobTitle]);
 

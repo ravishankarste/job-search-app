@@ -56,7 +56,7 @@ class GoogleAuthService {
       });
 
       this.isInitialized = true;
-      console.log('[GoogleAuth] Eternal Handshake initialized with nonce:', this.currentNonce);
+      console.log('Google Identity initialized - [GoogleAuth] Eternal Handshake initialized with nonce:', this.currentNonce);
     } catch (e) {
       console.error('[GoogleAuth] Initialization failed:', e);
     }

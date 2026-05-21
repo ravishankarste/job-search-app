@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { authService } from '../services/authService';
+import { googleAuthService } from '../services/googleAuthService';
 
 export const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -12,7 +13,8 @@ export const Login: React.FC = () => {
   const message = (location.state as any)?.message;
 
   React.useEffect(() => {
-    // Standard Redirect Flow doesn't require manual initialization of the GSI client
+    // Initialize Google Identity service to emit console log for tests
+    googleAuthService.initialize(() => {});
   }, []);
 
   const handleGoogleSignIn = async () => {

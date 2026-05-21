@@ -16,7 +16,7 @@ test.describe('Udyog Marg - Decathlon Sanity Suite', () => {
     await expect(page).toHaveTitle(/Udyog Marg/);
     
     // Verify Sandbox presence via the main CTA
-    await expect(page.locator('text=Try the Live Demo')).toBeVisible();
+    await page.click('text=Try the Live Demo');
     await expect(page.locator('button:has-text("Calculate ATS Match")')).toBeVisible();
   });
 

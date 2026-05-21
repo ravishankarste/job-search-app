@@ -128,7 +128,7 @@ export const UniversalImporter: React.FC<UniversalImporterProps> = ({ onImportSu
         
         <div className="flex-1 space-y-2">
           <div className="flex items-center gap-3">
-            <h3 className="text-[11px] font-black text-white uppercase tracking-[0.2em]">Universal Importer</h3>
+            <h3 className="text-[11px] font-black text-white uppercase tracking-[0.2em]">Compare Job Link</h3>
             {isScraping && (
               <span className="flex items-center gap-1.5 px-2 py-0.5 bg-[#FC6100]/20 rounded-full animate-in fade-in zoom-in duration-300">
                 <span className="w-1 h-1 bg-[#FC6100] rounded-full animate-ping"></span>
@@ -137,7 +137,7 @@ export const UniversalImporter: React.FC<UniversalImporterProps> = ({ onImportSu
             )}
           </div>
           <p className="text-xs text-gray-400 font-medium leading-relaxed max-w-md">
-            Paste a LinkedIn or Indeed URL. Our OS will extract the role, company, and description in seconds.
+            Paste any job description URL. Our OS will extract the role, company, and description in seconds.
           </p>
         </div>
 
@@ -147,7 +147,7 @@ export const UniversalImporter: React.FC<UniversalImporterProps> = ({ onImportSu
               <input 
                 type="text" 
                 data-testid="universal-import-input"
-                placeholder="https://www.linkedin.com/jobs/view/..."
+                placeholder="Paste job description URL here..."
                 className="w-full pl-5 pr-5 py-4 bg-black/40 border border-white/10 rounded-2xl text-[13px] text-white placeholder-gray-700 focus:border-[#FC6100] focus:bg-black/60 focus:ring-1 focus:ring-[#FC6100]/20 outline-none transition-all font-bold"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
@@ -175,10 +175,10 @@ export const UniversalImporter: React.FC<UniversalImporterProps> = ({ onImportSu
               {isScraping ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Importing
+                  Analyzing
                 </>
               ) : (
-                'Import Now'
+                'Analyze Link'
               )}
             </button>
           </div>

@@ -80,11 +80,11 @@ export const PioneerProgress: React.FC<PioneerProgressProps> = ({
   const steps: ProgressStep[] = [
     {
       id: 'import',
-      label: 'Import First Job',
-      description: 'Use the LinkedIn importer to find your first opportunity.',
+      label: 'Compare First Job',
+      description: 'Compare your resume with a job link to calculate your compatibility score.',
       isCompleted: hasJobs,
       link: '/pipeline',
-      linkText: 'Open Pipeline'
+      linkText: 'Compare Job'
     },
     {
       id: 'resume',

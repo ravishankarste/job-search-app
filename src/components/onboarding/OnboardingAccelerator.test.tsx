@@ -12,6 +12,11 @@ vi.mock('../../lib/analytics', () => ({
   trackEvent: vi.fn()
 }));
 
+const mockNavigate = vi.fn();
+vi.mock('react-router-dom', () => ({
+  useNavigate: () => mockNavigate
+}));
+
 describe('OnboardingAccelerator', () => {
   const mockOnManualClick = vi.fn();
   const mockOnImportClick = vi.fn();
@@ -33,8 +38,9 @@ describe('OnboardingAccelerator', () => {
       />
     );
 
+    expect(screen.getByText(/Compare Job Link/i)).toBeInTheDocument();
+    expect(screen.getByText(/Discover Matches/i)).toBeInTheDocument();
     expect(screen.getByText(/Try with Sample Job/i)).toBeInTheDocument();
-    expect(screen.getByText(/LinkedIn URL Import/i)).toBeInTheDocument();
     expect(screen.getByText(/Add Job Manually/i)).toBeInTheDocument();
   });
 
@@ -55,7 +61,7 @@ describe('OnboardingAccelerator', () => {
     }));
   });
 
-  it('calls onImportClick when LinkedIn option is clicked', () => {
+  it('calls onImportClick when Compare Job Link option is clicked', () => {
     render(
       <OnboardingAccelerator 
         onManualClick={mockOnManualClick} 
@@ -63,9 +69,37 @@ describe('OnboardingAccelerator', () => {
       />
     );
 
-    const importButton = screen.getByText(/LinkedIn URL Import/i);
+    const importButton = screen.getByText(/Compare Job Link/i);
     fireEvent.click(importButton);
 
     expect(mockOnImportClick).toHaveBeenCalled();
+  });
+
+  it('navigates to discovery when Discover Matches option is clicked', () => {
+    render(
+      <OnboardingAccelerator 
+        onManualClick={mockOnManualClick} 
+        onImportClick={mockOnImportClick} 
+      />
+    );
+
+    const discoverButton = screen.getByText(/Discover Matches/i);
+    fireEvent.click(discoverButton);
+
+    expect(mockNavigate).toHaveBeenCalledWith('/discovery');
+  });
+
+  it('calls onManualClick when Add Job Manually is clicked', () => {
+    render(
+      <OnboardingAccelerator 
+        onManualClick={mockOnManualClick} 
+        onImportClick={mockOnImportClick} 
+      />
+    );
+
+    const manualButton = screen.getByText(/Add Job Manually/i);
+    fireEvent.click(manualButton);
+
+    expect(mockOnManualClick).toHaveBeenCalled();
   });
 });

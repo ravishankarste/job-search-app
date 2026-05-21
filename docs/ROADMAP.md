@@ -15,7 +15,7 @@
 
 ### 🛡️ Phase 2: Product Hardening
 - [ ] **The "Immediate Value" CTA**: Add a "Generate Cover Letter" button directly to the Dashboard after sandbox hydration.
-- [ ] **Dominant Pathing**: Redesign the Dashboard empty state to prioritize "LinkedIn Import" as the primary action.
+- [x] **Dominant Pathing**: Redesign the Dashboard empty state to prioritize "Compare Job Link" and "Discover Matches" as primary actions.
 - [ ] **Mobile Optimization**: Ensure the Pipeline Kanban is 100% usable on LinkedIn's in-app browser.
 - [ ] **Resume Multi-Version**: Allow users to manage multiple "Ghost Versions" for different job tracks.
 

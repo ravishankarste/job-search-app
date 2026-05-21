@@ -166,16 +166,22 @@ export const Dashboard: React.FC = () => {
                 </div>
                 
                 <div className="flex-1 text-center md:text-left space-y-3">
-                  <h2 className="text-3xl font-bold text-white tracking-tighter">Resume Found. Now see your <span className="text-emerald-500">Match Score.</span></h2>
+                  <h2 className="text-3xl font-bold text-white tracking-tighter">Resume Ready. Now see your <span className="text-emerald-500">Match Score.</span></h2>
                   <p className="text-base text-gray-400 font-medium max-w-xl leading-relaxed">
-                    Great! Your resume is materialized. Now import your first job from LinkedIn to see your compatibility score in real-time.
+                    Great! Your resume is uploaded. Paste a job link to calculate your compatibility score, or scan the market for matching roles.
                   </p>
                   <div className="pt-6 flex flex-wrap gap-4 justify-center md:justify-start">
                     <Link 
                       to="/pipeline" 
                       className="px-10 py-5 bg-emerald-500 text-white rounded-xl font-black uppercase tracking-widest text-[11px] hover:bg-emerald-600 transition-all inline-flex items-center tactile-press shadow-lg shadow-emerald-500/20"
                     >
-                      Import First Job <ArrowRight className="w-4 h-4 ml-2" />
+                      Compare Job Link <ArrowRight className="w-4 h-4 ml-2" />
+                    </Link>
+                    <Link 
+                      to="/discovery" 
+                      className="px-10 py-5 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-xl font-black uppercase tracking-widest text-[11px] transition-all inline-flex items-center tactile-press"
+                    >
+                      Discover Matches <ArrowRight className="w-4 h-4 ml-2" />
                     </Link>
                   </div>
                 </div>

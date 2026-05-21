@@ -8,6 +8,7 @@ import { MatchScoreBadge } from './MatchScoreBadge';
 
 import { followupService } from '../services/followupService';
 import { MatchScoreModal } from './MatchScoreModal';
+import { trackEvent } from '../../../lib/analytics';
 
 interface JobCardProps {
   job: JobWithApplication;
@@ -47,6 +48,16 @@ export const JobCard: React.FC<JobCardProps> = ({ job, onFollowUpClick }) => {
             onClick={(e) => {
               e.stopPropagation();
               setShowScoreDetails(true);
+              trackEvent('match_score_modal_viewed', {
+                job_id: job.id,
+                score: score,
+                company: job.company_name
+              });
+              trackEvent('aha_moment', {
+                type: 'app_match',
+                score: score,
+                job_id: job.id
+              });
             }}
           />
           {job.url && (

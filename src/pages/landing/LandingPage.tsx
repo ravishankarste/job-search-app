@@ -578,7 +578,12 @@ export const LandingPage: React.FC = () => {
 
           <div className={`flex flex-col sm:flex-row items-center justify-center gap-4 transition-all duration-500 ease-in-out ${isSearching ? 'opacity-0 max-h-0 overflow-hidden pt-0 mt-0' : 'opacity-100 max-h-16 pt-1'}`}>
             <button 
-              onClick={() => document.getElementById('demo-scanner-section')?.scrollIntoView({ behavior: 'smooth' })}
+              onClick={() => {
+                setShowMatchModal(true);
+                setTimeout(() => {
+                  document.getElementById('demo-scanner-section')?.scrollIntoView({ behavior: 'smooth' });
+                }, 50);
+              }}
               data-testid="hero-demo-cta"
               className="w-full sm:w-auto px-10 py-5 bg-[#FC6100] text-white text-sm font-black uppercase tracking-[0.2em] rounded-lg hover:bg-[#E35205] transition-all tactile-press border border-white/10 flex items-center justify-center gap-2"
             >
