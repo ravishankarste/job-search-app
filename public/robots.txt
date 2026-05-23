@@ -6,4 +6,4 @@ Disallow: /resumes
 Disallow: /settings
 Disallow: /analytics
 
-Sitemap: https://upanita.app/sitemap.xml
+Sitemap: https://upanita.com/sitemap.xml

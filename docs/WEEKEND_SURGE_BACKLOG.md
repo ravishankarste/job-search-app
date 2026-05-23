@@ -20,6 +20,7 @@ This backlog defines the "High-Intensity" sessions for the upcoming weekend. The
 
 - [x] **Mission 5: Scraping Sovereignty** (Heuristic recovery and Indeed Pivot implemented).
 - [x] **Mission 6: The Breathing Audit (Part 1)** (40px Airflow enforced on dashboard).
+- [ ] **Mission 8: GTM LinkedIn Automation** (Setup Buffer integration on Make.com for automated LinkedIn pipeline).
 
 ### ⏳ INCUBATION PERIOD (7 Days)
 - **Goal**: Gather battle intelligence from real-world usage of the hardened discovery engine.

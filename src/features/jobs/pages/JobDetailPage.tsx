@@ -6,6 +6,7 @@ import { ResumeSelector } from '../components/ResumeSelector';
 import { TaskEngine } from '../components/TaskEngine';
 import { CoverLetterEditor } from '../components/CoverLetterEditor';
 import { MatchScoreWidget } from '../components/MatchScoreWidget';
+import { JobDescriptionViewer } from '../components/JobDescriptionViewer';
 import { InterviewPrepWidget } from '../components/InterviewPrepWidget';
 import { 
   ArrowLeft, 
@@ -181,6 +182,7 @@ export const JobDetailPage: React.FC = () => {
             </div>
           </div>
 
+          <JobDescriptionViewer description={job.description || undefined} />
 
           <MatchScoreWidget 
             jobId={job.id} 
