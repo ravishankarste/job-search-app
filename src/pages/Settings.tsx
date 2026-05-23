@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import { Download, AlertTriangle, ShieldCheck, Database, Check } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '../lib/supabaseClient';
 import { jobService } from '../features/jobs/services/jobService';
 import { resumeService } from '../features/resumes/services/resumeService';
 
 export const Settings: React.FC = () => {
+  const navigate = useNavigate();
   const [isExporting, setIsExporting] = useState(false);
   const [exportSuccess, setExportSuccess] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleExportData = async () => {
     setIsExporting(true);
@@ -87,9 +91,23 @@ export const Settings: React.FC = () => {
   };
 
   const handleDeleteAccount = async () => {
-    // In a real app, this would call an Edge Function or Supabase Admin API to delete the user
-    alert('Account deletion request initiated. (Demo Mode: This requires a Supabase Edge Function to fully delete auth records)');
-    setShowDeleteConfirm(false);
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase.functions.invoke('delete-account', {
+        method: 'POST',
+      });
+      
+      if (error) throw error;
+      
+      await supabase.auth.signOut();
+      navigate('/login');
+    } catch (error) {
+      console.error('Failed to delete account:', error);
+      alert('Failed to delete account. Please try again.');
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+    }
   };
 
   return (
@@ -187,9 +205,10 @@ export const Settings: React.FC = () => {
                     </button>
                     <button 
                       onClick={handleDeleteAccount}
-                      className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all font-bold text-sm"
+                      disabled={isDeleting}
+                      className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all font-bold text-sm disabled:opacity-50"
                     >
-                      Yes, Delete Everything
+                      {isDeleting ? 'Deleting...' : 'Yes, Delete Everything'}
                     </button>
                   </div>
                 </div>

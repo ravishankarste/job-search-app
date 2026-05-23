@@ -20,7 +20,7 @@ This backlog defines the "High-Intensity" sessions for the upcoming weekend. The
 
 - [x] **Mission 5: Scraping Sovereignty** (Heuristic recovery and Indeed Pivot implemented).
 - [x] **Mission 6: The Breathing Audit (Part 1)** (40px Airflow enforced on dashboard).
-- [ ] **Mission 8: GTM LinkedIn Automation** (Setup Buffer integration on Make.com for automated LinkedIn pipeline).
+- [x] **Mission 8: GTM LinkedIn Automation** (Setup Buffer integration on Make.com for automated LinkedIn pipeline).
 
 ### ⏳ INCUBATION PERIOD (7 Days)
 - **Goal**: Gather battle intelligence from real-world usage of the hardened discovery engine.
@@ -34,3 +34,10 @@ This backlog defines the "High-Intensity" sessions for the upcoming weekend. The
 
 ---
 **The Foundation is Secured. The OS is Live. The Surge continues into the human element.** 🛡️⚖️🏛️🌔
+
+---
+
+### 🔮 FUTURE OPS: Scraping Architecture (Post-MVP)
+*When Udyog Marg scales to thousands of requests and LinkedIn's 401/403 blocks become unmanageable with standard Apify stealth proxies, implement the following architectural pivots based on Reddit engineering consensus:*
+1. **The Voyager API Pivot:** Stop rendering the visual DOM. Reverse-engineer LinkedIn's frontend network requests and hit the hidden `https://www.linkedin.com/voyager/api/...` endpoints directly for instant, clean JSON extraction.
+2. **Invisible Playwright:** If DOM rendering is absolutely required, migrate away from JS-level stealth plugins (which leave traces) and utilize `Invisible_playwright` (which patches the browser fingerprint at the C++ level).
