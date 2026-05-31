@@ -20,7 +20,7 @@ import { SupportBot } from '../components/common/SupportBot';
 import { ExitNudge } from '../components/common/ExitNudge';
 import { useJobs } from '../features/jobs/hooks/useJobs';
 import { useNotifications } from '../features/notifications/hooks/useNotifications';
-
+import { InstallPrompt } from '../features/pwa/components/InstallPrompt';
 
 interface SidebarContentProps {
   navItems: { name: string; path: string; icon: any }[];
@@ -367,6 +367,7 @@ export const DashboardLayout: React.FC = () => {
           isOpen={isExitNudgeOpen} 
           onClose={() => setIsExitNudgeOpen(false)} 
         />
+        <InstallPrompt />
       </main>
     </div>
   );
