@@ -9,19 +9,19 @@
   "theme_color": "#FC6100",
   "icons": [
     {
-      "src": "/udyog_marg_elite_badge_icon_1777806612946.png",
+      "src": "/udyog_marg_icon_512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/udyog_marg_elite_badge_icon_1777806612946.png",
+      "src": "/udyog_marg_icon_192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/udyog_marg_elite_badge_icon_1777806612946.png",
+      "src": "/udyog_marg_icon_192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"

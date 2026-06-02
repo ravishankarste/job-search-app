@@ -1,8 +1,9 @@
-const CACHE_NAME = 'udyog-marg-v3';
+const CACHE_NAME = 'udyog-marg-v4';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
-  '/udyog_marg_elite_badge_icon_1777806612946.png',
+  '/udyog_marg_icon_192.png',
+  '/udyog_marg_icon_512.png',
   '/manifest.json'
 ];
 

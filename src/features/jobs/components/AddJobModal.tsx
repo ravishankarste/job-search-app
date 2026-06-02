@@ -34,6 +34,12 @@ const parseRawJobText = (text: string) => {
   // First non-garbage line: Job Title
   title = lines[startIndex] || '';
 
+  // Guard: If the 'title' is a long paragraph, the user pasted the description body, not the full page.
+  // It's too risky to guess the title/company from a raw paragraph using basic string splitting.
+  if (title.length > 100) {
+    return null;
+  }
+
   // Clean title: remove pipeline chars or trailing separators
   if (title.includes(' | ')) {
     title = title.split(' | ')[0];
@@ -44,6 +50,11 @@ const parseRawJobText = (text: string) => {
   // Second line: Company + Optional Location
   if (lines[startIndex + 1]) {
     const nextLine = lines[startIndex + 1];
+    
+    // Guard: Prevent extracting a paragraph as the company name
+    if (nextLine.length > 80) {
+      return { title, company_name: '', location: '' };
+    }
     
     // Check for "AVEVA · Bengaluru, Karnataka"
     if (nextLine.includes(' · ')) {
