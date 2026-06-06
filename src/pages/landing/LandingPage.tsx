@@ -1,6 +1,7 @@
 import React from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { jobService } from '../../features/jobs/services/jobService';
 import { 
   Layers, 
   ArrowRight, 
@@ -13,6 +14,8 @@ import {
 import { trackEvent } from '../../lib/analytics';
 import { matchAnalysisService, SYNONYMS } from '../../features/jobs/services/matchAnalysisService';
 import { pdfExtractionService } from '../../features/resumes/services/pdfExtractionService';
+import { jobRelevanceService } from '../../features/discovery/services/jobRelevanceService';
+import type { DiscoveredJob } from '../../features/discovery/services/apifyService';
 
 const LONDON_JOBS = [
   {
@@ -91,11 +94,56 @@ export const LandingPage: React.FC = () => {
   const [detectedLocation, setDetectedLocation] = React.useState('London, UK');
   const [showMatchModal, setShowMatchModal] = React.useState(false);
 
+  // Live Search State
+  const [liveJobs, setLiveJobs] = React.useState<DiscoveredJob[]>([]);
+  const [isSearchingLive, setIsSearchingLive] = React.useState(false);
+  const [lastSearch, setLastSearch] = React.useState('');
+
   // Postcode/Pincode Override States
   const [isChangingLocation, setIsChangingLocation] = React.useState(false);
   const [postalInput, setPostalInput] = React.useState('');
   const [postalError, setPostalError] = React.useState('');
   const [isLoadingPostal, setIsLoadingPostal] = React.useState(false);
+
+  React.useEffect(() => {
+    const handler = setTimeout(async () => {
+      const currentSearch = searchRole.trim();
+      if (currentSearch.length >= 2) {
+        setIsSearchingLive(true);
+        
+        // Track search initiation or refinement
+        if (lastSearch && lastSearch !== currentSearch) {
+          trackEvent('search_refined', { from: lastSearch, to: currentSearch, location: detectedLocation });
+        } else if (!lastSearch) {
+          trackEvent('search_initiated', { query: currentSearch, location: detectedLocation });
+        }
+        
+        try {
+          const results = await jobRelevanceService.searchJobs(currentSearch, detectedLocation);
+          setLiveJobs(results);
+          
+          trackEvent('search_completed', { 
+            query: currentSearch, 
+            location: detectedLocation, 
+            result_count: results.length 
+          });
+
+          if (results.length === 0) {
+            trackEvent('search_zero_results', { query: currentSearch, location: detectedLocation });
+          }
+          
+          setLastSearch(currentSearch);
+        } catch (err) {
+          console.error(err);
+        } finally {
+          setIsSearchingLive(false);
+        }
+      } else {
+        setLiveJobs([]);
+      }
+    }, 800);
+    return () => clearTimeout(handler);
+  }, [searchRole, detectedLocation]);
 
   React.useEffect(() => {
     // 1. Silent IP Geolocation Lookup
@@ -462,11 +510,42 @@ export const LandingPage: React.FC = () => {
   };
   const activeJobs = getRegionalJobs();
 
-  const handleSelectJob = (jobJd: string, jobTitle: string, jobCompany: string) => {
-    setJobText(jobJd);
+  const navigate = useNavigate();
+  const [selectedJobContext, setSelectedJobContext] = React.useState<DiscoveredJob | null>(null);
+  const [isJobSaved, setIsJobSaved] = React.useState(false);
+  const [isSaving, setIsSaving] = React.useState(false);
+
+  const handleSelectJob = (job: DiscoveredJob | { title: string, company_name: string, description: string, location: string, url: string }) => {
+    setJobText(job.description);
+    setSelectedJobContext(job as DiscoveredJob);
+    setIsJobSaved(false);
     setShowMatchModal(true);
-    trackEvent('landing_job_card_selected', { title: jobTitle, company: jobCompany });
+    trackEvent('job_opened', { title: job.title, company: job.company_name });
   };
+
+  const handleSaveJob = async () => {
+    if (!session?.user || !selectedJobContext) return;
+    setIsSaving(true);
+    try {
+      await jobService.createJob({
+        title: selectedJobContext.title,
+        company_name: selectedJobContext.company_name,
+        description: selectedJobContext.description,
+        location: selectedJobContext.location,
+        url: selectedJobContext.url || '',
+        salary_range: selectedJobContext.salary_range || null,
+        status: 'draft',
+        employment_type: 'full-time'
+      });
+      trackEvent('job_saved', { method: 'landing_page', url: selectedJobContext.url });
+      setIsJobSaved(true);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const [result, setResult] = React.useState<{ score: number, matchingSkills: string[], missingSkills: string[], warnings?: string[] } | null>(null);
   const [isAnalyzing, setIsAnalyzing] = React.useState(false);
   const [isExtracting, setIsExtracting] = React.useState(false);
@@ -533,6 +612,7 @@ export const LandingPage: React.FC = () => {
                   <button 
                     onClick={() => {
                       if (hasAnalyzed) {
+                        trackEvent('join_alpha_clicked', { source: 'navbar_after_match' });
                         localStorage.setItem('udyog_marg_sandbox_state', JSON.stringify({
                           jobText,
                           resumeText,
@@ -680,16 +760,13 @@ export const LandingPage: React.FC = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full animate-in fade-in duration-300" style={{ marginTop: '12px' }}>
-              {(() => {
-                const filtered = activeJobs.filter(job => 
-                  job.title.toLowerCase().includes(searchRole.toLowerCase()) || 
-                  job.tags.some(t => t.toLowerCase().includes(searchRole.toLowerCase()))
-                );
-                const displayedJobs = filtered.length > 0 
-                  ? filtered 
-                  : generateDynamicJobs(searchRole, detectedLocation);
-
-                return displayedJobs.map((job) => (
+              {isSearchingLive ? (
+                <div className="col-span-1 md:col-span-2 py-12 flex flex-col items-center justify-center text-gray-500">
+                  <div className="w-8 h-8 border-4 border-[#FC6100]/20 border-t-[#FC6100] rounded-full animate-spin mb-4"></div>
+                  <p className="text-sm font-medium animate-pulse text-[#FC6100]">Scanning real-time job market for "{searchRole}"...</p>
+                </div>
+              ) : liveJobs.length > 0 ? (
+                liveJobs.map((job: any) => (
                   <div 
                     key={job.id}
                     className="bg-white/[0.02] border border-white/5 hover:border-[#FC6100]/30 hover:bg-[#FC6100]/[0.01] p-6 rounded-[20px] transition-all duration-300 flex flex-col justify-between group/card relative overflow-hidden"
@@ -701,14 +778,18 @@ export const LandingPage: React.FC = () => {
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-xs font-black text-[#FC6100] group-hover/card:bg-[#FC6100] group-hover/card:text-white transition-all uppercase shadow-md shrink-0">
-                            {job.company.substring(0, 2)}
+                            {job.company_name.substring(0, 2)}
                           </div>
                           <div>
-                            <p className="text-xs font-black text-gray-500 uppercase tracking-widest leading-none">{job.company}</p>
+                            <p className="text-xs font-black text-gray-500 uppercase tracking-widest leading-none">{job.company_name}</p>
                             <h3 className="text-base font-bold text-white mt-1.5 group-hover/card:text-[#FC6100] transition-colors leading-tight">{job.title}</h3>
                           </div>
                         </div>
-                        <span className="text-[9px] font-black text-white/40 bg-white/5 border border-white/10 px-2.5 py-1 rounded-md shrink-0 tracking-widest">{job.compensation}</span>
+                        {job.match_label && (
+                          <span className={`text-[9px] font-black px-2.5 py-1 rounded-md shrink-0 tracking-widest ${job.match_label === 'Strong Match' ? 'text-[#FC6100] bg-[#FC6100]/10 border border-[#FC6100]/30' : 'text-green-500 bg-green-500/10 border border-green-500/30'}`}>
+                            {job.match_label}
+                          </span>
+                        )}
                       </div>
 
                       {/* Location & Tags */}
@@ -717,11 +798,7 @@ export const LandingPage: React.FC = () => {
                           <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
                           {job.location}
                         </p>
-                        <div className="flex flex-wrap gap-2 pt-0.5">
-                          {job.tags.map((tag) => (
-                            <span key={tag} className="text-[8px] font-black text-gray-500 bg-white/5 border border-white/5 px-2 py-0.5 rounded uppercase tracking-wider">{tag}</span>
-                          ))}
-                        </div>
+                        <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed">{job.description}</p>
                       </div>
                     </div>
 
@@ -729,15 +806,19 @@ export const LandingPage: React.FC = () => {
                     <div className="pt-4 border-t border-white/5 mt-4 flex items-center justify-between relative z-10">
                       <span className="text-[8px] font-black text-gray-600 uppercase tracking-widest group-hover/card:text-[#FC6100] transition-colors">Verify ATS Fit & Gaps</span>
                       <button 
-                        onClick={() => handleSelectJob(job.jd, job.title, job.company)}
+                        onClick={() => handleSelectJob(job)}
                         className="px-5 py-2.5 bg-[#FC6100] hover:bg-[#E35205] text-white text-[8px] font-black uppercase tracking-widest rounded-md transition-all border border-white/10 shadow-lg shadow-[#FC6100]/5 flex items-center gap-1.5 hover:scale-[1.02] active:scale-[0.98]"
                       >
                         Calculate Match ⚡
                       </button>
                     </div>
                   </div>
-                ));
-              })()}
+                ))
+              ) : (
+                <div className="col-span-1 md:col-span-2 py-12 flex flex-col items-center justify-center text-gray-500">
+                  <p className="text-sm font-medium">No direct matches found. Try broadening your search or modifying your location.</p>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -947,27 +1028,52 @@ export const LandingPage: React.FC = () => {
                    <p className="text-sm text-gray-300 font-medium max-w-md mx-auto leading-relaxed">
                      Your sandbox matches are saved! Claim your account now to inject this job into your tracking pipeline, resolve missing skills, and auto-draft a tailored cover letter instantly.
                    </p>
-                    <button 
-                     data-testid="demo-signup-cta"
-                     onClick={() => {
-                       trackEvent('cta_click', { location: 'sandbox_result' });
-                       
-                       // PERSIST SANDBOX STATE
-                       localStorage.setItem('udyog_marg_sandbox_state', JSON.stringify({
-                         jobText,
-                         resumeText,
-                         timestamp: new Date().toISOString()
-                       }));
- 
-                       // Force a small delay to ensure storage write before navigation
-                       setTimeout(() => {
-                         window.location.href = '/signup';
-                       }, 50);
-                     }}
-                     className="px-8 py-4 bg-[#FC6100] hover:bg-[#E35205] text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all border border-white/10 shadow-lg shadow-[#FC6100]/10 flex items-center gap-2 mx-auto hover:scale-[1.02]"
-                    >
-                      Claim Your Free Account & Tailor Now <ArrowRight className="w-4 h-4" />
-                    </button>
+                    {session ? (
+                      isJobSaved ? (
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full">
+                          <div className="px-6 py-4 bg-green-500/10 text-green-500 text-xs font-black uppercase tracking-widest rounded-xl border border-green-500/20 flex items-center justify-center gap-2 w-full sm:w-auto">
+                            ✅ Saved to Pipeline
+                          </div>
+                          <button 
+                            onClick={() => navigate('/pipeline')}
+                            className="px-6 py-4 bg-white/10 hover:bg-white/20 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all w-full sm:w-auto text-center"
+                          >
+                            View Pipeline
+                          </button>
+                        </div>
+                      ) : (
+                        <button 
+                          data-testid="demo-save-cta"
+                          onClick={handleSaveJob}
+                          disabled={isSaving}
+                          className="px-8 py-4 bg-[#FC6100] hover:bg-[#E35205] text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all border border-white/10 shadow-lg shadow-[#FC6100]/10 flex items-center justify-center gap-2 mx-auto hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
+                        >
+                          {isSaving ? 'Saving...' : 'Save to Pipeline ⚡'}
+                        </button>
+                      )
+                    ) : (
+                      <button 
+                        data-testid="demo-signup-cta"
+                        onClick={() => {
+                          trackEvent('cta_click', { location: 'sandbox_result' });
+                          
+                          // PERSIST SANDBOX STATE
+                          localStorage.setItem('udyog_marg_sandbox_state', JSON.stringify({
+                            jobText,
+                            resumeText,
+                            timestamp: new Date().toISOString()
+                          }));
+    
+                          // Force a small delay to ensure storage write before navigation
+                          setTimeout(() => {
+                            window.location.href = '/signup';
+                          }, 50);
+                        }}
+                        className="px-8 py-4 bg-[#FC6100] hover:bg-[#E35205] text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all border border-white/10 shadow-lg shadow-[#FC6100]/10 flex items-center gap-2 mx-auto hover:scale-[1.02]"
+                      >
+                        Claim Your Free Account & Tailor Now <ArrowRight className="w-4 h-4" />
+                      </button>
+                    )}
                    
                    <div className="pt-6">
                      <button 

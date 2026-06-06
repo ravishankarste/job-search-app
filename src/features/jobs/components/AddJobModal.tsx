@@ -205,7 +205,7 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    trackEvent('job_import_success', { method: 'manual', url: formData.url });
+    trackEvent('job_saved', { method: 'manual', url: formData.url });
     onSubmit(formData);
   };
 

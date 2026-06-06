@@ -182,7 +182,7 @@ export const DashboardLayout: React.FC = () => {
 
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Discovery', path: '/discovery', icon: Compass },
+    { name: 'Job Search', path: '/discovery', icon: Compass },
     { name: 'Job Pipeline', path: '/pipeline', icon: Briefcase },
     { name: 'Resumes', path: '/resumes', icon: FileText },
     { name: 'Analytics', path: '/analytics', icon: BarChart3 },
@@ -237,55 +237,23 @@ export const DashboardLayout: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="absolute left-1/2 -translate-x-1/2 hidden md:block group">
-              <input
-                type="text"
-                placeholder="Search pipeline..."
-                className="px-4 py-2.5 bg-white/10 border border-white/20 rounded-lg text-sm text-white placeholder-white/40 focus:border-[#FC6100] focus:ring-1 focus:ring-[#FC6100] outline-none transition-all w-64 lg:w-[400px] group-hover:bg-white/15 group-hover:border-white/30 text-center"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              
-              {/* Quick Search Results */}
-              {searchQuery.trim() && (
-                <div className="absolute top-full right-0 mt-3 w-80 bg-[#111] border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                  <div className="p-3 border-b border-white/5 bg-white/[0.02]">
-                    <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Global Pipeline Search</span>
-                  </div>
-                  <div className="max-h-64 overflow-y-auto">
-                    {filteredJobs.length > 0 ? (
-                      filteredJobs.map(job => (
-                        <Link 
-                          key={job.id} 
-                          to={`/pipeline/${job.id}`}
-                          onClick={() => setSearchQuery('')}
-                          className="flex items-center justify-between p-4 hover:bg-white/5 transition-colors group"
-                        >
-                          <div>
-                            <p className="text-xs font-bold text-white group-hover:text-[#FC6100] transition-colors">{job.title}</p>
-                            <p className="text-[10px] text-gray-500 font-medium">{job.company_name}</p>
-                          </div>
-                          <ChevronRight className="w-3.5 h-3.5 text-gray-700" />
-                        </Link>
-                      ))
-                    ) : (
-                      <div className="p-8 text-center">
-                        <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest">No matching jobs</p>
-                      </div>
-                    )}
-                  </div>
-                  {filteredJobs.length > 0 && (
-                    <Link 
-                      to="/pipeline" 
-                      onClick={() => setSearchQuery('')}
-                      className="block p-3 text-center bg-white/5 hover:bg-white/10 text-[10px] font-black text-[#FC6100] uppercase tracking-widest transition-colors border-t border-white/5"
-                    >
-                      View All Results
-                    </Link>
-                  )}
-                </div>
-              )}
-            </div>
+            {location.pathname !== '/discovery' && (
+              <div className="absolute left-1/2 -translate-x-1/2 hidden md:block group">
+                <input
+                  type="text"
+                  placeholder="Global Job Search..."
+                  className="px-4 py-2.5 bg-white/10 border border-white/20 rounded-lg text-sm text-white placeholder-white/40 focus:border-[#FC6100] focus:ring-1 focus:ring-[#FC6100] outline-none transition-all w-64 lg:w-[400px] group-hover:bg-white/15 group-hover:border-white/30 text-center"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      const val = e.currentTarget.value.trim();
+                      if (val) {
+                        window.location.href = `/discovery?q=${encodeURIComponent(val)}`;
+                      }
+                    }
+                  }}
+                />
+              </div>
+            )}
             <div className="relative">
               <button 
                 onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}

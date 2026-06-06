@@ -4,23 +4,37 @@ import { useDiscovery } from '../hooks/useDiscovery';
 import { DiscoveryCard } from '../components/DiscoveryCard';
 import { trackEvent } from '../../../lib/analytics';
 
+const guessDefaultCountry = () => {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone.toLowerCase();
+    if (tz.includes('london') || tz.includes('dublin') || tz.includes('belfast')) return 'gb';
+    if (tz.includes('calcutta') || tz.includes('kolkata')) return 'in';
+    return 'us';
+  } catch {
+    return 'us';
+  }
+};
+
 export const DiscoveryPage: React.FC = () => {
-  const [query, setQuery] = useState('');
-  const [location, setLocation] = useState('Remote');
+  const urlParams = new URLSearchParams(window.location.search);
+  const initialQuery = urlParams.get('q') || '';
+
+  const [query, setQuery] = useState(initialQuery);
+  const [country, setCountry] = useState(guessDefaultCountry());
   const [daysAgo, setDaysAgo] = useState(7);
-  const [activeSearch, setActiveSearch] = useState({ query: '', location: '', daysAgo: 7 });
+  const [activeSearch, setActiveSearch] = useState({ query: initialQuery, country: guessDefaultCountry(), daysAgo: 7 });
 
   const { data: jobs, isLoading, error, isRefetching } = useDiscovery(
     activeSearch.query, 
-    activeSearch.location, 
+    activeSearch.country, 
     activeSearch.daysAgo
   );
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
-    trackEvent('search_initiated', { query, location, daysAgo });
-    setActiveSearch({ query, location, daysAgo });
+    trackEvent('search_initiated', { query, country, daysAgo });
+    setActiveSearch({ query, country, daysAgo });
   };
 
   return (
@@ -31,12 +45,9 @@ export const DiscoveryPage: React.FC = () => {
           <div className="flex items-center gap-3 mb-2">
              <div className="w-8 h-[2px] bg-[#FC6100]"></div>
              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#FC6100]">Market Intelligence</span>
-             <span className="px-2 py-0.5 bg-[#FC6100]/10 border border-[#FC6100]/20 rounded text-[8px] font-black text-[#FC6100] uppercase tracking-widest animate-pulse">
-               Live: May 16 Deployment
-             </span>
           </div>
           <h1 className="text-6xl font-bold text-white tracking-tighter leading-none">
-            Job <span className="text-[#FC6100] italic">Discovery</span>
+            Job <span className="text-[#FC6100] italic">Search</span>
           </h1>
           <p className="text-lg text-gray-400 max-w-xl font-medium">
             Scan the entire market in seconds. We appreciate our global audience's patience during this 24h architectural rollout.
@@ -59,49 +70,51 @@ export const DiscoveryPage: React.FC = () => {
       {/* Search Command Center */}
       <section className="relative group">
         <div className="absolute inset-0 bg-[#FC6100]/5 blur-3xl rounded-[40px] transition-all duration-1000 group-hover:bg-[#FC6100]/10"></div>
-        <form onSubmit={handleSearch} className="relative z-10 grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-black/60 border border-white/10 rounded-[32px] backdrop-blur-xl shadow-2xl">
-          <div className="relative group/input flex-grow md:col-span-1.5">
+        <form onSubmit={handleSearch} className="relative z-10 flex flex-col md:flex-row gap-4 p-4 bg-[#1A1A1A] border border-white/20 rounded-[32px] backdrop-blur-xl shadow-2xl">
+          <div className="relative group/input md:w-40 shrink-0">
+            <select 
+              className="w-full px-6 py-5 bg-white/10 border border-white/20 rounded-2xl text-sm font-bold text-white appearance-none focus:bg-white/15 focus:border-[#FC6100] outline-none transition-all cursor-pointer shadow-inner"
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+            >
+              <option value="us" className="bg-[#1A1A1A] text-white">🇺🇸 USA</option>
+              <option value="gb" className="bg-[#1A1A1A] text-white">🇬🇧 UK</option>
+              <option value="in" className="bg-[#1A1A1A] text-white">🇮🇳 India</option>
+            </select>
+          </div>
+          <div className="relative group/input flex-1">
             <input 
               type="text"
-              placeholder="Job Title or Keywords..."
-              className="w-full px-6 py-5 bg-black/40 border border-white/5 rounded-2xl text-sm font-bold text-white placeholder-gray-700 focus:bg-black/60 focus:border-[#FC6100]/30 outline-none transition-all"
+              placeholder="Search for jobs or skills (e.g. 'Software Engineer')..."
+              className="w-full px-6 py-5 bg-white/10 border border-white/20 rounded-2xl text-sm font-bold text-white placeholder-gray-400 focus:bg-white/15 focus:border-[#FC6100] outline-none transition-all shadow-inner"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
           </div>
-          <div className="relative group/input md:col-span-1">
-            <input 
-              type="text"
-              placeholder="Location (e.g. Remote)..."
-              className="w-full px-6 py-5 bg-black/40 border border-white/5 rounded-2xl text-sm font-bold text-white placeholder-gray-700 focus:bg-black/60 focus:border-[#FC6100]/30 outline-none transition-all"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-            />
-          </div>
-          <div className="relative group/input md:col-span-1">
+          <div className="relative group/input md:w-48 shrink-0">
             <select 
-              className="w-full px-6 pr-10 py-5 bg-black/40 border border-white/5 rounded-2xl text-sm font-bold text-white appearance-none focus:bg-black/60 focus:border-[#FC6100]/30 outline-none transition-all cursor-pointer"
+              className="w-full px-6 pr-10 py-5 bg-white/10 border border-white/20 rounded-2xl text-sm font-bold text-white appearance-none focus:bg-white/15 focus:border-[#FC6100] outline-none transition-all cursor-pointer shadow-inner"
               value={daysAgo}
               onChange={(e) => setDaysAgo(Number(e.target.value))}
             >
-              <option value={1} className="bg-[#121212]">Last 24 Hours</option>
-              <option value={3} className="bg-[#121212]">Last 3 Days</option>
-              <option value={7} className="bg-[#121212]">Last 7 Days</option>
-              <option value={14} className="bg-[#121212]">Last 14 Days</option>
-              <option value={30} className="bg-[#121212]">Last 30 Days</option>
+              <option value={1} className="bg-[#1A1A1A] text-white">Last 24 Hours</option>
+              <option value={3} className="bg-[#1A1A1A] text-white">Last 3 Days</option>
+              <option value={7} className="bg-[#1A1A1A] text-white">Last 7 Days</option>
+              <option value={14} className="bg-[#1A1A1A] text-white">Last 14 Days</option>
+              <option value={30} className="bg-[#1A1A1A] text-white">Last 30 Days</option>
             </select>
           </div>
           <button 
             type="submit"
             disabled={isLoading || isRefetching}
-            className="md:col-span-0.5 w-full bg-[#FC6100] hover:bg-[#E35205] disabled:opacity-50 text-white rounded-2xl flex items-center justify-center transition-all shadow-xl shadow-[#FC6100]/20 active:scale-95"
+            className="md:w-48 shrink-0 bg-[#FC6100] hover:bg-[#E35205] disabled:opacity-50 text-white rounded-2xl flex items-center justify-center transition-all shadow-xl shadow-[#FC6100]/20 active:scale-95"
           >
             {isLoading || isRefetching ? (
               <Loader2 className="w-6 h-6 animate-spin" />
             ) : (
               <div className="flex items-center gap-3 px-4 py-5">
                 <Compass className="w-5 h-5" />
-                <span className="text-xs font-black uppercase tracking-widest">Discover</span>
+                <span className="text-xs font-black uppercase tracking-widest">Search</span>
               </div>
             )}
           </button>
@@ -125,8 +138,8 @@ export const DiscoveryPage: React.FC = () => {
              <div className="w-16 h-16 bg-red-500/10 border border-red-500/20 rounded-full flex items-center justify-center">
                <AlertCircle className="w-8 h-8 text-red-500" />
              </div>
-             <div className="space-y-2">
-               <h3 className="text-xl font-bold text-white tracking-tight uppercase">Discovery Interrupted</h3>
+             <div className="mt-1">
+               <h3 className="text-xl font-bold text-white tracking-tight uppercase">Search Interrupted</h3>
                <p className="text-sm text-gray-500 font-medium max-w-md mx-auto">{(error as any).message || "An unexpected error occurred while scanning the market."}</p>
              </div>
              <button 

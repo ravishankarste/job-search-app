@@ -44,6 +44,7 @@ export const JobDetailPage: React.FC = () => {
   const handleStatusChange = async (newStatus: ApplicationStatus) => {
     if (application) {
       await updateStatus({ applicationId: application.id, status: newStatus, jobId: job.id });
+      trackEvent('job_moved', { status: newStatus, job_id: job.id, company: job.company_name });
     }
   };
 

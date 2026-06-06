@@ -13,6 +13,7 @@ export const initAnalytics = () => {
       capture_pageview: true,
       persistence: 'localStorage',
       person_profiles: 'identified_only',
+      disable_session_recording: false,
       debug: true, 
     });
   } else {

@@ -65,7 +65,7 @@ export const UniversalImporter: React.FC<UniversalImporterProps> = ({ onImportSu
         employment_type: 'full-time',
       });
       
-      trackEvent('job_import_success', { method: 'automated', url });
+      trackEvent('job_saved', { method: 'automated', url });
       
       // Instant Victory Celebration
       import('../../../lib/confetti').then(({ triggerConfetti }) => triggerConfetti());

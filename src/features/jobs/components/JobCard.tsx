@@ -67,7 +67,10 @@ export const JobCard: React.FC<JobCardProps> = ({ job, onFollowUpClick }) => {
               rel="noopener noreferrer"
               title="Open Original Job Posting"
               className="p-1.5 text-gray-500 hover:text-[#FC6100] hover:bg-[#FC6100]/10 rounded-lg transition-all"
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                trackEvent('job_apply_clicked', { job_id: job.id, company: job.company_name, title: job.title });
+              }}
               data-testid="job-external-link"
             >
               <ExternalLink className="w-4 h-4" />
