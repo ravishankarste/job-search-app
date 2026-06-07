@@ -30,7 +30,7 @@ This backlog defines the "High-Intensity" sessions for the upcoming weekend. The
 - [x] **Mission: PWA Materialization & Installation** (Manifest, SW caching, and programmatically active Chrome/iOS install triggers).
 
 ### 🐛 PENDING FIXES
-- [ ] **Account Deletion Button Fix**: Currently showing a "Demo Mode" browser alert. Needs a Supabase Edge Function implementation to fully delete user Auth records and cascade delete associated user data.
+- [x] **Account Deletion Button Fix**: Currently showing a "Demo Mode" browser alert. Needs a Supabase Edge Function implementation to fully delete user Auth records and cascade delete associated user data.
 
 ---
 **The Foundation is Secured. The OS is Live. The Surge continues into the human element.** 🛡️⚖️🏛️🌔

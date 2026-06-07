@@ -5,6 +5,7 @@ import { useJobActions } from '../hooks/useJobActions';
 import { ResumeSelector } from '../components/ResumeSelector';
 import { TaskEngine } from '../components/TaskEngine';
 import { CoverLetterEditor } from '../components/CoverLetterEditor';
+import { ResumeTailorWidget } from '../../resumes/components/ResumeTailorWidget';
 import { MatchScoreWidget } from '../components/MatchScoreWidget';
 import { JobDescriptionViewer } from '../components/JobDescriptionViewer';
 import { InterviewPrepWidget } from '../components/InterviewPrepWidget';
@@ -201,6 +202,10 @@ export const JobDetailPage: React.FC = () => {
 
         {/* Sidebar / Integration Area */}
         <div className="space-y-8">
+          {application && (
+            <ResumeTailorWidget applicationId={application.id} />
+          )}
+
           <div className="bg-[#121212] p-8 rounded-[32px] border border-white/5 shadow-2xl shadow-black/50">
             <ResumeSelector 
               currentResumeId={application?.resume_id || null} 

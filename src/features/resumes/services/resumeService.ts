@@ -44,6 +44,7 @@ export const resumeService = {
         .from('resumes')
         .select('*')
         .eq('profile_id', user.id)
+        .neq('is_tailored', true)
         .order('updated_at', { ascending: false });
 
       if (error) throw error;

@@ -2,7 +2,7 @@
 
 -- 1. Create Discovery Cache to prevent redundant Apify costs
 CREATE TABLE IF NOT EXISTS discovery_cache (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     query TEXT NOT NULL,
     location TEXT NOT NULL,
     days_ago INTEGER NOT NULL,
@@ -15,7 +15,7 @@ CREATE INDEX IF NOT EXISTS idx_discovery_cache_lookup ON discovery_cache(query, 
 
 -- 2. Create Usage Logs to prevent credit exhaustion attacks
 CREATE TABLE IF NOT EXISTS usage_logs (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES auth.users(id),
     action_type TEXT NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW()

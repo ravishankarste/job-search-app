@@ -13,8 +13,15 @@ export const initAnalytics = () => {
       capture_pageview: true,
       persistence: 'localStorage',
       person_profiles: 'identified_only',
+      // Explicitly enable and configure session recording
+      session_recording: {
+        maskAllInputs: false,
+        maskInputOptions: {
+          password: true // Only mask passwords, let us see their search queries!
+        }
+      },
       disable_session_recording: false,
-      debug: true, 
+      debug: true,
     });
   } else {
     console.error("[Analytics] FATAL: PostHog Key is missing. Tracking will not work.");

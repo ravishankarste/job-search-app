@@ -12,10 +12,15 @@ export const jobRelevanceService = {
       });
 
       if (error) throw error;
-      return data as DiscoveredJob[];
+      
+      const results = data as DiscoveredJob[];
+      if (results && results.length > 0) {
+        return results;
+      }
+      return [];
     } catch (err: any) {
-      console.error("[jobRelevanceService] Error fetching from Adzuna proxy:", err.message);
-      throw new Error("Unable to retrieve live jobs right now.");
+      console.error("[jobRelevanceService] Error fetching from Aggregator proxy:", err.message);
+      throw new Error("All discovery engines failed. Please try again later.");
     }
   }
 };

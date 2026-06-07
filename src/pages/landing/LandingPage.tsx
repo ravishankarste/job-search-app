@@ -205,7 +205,10 @@ export const LandingPage: React.FC = () => {
             setIsChangingLocation(false);
             setPostalInput('');
           } else {
-            setDetectedLocation('Bengaluru, India');
+            // Use the actual district and state from the first post office match
+            const defaultPo = postOffices[0];
+            const dynamicLocation = `${defaultPo.District || defaultPo.Name}, India`;
+            setDetectedLocation(dynamicLocation);
             setIsChangingLocation(false);
             setPostalInput('');
           }
@@ -507,20 +510,21 @@ export const LandingPage: React.FC = () => {
                 liveJobs.map((job: any) => (
                   <div 
                     key={job.id}
-                    className="bg-white/[0.02] border border-white/5 hover:border-[#FC6100]/30 hover:bg-[#FC6100]/[0.01] p-6 rounded-[20px] transition-all duration-300 flex flex-col justify-between group/card relative overflow-hidden"
+                    className="bg-white/[0.02] border border-white/5 hover:border-[#FC6100]/30 hover:bg-[#FC6100]/[0.01] rounded-[20px] transition-all duration-300 flex flex-col h-full group/card relative overflow-hidden"
+                    style={{ padding: '1.5rem' }}
                   >
                     <div className="absolute top-0 right-0 w-24 h-24 bg-[#FC6100]/5 blur-2xl rounded-full opacity-0 group-hover/card:opacity-100 transition-opacity"></div>
                     
-                    <div className="space-y-4 relative z-10">
+                    <div className="flex flex-col gap-4 relative z-10 flex-1">
                       {/* Card Header */}
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex items-center gap-3">
+                      <div className="flex items-start justify-between gap-4 w-full">
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
                           <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-xs font-black text-[#FC6100] group-hover/card:bg-[#FC6100] group-hover/card:text-white transition-all uppercase shadow-md shrink-0">
                             {job.company_name.substring(0, 2)}
                           </div>
-                          <div>
-                            <p className="text-xs font-black text-gray-500 uppercase tracking-widest leading-none">{job.company_name}</p>
-                            <h3 className="text-base font-bold text-white mt-1.5 group-hover/card:text-[#FC6100] transition-colors leading-tight">{job.title}</h3>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-xs font-black text-gray-500 uppercase tracking-widest leading-none truncate">{job.company_name}</p>
+                            <h3 className="text-base font-bold text-white mt-1.5 group-hover/card:text-[#FC6100] transition-colors leading-tight truncate">{job.title}</h3>
                           </div>
                         </div>
                         {job.match_label && (
@@ -531,21 +535,23 @@ export const LandingPage: React.FC = () => {
                       </div>
 
                       {/* Location & Tags */}
-                      <div className="space-y-3">
-                        <p className="text-[9px] font-bold text-gray-400 flex items-center gap-2 uppercase tracking-wider leading-none">
-                          <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                      <div className="flex flex-col gap-3">
+                        <p className="text-[9px] font-bold text-gray-400 flex items-center gap-2 uppercase tracking-wider leading-none truncate">
+                          <span className="w-1.5 h-1.5 bg-green-500 rounded-full shrink-0"></span>
                           {job.location}
                         </p>
-                        <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed">{job.description}</p>
+                        <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed">
+                          {job.description ? job.description.replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, ' ') : 'No description provided.'}
+                        </p>
                       </div>
                     </div>
 
                     {/* Card Action */}
-                    <div className="pt-4 border-t border-white/5 mt-4 flex items-center justify-between relative z-10">
-                      <span className="text-[8px] font-black text-gray-600 uppercase tracking-widest group-hover/card:text-[#FC6100] transition-colors">Verify ATS Fit & Gaps</span>
+                    <div className="pt-4 border-t border-white/5 mt-auto flex items-center justify-between relative z-10 shrink-0">
+                      <span className="text-[8px] font-black text-gray-600 uppercase tracking-widest group-hover/card:text-[#FC6100] transition-colors truncate pr-2">Verify ATS Fit & Gaps</span>
                       <button 
                         onClick={() => handleSelectJob(job)}
-                        className="px-5 py-2.5 bg-[#FC6100] hover:bg-[#E35205] text-white text-[8px] font-black uppercase tracking-widest rounded-md transition-all border border-white/10 shadow-lg shadow-[#FC6100]/5 flex items-center gap-1.5 hover:scale-[1.02] active:scale-[0.98]"
+                        className="px-5 py-2.5 bg-[#FC6100] hover:bg-[#E35205] text-white text-[8px] font-black uppercase tracking-widest rounded-md transition-all border border-white/10 shadow-lg shadow-[#FC6100]/5 flex items-center gap-1.5 hover:scale-[1.02] active:scale-[0.98] shrink-0"
                       >
                         Calculate Match ⚡
                       </button>
