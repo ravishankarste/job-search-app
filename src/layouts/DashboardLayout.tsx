@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { SupportBot } from '../components/common/SupportBot';
 import { ExitNudge } from '../components/common/ExitNudge';
-import { useJobs } from '../features/jobs/hooks/useJobs';
+
 import { useNotifications } from '../features/notifications/hooks/useNotifications';
 import { InstallPrompt } from '../features/pwa/components/InstallPrompt';
 
@@ -110,22 +110,12 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
 
 export const DashboardLayout: React.FC = () => {
   const { session, isLoading: authLoading } = useAuth();
-  const { data: jobs = [] } = useJobs();
   const { notifications, unreadCount, sendTest, markAsRead } = useNotifications();
   
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
-  const [searchQuery, setSearchQuery] = React.useState('');
   const [isNotificationsOpen, setIsNotificationsOpen] = React.useState(false);
   const [isExitNudgeOpen, setIsExitNudgeOpen] = React.useState(false);
   const location = useLocation();
-
-  const filteredJobs = React.useMemo(() => {
-    if (!searchQuery.trim()) return [];
-    return jobs.filter(job => 
-      job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.company_name.toLowerCase().includes(searchQuery.toLowerCase())
-    ).slice(0, 5);
-  }, [jobs, searchQuery]);
 
   React.useEffect(() => {
     setIsMobileMenuOpen(false);

@@ -19,7 +19,7 @@ import { useResumes } from '../../resumes/hooks/useResumes';
 import type { ApplicationStatus } from '../services/jobService';
 
 import { DeleteConfirmModal } from '../components/DeleteConfirmModal';
-
+import { trackEvent } from '../../../lib/analytics';
 export const JobDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
