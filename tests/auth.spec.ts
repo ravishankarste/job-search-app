@@ -62,4 +62,27 @@ test.describe('🛡️ Sovereign Shield: Identity & Authentication', () => {
     // Future iteration: Mock the Supabase /auth/v1/authorize response.
   });
 
+  test('Password length validation protects against Bcrypt DoS (>72 chars)', async ({ page }) => {
+    // 1. Verify on Signup Page
+    await page.goto('/signup');
+    await page.fill('[data-testid="signup-email-input"]', 'dos_test@example.com');
+    
+    // Fill a password of 73 characters
+    const longPassword = 'a'.repeat(73);
+    await page.fill('[data-testid="signup-password-input"]', longPassword);
+    await page.click('[data-testid="signup-submit-btn"]');
+    
+    // Expect validation message to be visible
+    await expect(page.locator('text=Password cannot be longer than 72 characters')).toBeVisible();
+
+    // 2. Verify on Login Page
+    await page.goto('/login');
+    await page.fill('[data-testid="login-email-input"]', 'dos_test@example.com');
+    await page.fill('[data-testid="login-password-input"]', longPassword);
+    await page.click('[data-testid="login-submit-btn"]');
+    
+    // Expect validation message to be visible
+    await expect(page.locator('text=Password cannot be longer than 72 characters')).toBeVisible();
+  });
+
 });

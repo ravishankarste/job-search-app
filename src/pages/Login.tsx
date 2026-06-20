@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { authService } from '../services/authService';
+import { loginSchema } from '../lib/validation';
 import { googleAuthService } from '../services/googleAuthService';
 
 export const Login: React.FC = () => {
@@ -33,6 +34,13 @@ export const Login: React.FC = () => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+
+    const validation = loginSchema.safeParse({ email, password });
+    if (!validation.success) {
+      setError(validation.error.errors[0].message);
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const response = await authService.signIn(email, password);

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authService } from '../services/authService';
+import { signupSchema } from '../lib/validation';
 
 export const Signup: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -25,6 +26,13 @@ export const Signup: React.FC = () => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+
+    const validation = signupSchema.safeParse({ email, password });
+    if (!validation.success) {
+      setError(validation.error.errors[0].message);
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const response = await authService.signUp(email, password);
