@@ -32,7 +32,7 @@ function extractQueryAndLocation(rawQuery: string, rawLocation: string) {
     whereQuery = parts.pop()?.trim() || '';
     whatQuery = parts.join(',').trim();
   } else if (!whereQuery) {
-    const match = whatQuery.match(/^(.*?)\s+(?:in|near|around|at)\s+([a-zA-Z\s]+)$/i);
+    const match = whatQuery.match(/^(.*?)\s+(?:in|near|around|at)\s+([a-zA-Z][a-zA-Z\s]{0,99})$/i);
     if (match) {
       whatQuery = match[1].trim();
       whereQuery = match[2].trim();
