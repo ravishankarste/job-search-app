@@ -31,167 +31,183 @@ export interface LLMEnrichmentResult {
 }
 
 // A comprehensive list of tech keywords to look for (Universal Multi-Industry Library)
-const TECH_KEYWORDS = [
+export interface CanonicalSkill {
+  id: string;
+  label: string;
+  category: "core" | "technical" | "domain" | "tool" | "soft_skill" | "seniority";
+  baseWeight: number;
+  aliases: string[];
+  importanceTier: "critical" | "important" | "nice_to_have";
+}
+
+export const CANONICAL_SKILLS: CanonicalSkill[] = [
   // 💻 TECHNOLOGY & ENGINEERING
-  'react', 'typescript', 'javascript', 'next.js', 'node.js', 'python', 'java', 'go', 'golang',
-  'aws', 'azure', 'gcp', 'docker', 'kubernetes', 'sql', 'nosql', 'mongodb', 'postgresql',
-  'graphql', 'rest', 'api', 'microservices', 'devops', 'ci/cd', 'git', 'agile', 'scrum',
-  'frontend', 'backend', 'fullstack', 'mobile', 'react native', 'flutter', 'swift', 'kotlin',
-  'machine learning', 'ai', 'data science', 'security', 'cybersecurity', 'cloud', 'serverless',
-  'testing', 'jest', 'cypress', 'terraform', 'ansible', 'prometheus', 'grafana', 'redis',
-  'kafka', 'rabbitmq', 'elasticsearch', 'rust', 'c++', 'c#', 'dotnet', 'django', 'flask',
-  'engineer', 'developer', 'automation', 'qa', 'architect', 'full-stack', 'system design',
+  { id: 'react', label: 'React.js', category: 'tool', baseWeight: 2.0, aliases: ['react', 'react.js', 'reactjs'], importanceTier: 'critical' },
+  { id: 'typescript', label: 'TypeScript', category: 'technical', baseWeight: 2.0, aliases: ['typescript', 'ts'], importanceTier: 'critical' },
+  { id: 'javascript', label: 'JavaScript', category: 'technical', baseWeight: 2.0, aliases: ['javascript', 'js', 'es6'], importanceTier: 'critical' },
+  { id: 'nextjs', label: 'Next.js', category: 'tool', baseWeight: 2.0, aliases: ['next.js', 'nextjs'], importanceTier: 'critical' },
+  { id: 'nodejs', label: 'Node.js', category: 'tool', baseWeight: 2.0, aliases: ['node.js', 'nodejs'], importanceTier: 'critical' },
+  { id: 'python', label: 'Python', category: 'technical', baseWeight: 2.0, aliases: ['python', 'py'], importanceTier: 'critical' },
+  { id: 'java', label: 'Java', category: 'technical', baseWeight: 2.0, aliases: ['java'], importanceTier: 'important' },
+  { id: 'golang', label: 'Go (Golang)', category: 'technical', baseWeight: 2.0, aliases: ['go', 'golang'], importanceTier: 'important' },
+  { id: 'aws', label: 'AWS Cloud', category: 'tool', baseWeight: 2.0, aliases: ['aws', 'amazon web services'], importanceTier: 'critical' },
+  { id: 'azure', label: 'Azure Cloud', category: 'tool', baseWeight: 2.0, aliases: ['azure', 'microsoft azure'], importanceTier: 'important' },
+  { id: 'gcp', label: 'GCP Cloud', category: 'tool', baseWeight: 2.0, aliases: ['gcp', 'google cloud platform', 'google cloud'], importanceTier: 'important' },
+  { id: 'docker', label: 'Docker Containerization', category: 'tool', baseWeight: 2.0, aliases: ['docker', 'containerization'], importanceTier: 'important' },
+  { id: 'kubernetes', label: 'Kubernetes Orchestration', category: 'tool', baseWeight: 2.0, aliases: ['kubernetes', 'k8s'], importanceTier: 'important' },
+  { id: 'sql', label: 'SQL / Databases', category: 'technical', baseWeight: 2.0, aliases: ['sql', 'mysql', 'sqlite'], importanceTier: 'critical' },
+  { id: 'postgresql', label: 'PostgreSQL', category: 'tool', baseWeight: 2.0, aliases: ['postgresql', 'postgres'], importanceTier: 'important' },
+  { id: 'api', label: 'API Development', category: 'technical', baseWeight: 2.0, aliases: ['api', 'apis', 'rest api', 'graphql'], importanceTier: 'important' },
+  { id: 'devops', label: 'DevOps / CI-CD', category: 'technical', baseWeight: 2.0, aliases: ['devops', 'ci/cd', 'continuous integration', 'github actions'], importanceTier: 'important' },
+  { id: 'agile', label: 'Agile Methodology', category: 'domain', baseWeight: 1.5, aliases: ['agile', 'scrum', 'kanban'], importanceTier: 'important' },
+  { id: 'ai_ml', label: 'AI & Machine Learning', category: 'technical', baseWeight: 2.0, aliases: ['ai', 'artificial intelligence', 'machine learning', 'ml', 'deep learning', 'nlp', 'llm', 'generative ai', 'chatgpt', 'claude'], importanceTier: 'critical' },
+  { id: 'testing', label: 'Software Testing / QA', category: 'technical', baseWeight: 1.5, aliases: ['testing', 'qa', 'jest', 'cypress', 'selenium', 'playwright', 'unit test'], importanceTier: 'important' },
+  { id: 'system_design', label: 'System Design / Architecture', category: 'technical', baseWeight: 2.0, aliases: ['system design', 'architecture', 'software design'], importanceTier: 'critical' },
 
   // 📈 MARKETING & GROWTH
-  'seo', 'sem', 'content marketing', 'digital marketing', 'social media', 'email marketing',
-  'crm', 'hubspot', 'salesforce', 'google analytics', 'copywriting', 'growth hacking',
-  'performance marketing', 'branding', 'market research', 'e-commerce', 'conversion rate',
-  'ppc', 'advertising', 'public relations', 'pr', 'influencer marketing', 'b2b', 'b2c',
+  { id: 'seo_sem', label: 'SEO & Growth Marketing', category: 'technical', baseWeight: 1.5, aliases: ['seo', 'sem', 'growth marketing', 'performance marketing', 'google analytics', 'digital marketing'], importanceTier: 'important' },
+  { id: 'crm', label: 'CRM Systems', category: 'tool', baseWeight: 1.5, aliases: ['crm', 'salesforce', 'hubspot'], importanceTier: 'important' },
+  { id: 'ecommerce', label: 'E-commerce Management', category: 'domain', baseWeight: 1.8, aliases: ['e-commerce', 'ecommerce', 'shopify', 'online store'], importanceTier: 'important' },
 
   // 💰 SALES & REVENUE
-  'sales', 'account management', 'business development', 'pipeline', 'cold calling',
-  'lead generation', 'negotiation', 'closing', 'revenue', 'saas sales', 'enterprise sales',
-  'customer success', 'crm management', 'forecasting', 'quota', 'prospecting',
+  { id: 'sales', label: 'Sales & Business Development', category: 'domain', baseWeight: 1.8, aliases: ['sales', 'selling', 'business development', 'closing', 'cold calling', 'account management'], importanceTier: 'critical' },
+  { id: 'customer_success', label: 'Customer Success & Support', category: 'domain', baseWeight: 1.5, aliases: ['customer success', 'customer support', 'account management', 'relationship management'], importanceTier: 'important' },
 
-  // 🏥 HEALTHCARE & ADMINISTRATION
-  'healthcare', 'clinical', 'patient care', 'medical', 'hipaa', 'electronic health records',
-  'ehr', 'emr', 'nursing', 'pharmaceutical', 'hospital administration', 'public health',
-  'medical billing', 'compliance', 'regulatory', 'healthcare operations', 'telehealth',
+  // 🏥 HEALTHCARE
+  { id: 'healthcare', label: 'Healthcare & Patient Administration', category: 'domain', baseWeight: 1.8, aliases: ['healthcare', 'clinical', 'patient care', 'medical', 'hipaa', 'ehr', 'emr'], importanceTier: 'important' },
 
-  // ⚖️ LEGAL, FINANCE & COMPLIANCE
-  'audit', 'finance', 'accounting', 'p&l', 'budgeting', 'financial analysis', 'tax',
-  'legal', 'contracts', 'risk management', 'governance', 'regulatory compliance',
-  'sox', 'ifrs', 'gaap', 'investment', 'portfolio management', 'banking',
+  // ⚖️ LEGAL & FINANCE
+  { id: 'finance_accounting', label: 'Finance & Accounting', category: 'domain', baseWeight: 1.8, aliases: ['finance', 'accounting', 'tax', 'bookkeeping', 'gaap', 'audit', 'financial analysis'], importanceTier: 'critical' },
+  { id: 'budgeting_pl', label: 'Budgeting & P&L Management', category: 'domain', baseWeight: 1.8, aliases: ['budgeting', 'p&l', 'p and l', 'profit and loss', 'budget allocation'], importanceTier: 'critical' },
+  { id: 'compliance', label: 'Regulatory Compliance & Risk', category: 'domain', baseWeight: 1.5, aliases: ['compliance', 'regulatory compliance', 'regulatory', 'risk management', 'governance'], importanceTier: 'important' },
 
   // 🎨 DESIGN & CREATIVE
-  'ux', 'ui', 'user experience', 'user interface', 'figma', 'adobe creative suite',
-  'photoshop', 'illustrator', 'product design', 'graphic design', 'prototyping',
-  'wireframing', 'visual design', 'typography', 'motion design', 'user research',
+  { id: 'ux_ui', label: 'UX/UI Design', category: 'technical', baseWeight: 1.8, aliases: ['ux', 'ui', 'user experience', 'user interface', 'product design', 'figma', 'wireframing', 'prototyping'], importanceTier: 'critical' },
 
   // 👔 LEADERSHIP & OPERATIONS
-  'senior', 'junior', 'lead', 'manager', 'director', 'vp', 'cto', 'ceo', 'coo', 'cfo',
-  'head of', 'principal', 'staff', 'management', 'leadership', 'strategy', 'operations',
-  'project management', 'product management', 'mentoring', 'team building', 'stakeholder',
-  'process improvement', 'workflow', 'documentation', 'audit', 'administrative',
-  'coordination', 'planning', 'resource allocation', 'international standards',
-  'european standards', 'procedures', 'verification', 'validation', 'six sigma', 'lean',
+  { id: 'operations', label: 'Business & Team Operations', category: 'domain', baseWeight: 1.8, aliases: ['operations', 'operational excellence', 'ops', 'process improvement', 'efficiency', 'workflow'], importanceTier: 'critical' },
+  { id: 'project_mgmt', label: 'Project & Program Management', category: 'domain', baseWeight: 1.5, aliases: ['project management', 'program management', 'project manager', 'pmp'], importanceTier: 'important' },
+  { id: 'product_mgmt', label: 'Product Management', category: 'domain', baseWeight: 1.8, aliases: ['product management', 'product manager', 'roadmap'], importanceTier: 'important' },
+  { id: 'coordination', label: 'Administration & Coordination', category: 'soft_skill', baseWeight: 1.0, aliases: ['coordination', 'administrative', 'planning', 'scheduling', 'resource allocation', 'calendar management', 'travel coordination'], importanceTier: 'important' },
+  { id: 'validation', label: 'Quality Assurance & Validation', category: 'technical', baseWeight: 1.0, aliases: ['validation', 'verification', 'standards compliance', 'quality assurance'], importanceTier: 'important' },
+  { id: 'strategy', label: 'Strategic Planning & Execution', category: 'core', baseWeight: 2.0, aliases: ['strategy', 'strategic planning', 'execution', 'business strategy'], importanceTier: 'critical' },
 
   // 🤝 HUMAN RESOURCES & TALENT
-  'recruiting', 'talent acquisition', 'hr', 'human resources', 'onboarding', 'hris',
-  'employee relations', 'performance management', 'compensation', 'benefits',
-  'diversity', 'inclusion', 'culture', 'training', 'development'
+  { id: 'hr_recruiting', label: 'Human Resources & Talent Acquisition', category: 'domain', baseWeight: 1.5, aliases: ['recruiting', 'talent acquisition', 'hr', 'human resources', 'onboarding'], importanceTier: 'important' },
+
+  // 👔 SENIORITY & ROLES
+  { id: 'senior', label: 'Senior Experience', category: 'seniority', baseWeight: 1.5, aliases: ['senior', 'director', 'vp', 'cto', 'ceo', 'cfo', 'coo', 'head of', 'principal', 'staff', 'lead', 'manager'], importanceTier: 'critical' },
+  { id: 'leadership', label: 'Leadership & People Management', category: 'core', baseWeight: 1.8, aliases: ['leadership', 'management', 'team building', 'mentoring', 'people management', 'stakeholder management'], importanceTier: 'critical' },
+  { id: 'culture', label: 'Culture & Collaboration', category: 'soft_skill', baseWeight: 1.0, aliases: ['culture', 'collaboration', 'collaboration skills', 'cross-functional', 'communication', 'teamwork'], importanceTier: 'nice_to_have' }
 ];
 
-// Keyword Weighting Configuration
-export const KEYWORD_WEIGHTS: Record<string, number> = {
-  // Hard Skills / Tech (High Impact)
-  'react': 2, 'typescript': 2, 'javascript': 2, 'next.js': 2, 'python': 2, 'java': 2,
-  'aws': 2, 'azure': 2, 'gcp': 2, 'kubernetes': 2, 'sql': 2, 'postgresql': 2,
-  'compliance': 2, 'regulatory': 2, 'clinical': 2, 'finance': 2, 'audit': 2,
+export function normalize(text: string): string {
+  return text.toLowerCase().replace(/\s+/g, " ").trim();
+}
 
-  // Leadership & Seniority (Medium Impact)
-  'senior': 1.5, 'manager': 1.5, 'lead': 1.5, 'director': 1.5, 'strategy': 1.5,
-  'operations': 1.5, 'project management': 1.5,
-
-  // Tools & Methodologies (Base Impact)
-  'agile': 1, 'scrum': 1, 'jira': 1, 'slack': 1, 'git': 1, 'documentation': 1
-};
-
-// Synonym Mapping to handle "Literal vs Meaning" gap (Multi-Industry)
-export const SYNONYMS: Record<string, string[]> = {
-  // TECHNICAL & DEVOPS
-  'ci/cd': ['continuous integration', 'continuous delivery', 'deployment pipeline', 'automated deployment'],
-  'aws': ['amazon web services', 'ec2', 's3', 'lambda'],
-  'gcp': ['google cloud platform', 'bigquery', 'cloud run'],
-  'azure': ['microsoft azure', 'azure devops'],
-  'sql': ['database management', 'relational database', 'postgresql', 'mysql', 'querying'],
-  'agile': ['scrum master', 'kanban', 'software development lifecycle', 'sdlc', 'sprints'],
-  'frontend': ['ui engineering', 'client-side', 'user interface'],
-  'backend': ['server-side', 'api development', 'infrastructure engineering'],
-  'cybersecurity': ['information security', 'infosec', 'penetration testing', 'threat detection'],
-
-  // PROJECT & OPERATIONS
-  'project management': ['managing projects', 'project coordination', 'pm', 'pmo', 'delivery management'],
-  'operations': ['ops', 'process improvement', 'operational excellence', 'efficiency'],
-  'leadership': ['management', 'team lead', 'mentoring', 'head of'],
-  'stakeholder management': ['client relations', 'business communication', 'managing expectations'],
-
-  // FINANCE & LEGAL
-  'compliance': ['regulatory standards', 'audit', 'risk management', 'governance'],
-  'finance': ['accounting', 'financial analysis', 'budgeting', 'p&l'],
-  'data analysis': ['business intelligence', 'bi', 'data visualization', 'analytics'],
-
-  // HEALTHCARE & CLINICAL
-  'clinical': ['patient care', 'medical records', 'healthcare administration', 'hospital'],
-  'research': ['clinical trials', 'data collection', 'laboratory', 'scientific method'],
-
-  // MARKETING & SALES
-  'digital marketing': ['seo', 'sem', 'content strategy', 'social media management'],
-  'sales': ['business development', 'account management', 'lead generation', 'revenue growth'],
-  'ui/ux': ['user experience', 'user interface design', 'product design', 'wireframing']
-};
-
-const getKeywordRegex = (skill: string) => {
+export const getKeywordRegex = (skill: string) => {
   const escaped = skill.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const leading = /^\w/.test(skill) ? '\\b' : '(?:^|\\s|\\p{P})';
-  const trailing = /\w$/.test(skill) ? '\\b' : '(?:$|\\s|\\p{P})';
+  const leading = /^\w/.test(skill) ? '\\b' : '(?<=^|\\s|\\p{P})';
+  const trailing = /\w$/.test(skill) ? '\\b' : '(?=$|\\s|\\p{P})';
   return new RegExp(leading + escaped + trailing, 'iu');
 };
+
+export interface MappingMatch {
+  skillId: string;
+  weight: number;
+  matchedAlias: string;
+}
+
+export function mapSkills(text: string, skills: CanonicalSkill[]): MappingMatch[] {
+  const normalized = normalize(text);
+  const matches: MappingMatch[] = [];
+
+  for (const skill of skills) {
+    for (const alias of skill.aliases) {
+      const regex = getKeywordRegex(alias);
+      if (regex.test(normalized)) {
+        matches.push({
+          skillId: skill.id,
+          weight: skill.baseWeight,
+          matchedAlias: alias
+        });
+        break; // Match only the first alias for this node
+      }
+    }
+  }
+  return matches;
+}
 
 export const matchAnalysisService = {
   /**
    * Run local regex-based match calculation as a fallback
    */
   calculateLocalMatchScore(jobDescription: string, resumeText: string): MatchScoreResult {
-    const jobText = jobDescription.toLowerCase();
-    const resText = resumeText.toLowerCase();
+    // 1. Map canonical skills found in the Job Description
+    const jdSkills = mapSkills(jobDescription, CANONICAL_SKILLS);
 
-    const foundKeywords = TECH_KEYWORDS.filter(skill => {
-      const hasSkill = getKeywordRegex(skill).test(jobText);
-      
-      const synonyms = SYNONYMS[skill] || [];
-      const hasSynonym = synonyms.some(syn => {
-        return getKeywordRegex(syn).test(jobText);
-      });
-
-      return hasSkill || hasSynonym;
-    });
-
-    if (foundKeywords.length === 0) {
-      return { score: 0, matchingSkills: [], missingSkills: [], weightedDetails: { coreMatches: [], secondaryMatches: [] } };
+    if (jdSkills.length === 0) {
+      return { 
+        score: 0, 
+        matchingSkills: [], 
+        missingSkills: [], 
+        weightedDetails: { coreMatches: [], secondaryMatches: [] } 
+      };
     }
 
-    const matchingSkills = foundKeywords.filter(skill => {
-      const hasSkill = getKeywordRegex(skill).test(resText);
+    // 2. Map canonical skills found in the Resume
+    const resSkills = mapSkills(resumeText, CANONICAL_SKILLS);
+    const resSkillIds = new Set(resSkills.map(s => s.skillId));
 
-      const synonyms = SYNONYMS[skill] || [];
-      const hasSynonym = synonyms.some(syn => {
-        return getKeywordRegex(syn).test(resText);
-      });
+    // 3. Deduplicate matches & gaps
+    const matchedNodes = jdSkills.filter(s => resSkillIds.has(s.skillId));
+    const missingNodes = jdSkills.filter(s => !resSkillIds.has(s.skillId));
 
-      return hasSkill || hasSynonym;
-    });
-
-    const missingSkills = foundKeywords.filter(skill => !matchingSkills.includes(skill));
-
+    // 4. Calculate earned vs. possible weights
     let totalPossibleWeight = 0;
     let earnedWeight = 0;
 
-    foundKeywords.forEach(skill => {
-      const weight = KEYWORD_WEIGHTS[skill.toLowerCase()] || 1;
-      totalPossibleWeight += weight;
-      if (matchingSkills.includes(skill)) {
-        earnedWeight += weight;
-      }
+    jdSkills.forEach(s => {
+      totalPossibleWeight += s.weight;
+    });
+
+    matchedNodes.forEach(s => {
+      earnedWeight += s.weight;
     });
 
     const ratio = earnedWeight / totalPossibleWeight;
     const score = Math.round(Math.sqrt(ratio) * 100);
 
-    const coreMatches = matchingSkills.filter(s => (KEYWORD_WEIGHTS[s.toLowerCase()] || 1) >= 1.5);
-    const secondaryMatches = matchingSkills.filter(s => (KEYWORD_WEIGHTS[s.toLowerCase()] || 1) < 1.5);
+    // 5. Build clean label arrays for the UI (using the label of the canonical node)
+    const matchingSkills = matchedNodes.map(m => {
+      const node = CANONICAL_SKILLS.find(s => s.id === m.skillId);
+      return node ? node.label : m.skillId;
+    });
 
+    const missingSkills = missingNodes.map(m => {
+      const node = CANONICAL_SKILLS.find(s => s.id === m.skillId);
+      return node ? node.label : m.skillId;
+    });
+
+    const coreMatches = matchedNodes
+      .filter(m => m.weight >= 1.5)
+      .map(m => {
+        const node = CANONICAL_SKILLS.find(s => s.id === m.skillId);
+        return node ? node.label : m.skillId;
+      });
+
+    const secondaryMatches = matchedNodes
+      .filter(m => m.weight < 1.5)
+      .map(m => {
+        const node = CANONICAL_SKILLS.find(s => s.id === m.skillId);
+        return node ? node.label : m.skillId;
+      });
+
+    // 6. Seniority / Juniority check helpers
     const warnings: string[] = [];
+    const jobText = jobDescription.toLowerCase();
+    const resText = resumeText.toLowerCase();
+
     const seniorMarkers = ['director', 'vp', 'head of', 'principal', 'staff', 'lead', 'manager', 'senior'];
     const juniorMarkers = ['junior', 'associate', 'intern', 'entry level', 'grad', 'trainee'];
 

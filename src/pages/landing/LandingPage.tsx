@@ -12,7 +12,7 @@ import {
   MapPin
 } from 'lucide-react';
 import { trackEvent } from '../../lib/analytics';
-import { matchAnalysisService, SYNONYMS, KEYWORD_WEIGHTS } from '../../features/jobs/services/matchAnalysisService';
+import { matchAnalysisService, CANONICAL_SKILLS } from '../../features/jobs/services/matchAnalysisService';
 import { pdfExtractionService } from '../../features/resumes/services/pdfExtractionService';
 import { jobRelevanceService } from '../../features/discovery/services/jobRelevanceService';
 import { apifyService, type DiscoveredJob } from '../../features/discovery/services/apifyService';
@@ -1122,7 +1122,8 @@ export const LandingPage: React.FC = () => {
                           ...(result?.matchingSkills ?? []),
                           ...(result?.missingSkills ?? [])
                         ].flatMap(skill => {
-                          return [skill, ...(SYNONYMS[skill] || [])];
+                          const node = CANONICAL_SKILLS.find(cs => cs.label === skill);
+                          return node ? node.aliases : [skill];
                         });
                         allTerms.sort((a, b) => b.length - a.length);
                         const combinedRegex = new RegExp(`(${allTerms.map(t => {
@@ -1134,10 +1135,14 @@ export const LandingPage: React.FC = () => {
                         return jobText.split(combinedRegex).map((part, index) => {
                           const lowerPart = part.toLowerCase();
                           const isMatch = (result?.matchingSkills ?? []).some(s => {
-                            return s.toLowerCase() === lowerPart || (SYNONYMS[s] || []).some(syn => syn.toLowerCase() === lowerPart);
+                            const node = CANONICAL_SKILLS.find(cs => cs.label === s);
+                            const aliases = node ? node.aliases : [s];
+                            return aliases.some(alias => alias.toLowerCase() === lowerPart);
                           });
                           const isMissing = (result?.missingSkills ?? []).some(s => {
-                            return s.toLowerCase() === lowerPart || (SYNONYMS[s] || []).some(syn => syn.toLowerCase() === lowerPart);
+                            const node = CANONICAL_SKILLS.find(cs => cs.label === s);
+                            const aliases = node ? node.aliases : [s];
+                            return aliases.some(alias => alias.toLowerCase() === lowerPart);
                           });
                           if (isMatch) return <span key={index} className="text-[#00FF00] bg-[#00FF00]/10 px-1 rounded font-bold">{part}</span>;
                           if (isMissing) return <span key={index} className="text-white border-b border-white/40">{part}</span>;
@@ -1153,12 +1158,13 @@ export const LandingPage: React.FC = () => {
                         <div className="space-y-2 text-[10px] text-gray-500 font-mono leading-relaxed">
                           <p>We weigh core industry requirements higher than secondary keywords to prevent the "laundry list" penalty:</p>
                           <div className="bg-black/30 p-4 rounded-xl border border-white/5 space-y-2">
-                            <div className="flex justify-between text-white font-bold">
+                             <div className="flex justify-between text-white font-bold">
                               <span>Total Possible Weight:</span>
                               <span>{(() => {
                                 let total = 0;
                                 [...result.matchingSkills, ...result.missingSkills].forEach(s => {
-                                  total += KEYWORD_WEIGHTS[s.toLowerCase()] || 1;
+                                  const node = CANONICAL_SKILLS.find(cs => cs.label === s);
+                                  total += node ? node.baseWeight : 1;
                                 });
                                 return total.toFixed(1);
                               })()} pts</span>
@@ -1168,7 +1174,8 @@ export const LandingPage: React.FC = () => {
                               <span>{(() => {
                                 let earned = 0;
                                 result.matchingSkills.forEach(s => {
-                                  earned += KEYWORD_WEIGHTS[s.toLowerCase()] || 1;
+                                  const node = CANONICAL_SKILLS.find(cs => cs.label === s);
+                                  earned += node ? node.baseWeight : 1;
                                 });
                                 return earned.toFixed(1);
                               })()} pts</span>
@@ -1180,10 +1187,12 @@ export const LandingPage: React.FC = () => {
                                 let total = 0;
                                 let earned = 0;
                                 [...result.matchingSkills, ...result.missingSkills].forEach(s => {
-                                  total += KEYWORD_WEIGHTS[s.toLowerCase()] || 1;
+                                  const node = CANONICAL_SKILLS.find(cs => cs.label === s);
+                                  total += node ? node.baseWeight : 1;
                                 });
                                 result.matchingSkills.forEach(s => {
-                                  earned += KEYWORD_WEIGHTS[s.toLowerCase()] || 1;
+                                  const node = CANONICAL_SKILLS.find(cs => cs.label === s);
+                                  earned += node ? node.baseWeight : 1;
                                 });
                                 return total > 0 ? `${Math.round((earned / total) * 100)}%` : '0%';
                               })()}</span>
@@ -1200,7 +1209,8 @@ export const LandingPage: React.FC = () => {
                         <p className="text-[9px] font-mono uppercase tracking-[0.2em] text-white">Skills Weight Breakdown</p>
                         <div className="max-h-[160px] overflow-y-auto space-y-2 text-[9px] font-mono scrollbar-hide">
                           {result.matchingSkills.map(s => {
-                            const weight = KEYWORD_WEIGHTS[s.toLowerCase()] || 1;
+                            const node = CANONICAL_SKILLS.find(cs => cs.label === s);
+                            const weight = node ? node.baseWeight : 1;
                             return (
                               <div key={s} className="flex justify-between items-center text-[#00FF00]/80">
                                 <span>{s} (Match)</span>
@@ -1209,7 +1219,8 @@ export const LandingPage: React.FC = () => {
                             );
                           })}
                           {result.missingSkills.map(s => {
-                            const weight = KEYWORD_WEIGHTS[s.toLowerCase()] || 1;
+                            const node = CANONICAL_SKILLS.find(cs => cs.label === s);
+                            const weight = node ? node.baseWeight : 1;
                             return (
                               <div key={s} className="flex justify-between items-center text-gray-500">
                                 <span>{s} (Gap)</span>
