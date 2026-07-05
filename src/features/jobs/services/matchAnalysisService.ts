@@ -185,7 +185,8 @@ export const matchAnalysisService = {
       }
     });
 
-    const score = Math.round((earnedWeight / totalPossibleWeight) * 100);
+    const ratio = earnedWeight / totalPossibleWeight;
+    const score = Math.round(Math.sqrt(ratio) * 100);
 
     const coreMatches = matchingSkills.filter(s => (KEYWORD_WEIGHTS[s.toLowerCase()] || 1) >= 1.5);
     const secondaryMatches = matchingSkills.filter(s => (KEYWORD_WEIGHTS[s.toLowerCase()] || 1) < 1.5);

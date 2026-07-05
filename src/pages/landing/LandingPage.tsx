@@ -426,6 +426,7 @@ export const LandingPage: React.FC = () => {
 
           return {
             ...prev,
+            score: localResult.score,
             matchingSkills: localResult.matchingSkills || [],
             missingSkills: localResult.missingSkills || [],
             warnings: [

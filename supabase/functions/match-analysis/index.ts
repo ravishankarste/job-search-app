@@ -6,20 +6,112 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Keyword weights and synonyms helper (mirrors matchAnalysisService for consistent fallback fallback)
+// A comprehensive list of tech keywords to look for (Universal Multi-Industry Library)
 const TECH_KEYWORDS = [
+  // 💻 TECHNOLOGY & ENGINEERING
   'react', 'typescript', 'javascript', 'next.js', 'node.js', 'python', 'java', 'go', 'golang',
   'aws', 'azure', 'gcp', 'docker', 'kubernetes', 'sql', 'nosql', 'mongodb', 'postgresql',
   'graphql', 'rest', 'api', 'microservices', 'devops', 'ci/cd', 'git', 'agile', 'scrum',
   'frontend', 'backend', 'fullstack', 'mobile', 'react native', 'flutter', 'swift', 'kotlin',
-  'testing', 'jest', 'cypress', 'terraform', 'redis', 'kafka', 'leadership', 'strategy', 'operations'
+  'machine learning', 'ai', 'data science', 'security', 'cybersecurity', 'cloud', 'serverless',
+  'testing', 'jest', 'cypress', 'terraform', 'ansible', 'prometheus', 'grafana', 'redis',
+  'kafka', 'rabbitmq', 'elasticsearch', 'rust', 'c++', 'c#', 'dotnet', 'django', 'flask',
+  'engineer', 'developer', 'automation', 'qa', 'architect', 'full-stack', 'system design',
+
+  // 📈 MARKETING & GROWTH
+  'seo', 'sem', 'content marketing', 'digital marketing', 'social media', 'email marketing',
+  'crm', 'hubspot', 'salesforce', 'google analytics', 'copywriting', 'growth hacking',
+  'performance marketing', 'branding', 'market research', 'e-commerce', 'conversion rate',
+  'ppc', 'advertising', 'public relations', 'pr', 'influencer marketing', 'b2b', 'b2c',
+
+  // 💰 SALES & REVENUE
+  'sales', 'account management', 'business development', 'pipeline', 'cold calling',
+  'lead generation', 'negotiation', 'closing', 'revenue', 'saas sales', 'enterprise sales',
+  'customer success', 'crm management', 'forecasting', 'quota', 'prospecting',
+
+  // 🏥 HEALTHCARE & ADMINISTRATION
+  'healthcare', 'clinical', 'patient care', 'medical', 'hipaa', 'electronic health records',
+  'ehr', 'emr', 'nursing', 'pharmaceutical', 'hospital administration', 'public health',
+  'medical billing', 'compliance', 'regulatory', 'healthcare operations', 'telehealth',
+
+  // ⚖️ LEGAL, FINANCE & COMPLIANCE
+  'audit', 'finance', 'accounting', 'p&l', 'budgeting', 'financial analysis', 'tax',
+  'legal', 'contracts', 'risk management', 'governance', 'regulatory compliance',
+  'sox', 'ifrs', 'gaap', 'investment', 'portfolio management', 'banking',
+
+  // 🎨 DESIGN & CREATIVE
+  'ux', 'ui', 'user experience', 'user interface', 'figma', 'adobe creative suite',
+  'photoshop', 'illustrator', 'product design', 'graphic design', 'prototyping',
+  'wireframing', 'visual design', 'typography', 'motion design', 'user research',
+
+  // 👔 LEADERSHIP & OPERATIONS
+  'senior', 'junior', 'lead', 'manager', 'director', 'vp', 'cto', 'ceo', 'coo', 'cfo',
+  'head of', 'principal', 'staff', 'management', 'leadership', 'strategy', 'operations',
+  'project management', 'product management', 'mentoring', 'team building', 'stakeholder',
+  'process improvement', 'workflow', 'documentation', 'audit', 'administrative',
+  'coordination', 'planning', 'resource allocation', 'international standards',
+  'european standards', 'procedures', 'verification', 'validation', 'six sigma', 'lean',
+
+  // 🤝 HUMAN RESOURCES & TALENT
+  'recruiting', 'talent acquisition', 'hr', 'human resources', 'onboarding', 'hris',
+  'employee relations', 'performance management', 'compensation', 'benefits',
+  'diversity', 'inclusion', 'culture', 'training', 'development'
 ];
 
+// Keyword Weighting Configuration
 const KEYWORD_WEIGHTS: Record<string, number> = {
+  // Hard Skills / Tech (High Impact)
   'react': 2, 'typescript': 2, 'javascript': 2, 'next.js': 2, 'python': 2, 'java': 2,
   'aws': 2, 'azure': 2, 'gcp': 2, 'kubernetes': 2, 'sql': 2, 'postgresql': 2,
-  'senior': 1.5, 'manager': 1.5, 'lead': 1.5, 'strategy': 1.5, 'operations': 1.5,
-  'agile': 1, 'scrum': 1, 'git': 1, 'documentation': 1
+  'compliance': 2, 'regulatory': 2, 'clinical': 2, 'finance': 2, 'audit': 2,
+
+  // Leadership & Seniority (Medium Impact)
+  'senior': 1.5, 'manager': 1.5, 'lead': 1.5, 'director': 1.5, 'strategy': 1.5,
+  'operations': 1.5, 'project management': 1.5,
+
+  // Tools & Methodologies (Base Impact)
+  'agile': 1, 'scrum': 1, 'jira': 1, 'slack': 1, 'git': 1, 'documentation': 1
+};
+
+// Synonym Mapping to handle "Literal vs Meaning" gap (Multi-Industry)
+const SYNONYMS: Record<string, string[]> = {
+  // TECHNICAL & DEVOPS
+  'ci/cd': ['continuous integration', 'continuous delivery', 'deployment pipeline', 'automated deployment'],
+  'aws': ['amazon web services', 'ec2', 's3', 'lambda'],
+  'gcp': ['google cloud platform', 'bigquery', 'cloud run'],
+  'azure': ['microsoft azure', 'azure devops'],
+  'sql': ['database management', 'relational database', 'postgresql', 'mysql', 'querying'],
+  'agile': ['scrum master', 'kanban', 'software development lifecycle', 'sdlc', 'sprints'],
+  'frontend': ['ui engineering', 'client-side', 'user interface'],
+  'backend': ['server-side', 'api development', 'infrastructure engineering'],
+  'cybersecurity': ['information security', 'infosec', 'penetration testing', 'threat detection'],
+
+  // PROJECT & OPERATIONS
+  'project management': ['managing projects', 'project coordination', 'pm', 'pmo', 'delivery management'],
+  'operations': ['ops', 'process improvement', 'operational excellence', 'efficiency'],
+  'leadership': ['management', 'team lead', 'mentoring', 'head of'],
+  'stakeholder management': ['client relations', 'business communication', 'managing expectations'],
+
+  // FINANCE & LEGAL
+  'compliance': ['regulatory standards', 'audit', 'risk management', 'governance'],
+  'finance': ['accounting', 'financial analysis', 'budgeting', 'p&l'],
+  'data analysis': ['business intelligence', 'bi', 'data visualization', 'analytics'],
+
+  // HEALTHCARE & CLINICAL
+  'clinical': ['patient care', 'medical records', 'healthcare administration', 'hospital'],
+  'research': ['clinical trials', 'data collection', 'laboratory', 'scientific method'],
+
+  // MARKETING & SALES
+  'digital marketing': ['seo', 'sem', 'content strategy', 'social media management'],
+  'sales': ['business development', 'account management', 'lead generation', 'revenue growth'],
+  'ui/ux': ['user experience', 'user interface design', 'product design', 'wireframing']
+};
+
+const getKeywordRegex = (skill: string) => {
+  const escaped = skill.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const leading = /^\w/.test(skill) ? '\\b' : '(?:^|\\s|\\p{P})';
+  const trailing = /\w$/.test(skill) ? '\\b' : '(?:$|\\s|\\p{P})';
+  return new RegExp(leading + escaped + trailing, 'iu');
 };
 
 function calculateLocalMatchScore(jobDescription: string, resumeText: string) {
@@ -27,8 +119,10 @@ function calculateLocalMatchScore(jobDescription: string, resumeText: string) {
   const resText = resumeText.toLowerCase();
 
   const foundKeywords = TECH_KEYWORDS.filter(skill => {
-    const skillRegex = new RegExp(`\\b${skill}\\b`, 'i');
-    return skillRegex.test(jobText);
+    const hasSkill = getKeywordRegex(skill).test(jobText);
+    const synonyms = SYNONYMS[skill] || [];
+    const hasSynonym = synonyms.some(syn => getKeywordRegex(syn).test(jobText));
+    return hasSkill || hasSynonym;
   });
 
   if (foundKeywords.length === 0) {
@@ -36,8 +130,10 @@ function calculateLocalMatchScore(jobDescription: string, resumeText: string) {
   }
 
   const matchingSkills = foundKeywords.filter(skill => {
-    const skillRegex = new RegExp(`\\b${skill}\\b`, 'i');
-    return skillRegex.test(resText);
+    const hasSkill = getKeywordRegex(skill).test(resText);
+    const synonyms = SYNONYMS[skill] || [];
+    const hasSynonym = synonyms.some(syn => getKeywordRegex(syn).test(resText));
+    return hasSkill || hasSynonym;
   });
 
   let totalPossibleWeight = 0;
@@ -51,7 +147,8 @@ function calculateLocalMatchScore(jobDescription: string, resumeText: string) {
     }
   });
 
-  return Math.round((earnedWeight / totalPossibleWeight) * 100);
+  const ratio = earnedWeight / totalPossibleWeight;
+  return Math.round(Math.sqrt(ratio) * 100);
 }
 
 async function getLLMMatchAnalysis(prompt: string, groqKey: string, openaiKey: string) {
@@ -193,6 +290,13 @@ serve(async (req) => {
 
     // Lane A: Vector Match Mode (Stateless Similarity, <100ms)
     if (mode === 'vector') {
+      const calibrateVectorScore = (rawScore: number) => {
+        const min = 22;
+        const max = 48;
+        const calibrated = ((rawScore - min) / (max - min)) * 100;
+        return Math.max(0, Math.min(100, Math.round(calibrated)));
+      };
+
       if (jobId && resumeVersionId) {
         const { data: score, error: rpcError } = await supabaseAdmin.rpc('calculate_match_score', {
           resume_ver_id: resumeVersionId,
@@ -201,7 +305,7 @@ serve(async (req) => {
 
         if (!rpcError && score !== null) {
           return new Response(JSON.stringify({
-            score: score,
+            score: calibrateVectorScore(score),
             confidence_mode: "vector",
             status: "instant",
             warnings: []
