@@ -15,7 +15,7 @@ import { trackEvent } from '../../lib/analytics';
 import { matchAnalysisService, SYNONYMS } from '../../features/jobs/services/matchAnalysisService';
 import { pdfExtractionService } from '../../features/resumes/services/pdfExtractionService';
 import { jobRelevanceService } from '../../features/discovery/services/jobRelevanceService';
-import type { DiscoveredJob } from '../../features/discovery/services/apifyService';
+import { apifyService, type DiscoveredJob } from '../../features/discovery/services/apifyService';
 
 
 export const LandingPage: React.FC = () => {
@@ -25,6 +25,7 @@ export const LandingPage: React.FC = () => {
   const [jobText, setJobText] = React.useState('');
   const [resumeText, setResumeText] = React.useState('');
   const [resumeFileName, setResumeFileName] = React.useState<string | null>(null);
+  const [isScrapingFullDesc, setIsScrapingFullDesc] = React.useState(false);
   
   // Value-First Geolocation & Select Job state
   const [searchRole, setSearchRole] = React.useState('');
@@ -258,12 +259,39 @@ export const LandingPage: React.FC = () => {
   const [isJobSaved, setIsJobSaved] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
 
-  const handleSelectJob = (job: DiscoveredJob | { title: string, company_name: string, description: string, location: string, url: string }) => {
-    setJobText(job.description);
+  const handleSelectJob = async (job: DiscoveredJob | { title: string, company_name: string, description: string, location: string, url: string }) => {
+    const cleanDesc = (job.description || '')
+      .replace(/<[^>]*>?/gm, '')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    setJobText(cleanDesc);
     setSelectedJobContext(job as DiscoveredJob);
     setIsJobSaved(false);
     setShowMatchModal(true);
     trackEvent('job_opened', { title: job.title, company: job.company_name });
+
+    // If description is a truncated snippet with ellipsis or very short, crawl the full JD
+    if (job.url && (cleanDesc.includes('...') || cleanDesc.length < 500)) {
+      setIsScrapingFullDesc(true);
+      try {
+        const fullJob = await apifyService.scrapeJobUrl(job.url);
+        if (fullJob && fullJob.description) {
+          const cleanFullDesc = fullJob.description
+            .replace(/<[^>]*>?/gm, '')
+            .replace(/&nbsp;/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+          setJobText(cleanFullDesc);
+          setSelectedJobContext(prev => prev ? { ...prev, description: cleanFullDesc } : null);
+        }
+      } catch (err) {
+        console.warn("[LandingPage] Background scrape of full description failed:", err);
+      } finally {
+        setIsScrapingFullDesc(false);
+      }
+    }
   };
 
   const handleSaveJob = async () => {
@@ -686,9 +714,15 @@ export const LandingPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Step 1 */}
             <div className="space-y-4">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 w-full">
                 <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-black border transition-all ${jobText ? 'bg-[#FC6100]/20 border-[#FC6100]/50 text-[#FC6100]' : 'bg-white/5 border-white/10 text-gray-500'}`}>01</span>
                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Paste Job Description</label>
+                {isScrapingFullDesc && (
+                  <span className="text-[9px] font-bold text-[#FC6100] animate-pulse flex items-center gap-1.5 ml-auto">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#FC6100] animate-ping" />
+                    Hydrating Full JD...
+                  </span>
+                )}
               </div>
               <textarea 
                 value={jobText}
