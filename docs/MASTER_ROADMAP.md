@@ -26,15 +26,15 @@
 
 ## 🛠️ 3. Pending Features (Absolutely Necessary)
 *These must be completed before escalating GTM activity.*
-- [ ] **Onboarding Polish**: Ensure a user landing on the page for the first time knows exactly where to paste their first job.
+- [x] **Onboarding Polish**: Ensure a user landing on the page for the first time knows exactly where to paste their first job.
 - [x] **Scoring Transparency**: Users can click the match score to see exactly why they are missing points (Deciphering the algorithm).
-- [ ] **Landing Page v2**: Focus on the "Draft Headlines" (Performance, Efficiency, Growth) to optimize for signups.
+- [x] **Landing Page v2**: Focus on the "Draft Headlines" (Performance, Efficiency, Growth) to optimize for signups.
 
 ---
 
 ## 🔮 4. Future Pipeline (The "Wait for Feedback" List)
 *Do NOT build these until GTM data proves they are needed.*
-- [ ] **Legal API Migration**: Research and integrate Google Jobs API (via SerpApi) to replace brittle scraping with a stable, legal data pipeline.
+- [x] **Legal API Migration**: Research and integrate Google Jobs API (via SerpApi) to replace brittle scraping with a stable, legal data pipeline.
 - [ ] **Viral Loop**: Referral credits for friends.
 - [ ] **Success Hall of Fame**: UI for showcasing before/after ATS scores of hired users.
 - [ ] **Browser Extension**: 1-click "import and score" directly on LinkedIn.

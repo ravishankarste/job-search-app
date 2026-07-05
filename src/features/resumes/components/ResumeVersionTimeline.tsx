@@ -8,6 +8,7 @@ interface ResumeVersionTimelineProps {
   isSelectionMode?: boolean;
   selectedIds?: string[];
   onToggleSelection?: (id: string) => void;
+  onViewVersion?: (version: ResumeVersion) => void;
 }
 
 export const ResumeVersionTimeline: React.FC<ResumeVersionTimelineProps> = ({
@@ -16,6 +17,7 @@ export const ResumeVersionTimeline: React.FC<ResumeVersionTimelineProps> = ({
   isSelectionMode = false,
   selectedIds = [],
   onToggleSelection,
+  onViewVersion,
 }) => {
   if (isLoading) {
     return (
@@ -46,6 +48,7 @@ export const ResumeVersionTimeline: React.FC<ResumeVersionTimelineProps> = ({
             isSelectionMode={isSelectionMode}
             isSelected={selectedIds.includes(version.id)}
             onSelect={() => onToggleSelection?.(version.id)}
+            onView={() => onViewVersion?.(version)}
           />
         </div>
       ))}

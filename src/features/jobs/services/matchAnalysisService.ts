@@ -1,10 +1,36 @@
-/**
- * Match Analysis Service
- * Calculates the compatibility between a Resume and a Job Description.
- */
+import { supabase } from '../../../lib/supabaseClient';
 
-// A comprehensive list of tech keywords to look for
-// A Universal, Multi-Industry Keyword Library for the ATS Engine
+export interface MatchScoreResult {
+  score: number; // 0-100
+  matchingSkills: string[];
+  missingSkills: string[];
+  warnings?: string[]; // New: For "Reality Check" alerts
+  weightedDetails?: {
+    coreMatches: string[];
+    secondaryMatches: string[];
+  };
+}
+
+export interface VectorMatchResult {
+  score: number;
+  confidence_mode: 'vector' | 'fallback';
+  status: 'instant';
+  warnings?: string[];
+}
+
+export interface LLMEnrichmentResult {
+  matchingSkills: string[];
+  missingSkills: string[];
+  warnings?: string[];
+  weightedDetails?: {
+    coreMatches: string[];
+    secondaryMatches: string[];
+  };
+  confidence_mode: 'llm';
+  status: 'enriched';
+}
+
+// A comprehensive list of tech keywords to look for (Universal Multi-Industry Library)
 const TECH_KEYWORDS = [
   // 💻 TECHNOLOGY & ENGINEERING
   'react', 'typescript', 'javascript', 'next.js', 'node.js', 'python', 'java', 'go', 'golang',
@@ -55,17 +81,6 @@ const TECH_KEYWORDS = [
   'employee relations', 'performance management', 'compensation', 'benefits',
   'diversity', 'inclusion', 'culture', 'training', 'development'
 ];
-
-export interface MatchScoreResult {
-  score: number; // 0-100
-  matchingSkills: string[];
-  missingSkills: string[];
-  warnings?: string[]; // New: For "Reality Check" alerts
-  weightedDetails?: {
-    coreMatches: string[];
-    secondaryMatches: string[];
-  };
-}
 
 // Keyword Weighting Configuration
 const KEYWORD_WEIGHTS: Record<string, number> = {
@@ -118,28 +133,21 @@ export const SYNONYMS: Record<string, string[]> = {
 
 export const matchAnalysisService = {
   /**
-   * Calculate a weighted match score between a job description and a resume text
+   * Run local regex-based match calculation as a fallback
    */
-  calculateMatchScore(jobDescription: string, resumeText: string): MatchScoreResult {
-    if (!jobDescription || !resumeText) {
-      return { score: 0, matchingSkills: [], missingSkills: [], weightedDetails: { coreMatches: [], secondaryMatches: [] } };
-    }
-
+  calculateLocalMatchScore(jobDescription: string, resumeText: string): MatchScoreResult {
     const jobText = jobDescription.toLowerCase();
     const resText = resumeText.toLowerCase();
 
-    // Helper to escape special regex characters
     const escapeRegExp = (string: string) => {
       return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     };
 
-    // 1. Identify keywords present in the Job Description (including synonyms)
     const foundKeywords = TECH_KEYWORDS.filter(skill => {
       const escapedSkill = escapeRegExp(skill);
       const skillRegex = new RegExp(`\\b${escapedSkill}\\b`, 'i');
       const hasSkill = skillRegex.test(jobText);
       
-      // Check synonyms if primary word not found
       const synonyms = SYNONYMS[skill] || [];
       const hasSynonym = synonyms.some(syn => {
         const synRegex = new RegExp(`\\b${escapeRegExp(syn)}\\b`, 'i');
@@ -153,13 +161,11 @@ export const matchAnalysisService = {
       return { score: 0, matchingSkills: [], missingSkills: [], weightedDetails: { coreMatches: [], secondaryMatches: [] } };
     }
 
-    // 2. See which of those are in the Resume
     const matchingSkills = foundKeywords.filter(skill => {
       const escapedSkill = escapeRegExp(skill);
       const skillRegex = new RegExp(`\\b${escapedSkill}\\b`, 'i');
       const hasSkill = skillRegex.test(resText);
 
-      // Check synonyms in resume too
       const synonyms = SYNONYMS[skill] || [];
       const hasSynonym = synonyms.some(syn => {
         const synRegex = new RegExp(`\\b${escapeRegExp(syn)}\\b`, 'i');
@@ -171,7 +177,6 @@ export const matchAnalysisService = {
 
     const missingSkills = foundKeywords.filter(skill => !matchingSkills.includes(skill));
 
-    // 3. Apply Weighted Scoring
     let totalPossibleWeight = 0;
     let earnedWeight = 0;
 
@@ -185,11 +190,9 @@ export const matchAnalysisService = {
 
     const score = Math.round((earnedWeight / totalPossibleWeight) * 100);
 
-    // 4. Categorize for Delta UI
     const coreMatches = matchingSkills.filter(s => (KEYWORD_WEIGHTS[s.toLowerCase()] || 1) >= 1.5);
     const secondaryMatches = matchingSkills.filter(s => (KEYWORD_WEIGHTS[s.toLowerCase()] || 1) < 1.5);
 
-    // 5. Reality Check: Seniority Clash Detection
     const warnings: string[] = [];
     const seniorMarkers = ['director', 'vp', 'head of', 'principal', 'staff', 'lead', 'manager', 'senior'];
     const juniorMarkers = ['junior', 'associate', 'intern', 'entry level', 'grad', 'trainee'];
@@ -215,5 +218,90 @@ export const matchAnalysisService = {
         secondaryMatches
       }
     };
+  },
+
+  /**
+   * Calculate a weighted match score between a job description and a resume text.
+   * Invokes LLM match Edge Function, falling back to local heuristic match if rate-limited or offline.
+   */
+  async calculateMatchScore(jobDescription: string, resumeText: string): Promise<MatchScoreResult> {
+    if (!jobDescription || !resumeText) {
+      return { score: 0, matchingSkills: [], missingSkills: [], weightedDetails: { coreMatches: [], secondaryMatches: [] } };
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke('match-analysis', {
+        body: { jobDescription, resumeText }
+      });
+
+      if (error) throw error;
+      if (data.error) {
+        const err = new Error(data.message || data.error);
+        (err as any).status = 429;
+        throw err;
+      }
+
+      return data;
+    } catch (err: any) {
+      console.warn("[matchAnalysisService] LLM Match Failed or Rate Limited. Falling back to local keyword approximation. Error:", err);
+      
+      const localResult = this.calculateLocalMatchScore(jobDescription, resumeText);
+      const warnings = localResult.warnings || [];
+
+      if (err.status === 429 || err.message?.includes('limit') || err.message?.includes('Rate limit')) {
+        warnings.unshift("⚠️ Rate Limit Active: You've exhausted your daily AI analysis limit. Displaying a keyword-matched approximation.");
+      } else {
+        warnings.unshift("⚠️ Connection Warning: Failed to reach the AI match engine. Displaying a local keyword-matched approximation.");
+      }
+
+      return {
+        ...localResult,
+        warnings
+      };
+    }
+  },
+
+  /**
+   * Perform vector-based similarity scoring (stateless and fast)
+   */
+  async calculateVectorMatch(params: {
+    jobId?: string;
+    resumeVersionId?: string;
+    jobDescription?: string;
+    resumeText?: string;
+  }): Promise<VectorMatchResult> {
+    try {
+      const { data, error } = await supabase.functions.invoke('match-analysis', {
+        body: { mode: 'vector', ...params }
+      });
+      if (error) throw error;
+      return data;
+    } catch (err: any) {
+      console.warn("[matchAnalysisService] Vector Match Failed, falling back to local calculation:", err);
+      const localResult = this.calculateLocalMatchScore(params.jobDescription || "", params.resumeText || "");
+      return {
+        score: localResult.score,
+        confidence_mode: "fallback",
+        status: "instant",
+        warnings: ["⚠️ Displaying a local keyword-matched approximation."]
+      };
+    }
+  },
+
+  /**
+   * Lazy fetch of full LLM match enrichment details (gaps, recommendations, warnings)
+   */
+  async getLLMEnrichment(params: {
+    jobId?: string;
+    resumeVersionId?: string;
+    jobDescription?: string;
+    resumeText?: string;
+  }): Promise<LLMEnrichmentResult> {
+    const { data, error } = await supabase.functions.invoke('match-analysis', {
+      body: { mode: 'enrichment', ...params }
+    });
+    if (error) throw error;
+    if (data.error) throw new Error(data.message || data.error);
+    return data;
   }
 };

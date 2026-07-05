@@ -8,13 +8,15 @@ interface ResumeVersionCardProps {
   isSelectionMode?: boolean;
   isSelected?: boolean;
   onSelect?: () => void;
+  onView?: () => void;
 }
 
 export const ResumeVersionCard: React.FC<ResumeVersionCardProps> = ({ 
   version,
   isSelectionMode = false,
   isSelected = false,
-  onSelect
+  onSelect,
+  onView
 }) => {
   const formattedDate = version.created_at
     ? new Date(version.created_at).toLocaleString()
@@ -64,13 +66,21 @@ export const ResumeVersionCard: React.FC<ResumeVersionCardProps> = ({
     }
   };
 
+  const handleCardClick = () => {
+    if (isSelectionMode) {
+      onSelect?.();
+    } else {
+      onView?.();
+    }
+  };
+
   return (
     <div 
-      onClick={isSelectionMode ? onSelect : undefined}
+      onClick={handleCardClick}
       data-testid="resume-version-card"
       data-version-id={version.id}
       className={`bg-[#121212] border rounded-2xl p-5 transition-all group ${
-        isSelectionMode ? 'cursor-pointer' : ''
+        isSelectionMode || onView ? 'cursor-pointer' : ''
       } ${
         isSelected 
           ? 'border-[#FC6100] shadow-[0_0_15px_rgba(252,97,0,0.1)]' 
@@ -87,20 +97,25 @@ export const ResumeVersionCard: React.FC<ResumeVersionCardProps> = ({
             </div>
           )}
           <div>
-            <div className="flex items-center space-x-3">
-            <span className="inline-flex items-center justify-center px-2.5 py-1 text-xs font-black leading-none text-[#FC6100] bg-[#FC6100]/10 border border-[#FC6100]/20 rounded-full">
-              v{version.version_number}
-            </span>
-            <h4 className="text-base font-bold text-white">{label}</h4>
-          </div>
-          <div className="flex items-center text-[10px] font-bold text-gray-600 uppercase tracking-widest mt-3">
-            <Clock className="w-3.5 h-3.5 mr-1.5 text-[#FC6100]/30" />
-            {formattedDate}
-          </div>
+            <div className="flex items-center space-x-3 flex-wrap gap-2">
+              <span className="inline-flex items-center justify-center px-2.5 py-1 text-xs font-black leading-none text-[#FC6100] bg-[#FC6100]/10 border border-[#FC6100]/20 rounded-full">
+                v{version.version_number}
+              </span>
+              {!version.file_url && (
+                <span className="inline-flex items-center justify-center px-2.5 py-1 text-[9px] font-black leading-none text-green-500 bg-green-500/10 border border-green-500/20 rounded-full uppercase tracking-wider">
+                  AI Tailored
+                </span>
+              )}
+              <h4 className="text-base font-bold text-white">{label}</h4>
+            </div>
+            <div className="flex items-center text-[10px] font-bold text-gray-600 uppercase tracking-widest mt-3">
+              <Clock className="w-3.5 h-3.5 mr-1.5 text-[#FC6100]/30" />
+              {formattedDate}
+            </div>
           </div>
         </div>
         
-        {version.file_url && (
+        {version.file_url ? (
           <button
             onClick={handleDownload}
             disabled={isDownloading}
@@ -110,6 +125,10 @@ export const ResumeVersionCard: React.FC<ResumeVersionCardProps> = ({
           >
             <FileDown className={`w-4 h-4 ${isDownloading ? 'animate-pulse' : ''}`} />
           </button>
+        ) : (
+          <span className="px-2.5 py-1.5 text-[10px] font-black text-green-500 bg-green-500/10 border border-green-500/20 rounded-lg uppercase tracking-wider">
+            AI Text
+          </span>
         )}
       </div>
     </div>

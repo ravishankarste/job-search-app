@@ -9,7 +9,7 @@ describe('matchAnalysisService', () => {
 
   it('should calculate a basic match score correctly', () => {
     const jobDescription = 'Looking for a Senior React Developer with TypeScript skills.';
-    const result = matchAnalysisService.calculateMatchScore(jobDescription, mockResume);
+    const result = matchAnalysisService.calculateLocalMatchScore(jobDescription, mockResume);
     
     expect(result.score).toBeGreaterThan(0);
     expect(result.matchingSkills).toContain('react');
@@ -19,21 +19,21 @@ describe('matchAnalysisService', () => {
 
   it('should handle synonym mapping (AWS vs Amazon Web Services)', () => {
     const jobDescription = 'Experience with Amazon Web Services is required.';
-    const result = matchAnalysisService.calculateMatchScore(jobDescription, mockResume);
+    const result = matchAnalysisService.calculateLocalMatchScore(jobDescription, mockResume);
     
     expect(result.matchingSkills).toContain('aws');
   });
 
   it('should detect overqualification (Senior Resume vs Junior Job)', () => {
     const juniorJob = 'Junior Frontend Developer role for entry-level candidates.';
-    const result = matchAnalysisService.calculateMatchScore(juniorJob, mockResume);
+    const result = matchAnalysisService.calculateLocalMatchScore(juniorJob, mockResume);
     
     expect(result.warnings).toContain("Reality Check: You appear overqualified for this role. Hiring managers may fear you'll leave for a higher-paying position.");
   });
 
   it('should return zero score for completely unrelated texts', () => {
     const unrelatedJob = 'Professional chef needed for Italian restaurant.';
-    const result = matchAnalysisService.calculateMatchScore(unrelatedJob, mockResume);
+    const result = matchAnalysisService.calculateLocalMatchScore(unrelatedJob, mockResume);
     
     expect(result.score).toBe(0);
     expect(result.matchingSkills).toHaveLength(0);

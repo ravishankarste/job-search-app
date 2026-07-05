@@ -29,7 +29,7 @@ export const Signup: React.FC = () => {
 
     const validation = signupSchema.safeParse({ email, password });
     if (!validation.success) {
-      setError(validation.error.errors[0].message);
+      setError(validation.error.issues[0].message);
       setIsLoading(false);
       return;
     }

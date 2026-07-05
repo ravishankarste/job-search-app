@@ -289,6 +289,7 @@ export const LandingPage: React.FC = () => {
 
   const [result, setResult] = React.useState<{ score: number, matchingSkills: string[], missingSkills: string[], warnings?: string[] } | null>(null);
   const [isAnalyzing, setIsAnalyzing] = React.useState(false);
+  const [isEnriching, setIsEnriching] = React.useState(false);
   const [isExtracting, setIsExtracting] = React.useState(false);
   const [showScanner, setShowScanner] = React.useState(false);
   const [hasAnalyzed, setHasAnalyzed] = React.useState(false);
@@ -312,21 +313,83 @@ export const LandingPage: React.FC = () => {
     }
   };
 
-  const handleAnalyze = () => {
+  const handleAnalyze = async () => {
     if (!jobText || !resumeText) return;
     setIsAnalyzing(true);
+    setIsEnriching(true);
     
-    // Simulate a brief "processing" for effect
-    setTimeout(() => {
-      const analysis = matchAnalysisService.calculateMatchScore(jobText, resumeText);
-      setResult(analysis);
-      setIsAnalyzing(false);
-      setHasAnalyzed(true);
+    const startTime = Date.now();
+    try {
+      // 1. Fetch Vector Match Baseline (Fast)
+      const vectorResult = await matchAnalysisService.calculateVectorMatch({
+        jobDescription: jobText,
+        resumeText: resumeText
+      });
       
-      // Critical GTM Sync: Capture this as an 'Aha! Moment' for the dashboard
-      trackEvent('landing_page_analysis', { score: analysis.score });
-      trackEvent('aha_moment', { type: 'sandbox_match', score: analysis.score });
-    }, 800);
+      // Step 16: Check if fallback is active and add a perception threshold delay
+      const isFallback = vectorResult.warnings?.some((w: string) => 
+        w.toLowerCase().includes('approximation') || 
+        w.toLowerCase().includes('warning') || 
+        w.toLowerCase().includes('limit')
+      ) || false;
+      
+      if (isFallback) {
+        const elapsedTime = Date.now() - startTime;
+        const targetDelay = 900; // 900ms minimum threshold
+        if (elapsedTime < targetDelay) {
+          await new Promise(resolve => setTimeout(resolve, targetDelay - elapsedTime));
+        }
+      }
+
+      // Immediately show score + CTA to user (Column 1 is now active)
+      setResult({
+        score: vectorResult.score,
+        matchingSkills: [],
+        missingSkills: [],
+        warnings: vectorResult.warnings
+      });
+      setHasAnalyzed(true);
+      setIsAnalyzing(false); // Stop loading skeletons for Column 1
+      
+      // Log instant match event
+      trackEvent('landing_page_analysis_instant', { score: vectorResult.score });
+
+      // 2. Fetch LLM Enrichment Asynchronously in background
+      try {
+        const enrichmentResult = await matchAnalysisService.getLLMEnrichment({
+          jobDescription: jobText,
+          resumeText: resumeText
+        });
+        
+        setResult(prev => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            matchingSkills: enrichmentResult.matchingSkills,
+            missingSkills: enrichmentResult.missingSkills,
+            warnings: enrichmentResult.warnings || prev.warnings
+          };
+        });
+
+        trackEvent('landing_page_analysis_enriched', { score: vectorResult.score });
+        trackEvent('aha_moment', { type: 'sandbox_match', score: vectorResult.score });
+      } catch (llmErr) {
+        console.warn("LLM enrichment failed in background:", llmErr);
+      } finally {
+        setIsEnriching(false);
+      }
+
+    } catch (err: any) {
+      console.error(err);
+      setResult({
+        score: 0,
+        matchingSkills: [],
+        missingSkills: [],
+        warnings: [err.message || "Failed to analyze match score."]
+      });
+      setIsAnalyzing(false);
+      setIsEnriching(false);
+    }
   };
 
   // Smart Redirect: If already logged in, skip the landing page
@@ -731,113 +794,260 @@ export const LandingPage: React.FC = () => {
               {isAnalyzing ? 'Analyzing Algorithm...' : 'Calculate ATS Match'}
             </button>
 
-            {result && (
+            {(result || isAnalyzing) && (
               <div className="w-full space-y-8 animate-in fade-in slide-in-from-top-4 duration-500">
                 <div className="flex items-center gap-3 justify-center">
-                  <span className="w-7 h-7 rounded-lg bg-green-500/20 border border-green-500/50 flex items-center justify-center text-green-500 text-[10px] font-black">03</span>
-                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">The Verdict</label>
+                  <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-black border transition-all ${result && !isEnriching ? 'bg-green-500/20 border-green-500/50 text-green-500' : 'bg-white/5 border-white/10 text-gray-500 animate-pulse'}`}>03</span>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">
+                    {isAnalyzing || isEnriching ? 'Analyzing Alignment' : 'The Verdict'}
+                  </label>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  <div className="bg-white/5 border border-white/10 rounded-[24px] p-8 text-center flex flex-col items-center justify-center space-y-2">
-                    <p className="text-6xl font-bold text-[#FC6100] tracking-tighter">{result.score}%</p>
-                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500">Match Accuracy</p>
-                  </div>
-                
-                <div className="bg-white/5 border border-white/10 rounded-[24px] p-8 space-y-4">
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#00FF00]">Matching Skills</p>
-                  <div className="flex flex-wrap gap-2">
-                    {result.matchingSkills.length > 0 ? result.matchingSkills.map(s => (
-                      <span key={s} className="px-3 py-1.5 bg-[#00FF00]/10 text-[#00FF00] border border-[#00FF00]/30 text-[10px] font-black uppercase tracking-wider rounded-lg">{s}</span>
-                    )) : <span className="text-xs text-gray-600 italic">No matches detected.</span>}
-                  </div>
-                </div>
-
-                <div className="bg-white/5 border border-white/10 rounded-[24px] p-8 space-y-4">
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white">Critical Gaps</p>
-                  <div className="flex flex-wrap gap-2">
-                    {result.missingSkills.length > 0 ? result.missingSkills.map(s => (
-                      <span key={s} className="px-3 py-1.5 bg-white/10 text-white border border-white/20 text-[10px] font-black uppercase tracking-wider rounded-lg">{s}</span>
-                    )) : <span className="text-xs text-gray-600 italic">None! Ready to apply.</span>}
-                  </div>
-                </div>
-
-              </div>
-
-                {/* The Conversion Hook */}
-                <div className="md:col-span-3 pt-10 text-center space-y-6 border-t border-white/5 mt-6 bg-[#FC6100]/5 rounded-3xl p-8 border border-[#FC6100]/20 max-w-2xl mx-auto shadow-[0_0_30px_rgba(252,97,0,0.02)]">
-                   <p className="text-xs font-black uppercase tracking-[0.2em] text-[#FC6100]">
-                     Match Solved. What's Next?
-                   </p>
-                   <p className="text-sm text-gray-300 font-medium max-w-md mx-auto leading-relaxed">
-                     Your sandbox matches are saved! Claim your account now to inject this job into your tracking pipeline, resolve missing skills, and auto-draft a tailored cover letter instantly.
-                   </p>
-                    {session ? (
-                      isJobSaved ? (
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full">
-                          <div className="px-6 py-4 bg-green-500/10 text-green-500 text-xs font-black uppercase tracking-widest rounded-xl border border-green-500/20 flex items-center justify-center gap-2 w-full sm:w-auto">
-                            ✅ Saved to Pipeline
-                          </div>
-                          <button 
-                            onClick={() => navigate('/pipeline')}
-                            className="px-6 py-4 bg-white/10 hover:bg-white/20 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all w-full sm:w-auto text-center"
-                          >
-                            View Pipeline
-                          </button>
+                  {/* Column 1 (Hero Metric Card) */}
+                  {isAnalyzing ? (
+                    <div className="bg-white/[0.05] border border-white/10 rounded-[24px] p-6 text-center flex flex-col justify-between space-y-6 opacity-60">
+                      {/* Header */}
+                      <div className="flex items-center justify-between text-[8px] font-mono text-gray-600 uppercase tracking-widest border-b border-white/5 pb-2 w-full">
+                        <span>System KPI</span>
+                        <span>ATS_SCAN_V1</span>
+                      </div>
+                      
+                      {/* Enclosure Skeleton */}
+                      <div className="bg-black/30 border border-white/5 rounded-2xl p-5 space-y-4 w-full flex flex-col items-center">
+                        <div className="animate-pulse">
+                          <p className="text-7xl font-bold text-gray-800 tracking-tighter leading-none">--%</p>
+                          <p className="text-[9px] font-mono uppercase tracking-[0.2em] text-gray-600 mt-2">Computing Fit...</p>
                         </div>
-                      ) : (
-                        <button 
-                          data-testid="demo-save-cta"
-                          onClick={handleSaveJob}
-                          disabled={isSaving}
-                          className="px-8 py-4 bg-[#FC6100] hover:bg-[#E35205] text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all border border-white/10 shadow-lg shadow-[#FC6100]/10 flex items-center justify-center gap-2 mx-auto hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
-                        >
-                          {isSaving ? 'Saving...' : 'Save to Pipeline ⚡'}
-                        </button>
-                      )
-                    ) : (
-                      <button 
-                        data-testid="demo-signup-cta"
-                        onClick={() => {
-                          trackEvent('cta_click', { location: 'sandbox_result' });
-                          
-                          // PERSIST SANDBOX STATE
-                          localStorage.setItem('udyog_marg_sandbox_state', JSON.stringify({
-                            jobText,
-                            resumeText,
-                            timestamp: new Date().toISOString()
-                          }));
-    
-                          // Force a small delay to ensure storage write before navigation
-                          setTimeout(() => {
-                            window.location.href = '/signup';
-                          }, 50);
-                        }}
-                        className="px-8 py-4 bg-[#FC6100] hover:bg-[#E35205] text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all border border-white/10 shadow-lg shadow-[#FC6100]/10 flex items-center gap-2 mx-auto hover:scale-[1.02]"
-                      >
-                        Claim Your Free Account & Tailor Now <ArrowRight className="w-4 h-4" />
-                      </button>
-                    )}
-                   
-                   <div className="pt-6">
-                     <button 
-                       onClick={() => setShowScanner(!showScanner)}
-                       className="text-[9px] font-black uppercase tracking-[0.3em] text-white/40 hover:text-white transition-colors flex items-center gap-2 mx-auto"
-                     >
-                       {showScanner ? 'Hide Technical Scan' : 'View Intelligence Scanner Output'}
-                     </button>
-                   </div>
+                        <div className="inline-block px-2.5 py-1 text-[8px] font-mono font-bold uppercase tracking-wider rounded-md border border-white/5 text-gray-600 bg-white/5 animate-pulse">
+                          ● Parsing Data...
+                        </div>
+                      </div>
+
+                      <div className="w-full border-t border-white/5 my-4"></div>
+
+                      {/* Locked placeholder */}
+                      <div className="flex flex-col items-center justify-center p-4 border border-dashed border-white/5 rounded-xl w-full bg-white/[0.01]">
+                        <span className="text-[9px] font-mono font-black uppercase tracking-[0.25em] text-gray-600 flex items-center gap-1.5 animate-pulse">
+                          🔒 Pipeline Locked
+                        </span>
+                        <span className="text-[7px] text-gray-700 font-mono mt-1">Awaiting scanner readout...</span>
+                      </div>
+                    </div>
+                  ) : result && (
+                    <div className="bg-white/[0.08] border border-[#FC6100]/35 rounded-[24px] p-6 text-center flex flex-col justify-between space-y-6 shadow-[0_0_40px_rgba(252,97,0,0.08)]">
+                      {/* Header */}
+                      <div className="flex items-center justify-between text-[8px] font-mono text-gray-500 uppercase tracking-widest border-b border-white/5 pb-2 w-full">
+                        <span>System KPI</span>
+                        <span>ATS_SCAN_V1</span>
+                      </div>
+
+                      {/* Unified System Enclosure (Metric + Controls) */}
+                      <div className="bg-black/40 border border-white/5 rounded-2xl p-5 shadow-inner w-full flex flex-col items-center">
+                        
+                        {/* Metric Section */}
+                        <div className="space-y-3 flex flex-col items-center w-full">
+                          <div>
+                            <p className="text-7xl font-bold text-[#FC6100] tracking-tighter leading-none">{result.score}%</p>
+                            <p className="text-[9px] font-mono uppercase tracking-[0.2em] text-gray-500 mt-2">Match Accuracy</p>
+                            {(() => {
+                        const isFallback = result.warnings?.some((w: string) => 
+                          w.toLowerCase().includes('approximation') || 
+                          w.toLowerCase().includes('warning') || 
+                          w.toLowerCase().includes('limit')
+                        ) || false;
+                        
+                        let label = '● System Scan Active';
+                        let colorClass = 'text-green-500 bg-green-500/10 border-green-500/20';
+                        
+                        if (isFallback) {
+                          label = '▲ Local Scan (Approximate)';
+                          colorClass = 'text-[#FC6100]/80 bg-[#FC6100]/5 border-[#FC6100]/20';
+                        } else if (result.score >= 80) {
+                          label = '● System Scan Active (Optimal)';
+                          colorClass = 'text-green-500 bg-green-500/10 border-green-500/20';
+                        } else if (result.score >= 60) {
+                          label = '▲ System Scan Active (Compatible)';
+                          colorClass = 'text-[#FC6100] bg-[#FC6100]/10 border-[#FC6100]/20';
+                        } else {
+                          label = '■ System Scan Active (Critical)';
+                          colorClass = 'text-red-500 bg-red-500/10 border-red-500/20';
+                        }
+                        
+                        return (
+                          <div className={`inline-block px-2.5 py-1 text-[8px] font-mono font-bold uppercase tracking-wider rounded-md border ${colorClass}`}>
+                            {label}
+                          </div>
+                        );
+                      })()}
+                          </div>
+                        </div>
+
+                        {/* Internal Enclosure Divider */}
+                        <div className="w-full border-t border-white/5 my-4"></div>
+
+                        {/* Action Control Section - High-Tension Execution Zone */}
+                        <div className="flex flex-col items-center space-y-3 w-full bg-[#FC6100]/5 border border-[#FC6100]/20 rounded-xl p-4 shadow-[0_0_15px_rgba(252,97,0,0.05)] animate-in fade-in slide-in-from-bottom-2 duration-700 delay-300">
+                          {(() => {
+                            const isFallback = result.warnings?.some((w: string) => 
+                              w.toLowerCase().includes('approximation') || 
+                              w.toLowerCase().includes('warning') || 
+                              w.toLowerCase().includes('limit')
+                            ) || false;
+                            
+                            const isMediumConfidence = !isFallback && result.score < 80;
+
+                            if (!session) {
+                              let btnLabel = 'Claim Free Account';
+                              let subText = 'Auto-saves state to generate cover letters & resume variants.';
+                              
+                              if (isFallback) {
+                                btnLabel = 'Refine Resume & Re-run Scan';
+                                subText = 'Runs local parsing now. Sign up to unlock complete AI scoring.';
+                              } else if (isMediumConfidence) {
+                                btnLabel = 'Claim & Optimize Profile';
+                                subText = 'Unlock AI tailoring suggestions to bridge these missing gaps.';
+                              }
+                              
+                              return (
+                                <>
+                                  <button 
+                                    data-testid="demo-signup-cta"
+                                    onClick={() => {
+                                      trackEvent('cta_click', { location: 'sandbox_result_inline' });
+                                      localStorage.setItem('udyog_marg_sandbox_state', JSON.stringify({
+                                        jobText,
+                                        resumeText,
+                                        timestamp: new Date().toISOString()
+                                      }));
+                                      setTimeout(() => {
+                                        window.location.href = '/signup';
+                                      }, 50);
+                                    }}
+                                    className="px-6 py-3 bg-[#FC6100] hover:bg-[#E35205] text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all border border-white/10 shadow-lg shadow-[#FC6100]/20 flex items-center justify-center gap-1.5 hover:scale-[1.02] w-full"
+                                  >
+                                    {btnLabel} <ArrowRight className="w-3.5 h-3.5" />
+                                  </button>
+                                  <p className="text-[8px] text-gray-500 leading-normal max-w-[200px] mx-auto">
+                                    {subText}
+                                  </p>
+                                </>
+                              );
+                            } else {
+                              if (isJobSaved) {
+                                return (
+                                  <div className="flex flex-col gap-2 w-full">
+                                    <div className="py-2.5 bg-green-500/10 text-green-500 text-[10px] font-black uppercase tracking-widest rounded-xl border border-green-500/20 text-center w-full">
+                                      ✓ Saved to Pipeline
+                                    </div>
+                                    <button 
+                                      onClick={() => navigate('/pipeline')}
+                                      className="py-2.5 bg-white/10 hover:bg-white/20 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all text-center border border-white/5 w-full"
+                                    >
+                                      View Pipeline
+                                    </button>
+                                  </div>
+                                );
+                              } else {
+                                let btnLabel = 'Save to Pipeline ⚡';
+                                let subText = 'Injects this target profile directly into your tracking board.';
+                                
+                                if (isFallback) {
+                                  btnLabel = 'Refine & Re-run Scan ⚡';
+                                  subText = 'Saves target profile. Refine inputs above to restart AI alignment.';
+                                } else if (isMediumConfidence) {
+                                  btnLabel = 'Save & Improve Match ⚡';
+                                  subText = 'Saves profile and begins tracking steps to optimize missing skills.';
+                                }
+                                
+                                return (
+                                  <>
+                                    <button 
+                                      data-testid="demo-save-cta"
+                                      onClick={handleSaveJob}
+                                      disabled={isSaving}
+                                      className="py-3 bg-[#FC6100] hover:bg-[#E35205] text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all border border-white/10 shadow-lg flex items-center justify-center gap-1.5 hover:scale-[1.02] w-full disabled:opacity-50"
+                                    >
+                                      {isSaving ? 'Saving...' : btnLabel}
+                                    </button>
+                                    <p className="text-[8px] text-gray-500 leading-normal max-w-[220px] mx-auto">
+                                      {subText}
+                                    </p>
+                                  </>
+                                );
+                              }
+                            }
+                          })()}
+                        </div>
+
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Column 2 (Matching Skills Card) */}
+                  {(isAnalyzing || isEnriching) ? (
+                    <div className="bg-white/5 border border-white/10 rounded-[24px] p-8 space-y-4 opacity-50">
+                      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-600">Matching Skills</p>
+                      <div className="flex flex-wrap gap-2 animate-pulse">
+                        <div className="w-16 h-7 bg-white/5 rounded-lg border border-white/5"></div>
+                        <div className="w-24 h-7 bg-white/5 rounded-lg border border-white/5"></div>
+                        <div className="w-20 h-7 bg-white/5 rounded-lg border border-white/5"></div>
+                      </div>
+                    </div>
+                  ) : result && (
+                    <div className="bg-white/5 border border-white/10 rounded-[24px] p-8 space-y-4">
+                      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#00FF00]">Matching Skills</p>
+                      <div className="flex flex-wrap gap-2">
+                        {result.matchingSkills.length > 0 ? result.matchingSkills.map(s => (
+                          <span key={s} className="px-3 py-1.5 bg-[#00FF00]/10 text-[#00FF00] border border-[#00FF00]/30 text-[10px] font-black uppercase tracking-wider rounded-lg">{s}</span>
+                        )) : <span className="text-xs text-gray-600 italic">No matches detected.</span>}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Column 3 (Critical Gaps Card) */}
+                  {(isAnalyzing || isEnriching) ? (
+                    <div className="bg-white/5 border border-white/10 rounded-[24px] p-8 space-y-4 opacity-50">
+                      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-600">Critical Gaps</p>
+                      <div className="flex flex-wrap gap-2 animate-pulse">
+                        <div className="w-20 h-7 bg-white/5 rounded-lg border border-white/5"></div>
+                        <div className="w-14 h-7 bg-white/5 rounded-lg border border-white/5"></div>
+                        <div className="w-28 h-7 bg-white/5 rounded-lg border border-white/5"></div>
+                      </div>
+                    </div>
+                  ) : result && (
+                    <div className="bg-white/5 border border-white/10 rounded-[24px] p-8 space-y-4">
+                      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white">Critical Gaps</p>
+                      <div className="flex flex-wrap gap-2">
+                        {result.missingSkills.length > 0 ? result.missingSkills.map(s => (
+                          <span key={s} className="px-3 py-1.5 bg-white/10 text-white border border-white/20 text-[10px] font-black uppercase tracking-wider rounded-lg">{s}</span>
+                        )) : <span className="text-xs text-gray-600 italic">None! Ready to apply.</span>}
+                      </div>
+                    </div>
+                  )}
+
                 </div>
+
+                {!isAnalyzing && (
+                  <div className="pt-6 text-center">
+                    <button 
+                      onClick={() => setShowScanner(!showScanner)}
+                      className="text-[9px] font-black uppercase tracking-[0.3em] text-white/40 hover:text-white transition-colors flex items-center gap-2 mx-auto"
+                    >
+                      {showScanner ? 'Hide Technical Scan' : 'View Intelligence Scanner Output'}
+                    </button>
+                  </div>
+                )}
 
                 {/* The Delta Scanner View (Hidden by default) */}
-                {showScanner && (
+                {showScanner && result && (
                   <div className="md:col-span-3 pt-8 space-y-6 animate-in fade-in zoom-in duration-300">
                     <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-600 text-center">Scanner Analysis</p>
                     <div className="p-8 bg-black/60 border border-white/5 rounded-3xl text-sm leading-relaxed text-gray-400 max-h-64 overflow-y-auto font-mono scrollbar-hide">
                       {(() => {
                         const allTerms = [
-                          ...result.matchingSkills,
-                          ...result.missingSkills
+                          ...(result?.matchingSkills ?? []),
+                          ...(result?.missingSkills ?? [])
                         ].flatMap(skill => {
                           return [skill, ...(SYNONYMS[skill] || [])];
                         });
@@ -845,10 +1055,10 @@ export const LandingPage: React.FC = () => {
                         const combinedRegex = new RegExp(`(${allTerms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`, 'gi');
                         return jobText.split(combinedRegex).map((part, index) => {
                           const lowerPart = part.toLowerCase();
-                          const isMatch = result.matchingSkills.some(s => {
+                          const isMatch = (result?.matchingSkills ?? []).some(s => {
                             return s.toLowerCase() === lowerPart || (SYNONYMS[s] || []).some(syn => syn.toLowerCase() === lowerPart);
                           });
-                          const isMissing = result.missingSkills.some(s => {
+                          const isMissing = (result?.missingSkills ?? []).some(s => {
                             return s.toLowerCase() === lowerPart || (SYNONYMS[s] || []).some(syn => syn.toLowerCase() === lowerPart);
                           });
                           if (isMatch) return <span key={index} className="text-[#00FF00] bg-[#00FF00]/10 px-1 rounded font-bold">{part}</span>;

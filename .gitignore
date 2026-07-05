@@ -38,3 +38,8 @@ client_secret_*.json
 !package-lock.json
 !docs/tasks/*.json
 Promotion_material/
+
+# Scratch & Test reports
+scratch/
+playwright-report/
+test-results/
