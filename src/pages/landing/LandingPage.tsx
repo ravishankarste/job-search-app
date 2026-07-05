@@ -26,6 +26,7 @@ export const LandingPage: React.FC = () => {
   const [resumeText, setResumeText] = React.useState('');
   const [resumeFileName, setResumeFileName] = React.useState<string | null>(null);
   const [isScrapingFullDesc, setIsScrapingFullDesc] = React.useState(false);
+  const [uploadError, setUploadError] = React.useState<string | null>(null);
   
   // Value-First Geolocation & Select Job state
   const [searchRole, setSearchRole] = React.useState('');
@@ -329,13 +330,24 @@ export const LandingPage: React.FC = () => {
 
     setIsExtracting(true);
     setResumeFileName(file.name);
+    setUploadError(null);
     
     try {
       const text = await pdfExtractionService.extractText(file);
-      setResumeText(text);
-      trackEvent('resume_upload_landing', { fileName: file.name });
+      
+      if (!text || text.trim().length < 100) {
+        setUploadError("⚠️ Scanned PDF/Image Detected: We could not find a selectable text layer in your PDF. Please upload a digital PDF/Word document, or paste the text manually using the toggle above.");
+        setResumeFileName(null);
+        setResumeText('');
+      } else {
+        setResumeText(text);
+        trackEvent('resume_upload_landing', { fileName: file.name });
+      }
     } catch (err) {
       console.error("Extraction failed", err);
+      setUploadError("⚠️ Extraction Failed: Something went wrong while parsing the document. Please try pasting the text manually.");
+      setResumeFileName(null);
+      setResumeText('');
     } finally {
       setIsExtracting(false);
     }
@@ -402,7 +414,26 @@ export const LandingPage: React.FC = () => {
         trackEvent('landing_page_analysis_enriched', { score: vectorResult.score });
         trackEvent('aha_moment', { type: 'sandbox_match', score: vectorResult.score });
       } catch (llmErr) {
-        console.warn("LLM enrichment failed in background:", llmErr);
+        console.warn("LLM enrichment failed in background, using fallback:", llmErr);
+
+        const localResult = matchAnalysisService.calculateLocalMatchScore(
+          jobText,
+          resumeText
+        );
+
+        setResult(prev => {
+          if (!prev) return null;
+
+          return {
+            ...prev,
+            matchingSkills: localResult.matchingSkills || [],
+            missingSkills: localResult.missingSkills || [],
+            warnings: [
+              ...(prev.warnings || []),
+              "⚠️ AI enrichment failed. Showing local fallback analysis."
+            ]
+          };
+        });
       } finally {
         setIsEnriching(false);
       }
@@ -747,6 +778,7 @@ export const LandingPage: React.FC = () => {
                     setIsPastingResume(!isPastingResume);
                     setResumeText('');
                     setResumeFileName(null);
+                    setUploadError(null);
                   }}
                   className="text-[9px] font-black uppercase tracking-widest text-[#FC6100] hover:underline"
                 >
@@ -783,7 +815,7 @@ export const LandingPage: React.FC = () => {
                       </div>
                       <p className="text-xs font-bold text-white truncate max-w-[200px]">{resumeFileName}</p>
                       <button 
-                        onClick={(e) => { e.stopPropagation(); setResumeFileName(null); setResumeText(''); }}
+                        onClick={(e) => { e.stopPropagation(); setResumeFileName(null); setResumeText(''); setUploadError(null); }}
                         className="text-[9px] font-black uppercase tracking-widest text-red-500/60 hover:text-red-500 relative z-20"
                       >
                         Remove
@@ -800,6 +832,12 @@ export const LandingPage: React.FC = () => {
                       </div>
                     </>
                   )}
+                </div>
+              )}
+
+              {uploadError && (
+                <div className="text-[10px] font-semibold text-red-400 bg-red-950/20 border border-red-500/15 rounded-2xl p-4 animate-in fade-in slide-in-from-top-1 duration-300 leading-normal">
+                  {uploadError}
                 </div>
               )}
               

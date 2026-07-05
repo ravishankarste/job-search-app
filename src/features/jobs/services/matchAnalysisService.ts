@@ -131,6 +131,13 @@ export const SYNONYMS: Record<string, string[]> = {
   'ui/ux': ['user experience', 'user interface design', 'product design', 'wireframing']
 };
 
+const getKeywordRegex = (skill: string) => {
+  const escaped = skill.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const leading = /^\w/.test(skill) ? '\\b' : '(?:^|\\s|\\p{P})';
+  const trailing = /\w$/.test(skill) ? '\\b' : '(?:$|\\s|\\p{P})';
+  return new RegExp(leading + escaped + trailing, 'iu');
+};
+
 export const matchAnalysisService = {
   /**
    * Run local regex-based match calculation as a fallback
@@ -139,19 +146,12 @@ export const matchAnalysisService = {
     const jobText = jobDescription.toLowerCase();
     const resText = resumeText.toLowerCase();
 
-    const escapeRegExp = (string: string) => {
-      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    };
-
     const foundKeywords = TECH_KEYWORDS.filter(skill => {
-      const escapedSkill = escapeRegExp(skill);
-      const skillRegex = new RegExp(`\\b${escapedSkill}\\b`, 'i');
-      const hasSkill = skillRegex.test(jobText);
+      const hasSkill = getKeywordRegex(skill).test(jobText);
       
       const synonyms = SYNONYMS[skill] || [];
       const hasSynonym = synonyms.some(syn => {
-        const synRegex = new RegExp(`\\b${escapeRegExp(syn)}\\b`, 'i');
-        return synRegex.test(jobText);
+        return getKeywordRegex(syn).test(jobText);
       });
 
       return hasSkill || hasSynonym;
@@ -162,14 +162,11 @@ export const matchAnalysisService = {
     }
 
     const matchingSkills = foundKeywords.filter(skill => {
-      const escapedSkill = escapeRegExp(skill);
-      const skillRegex = new RegExp(`\\b${escapedSkill}\\b`, 'i');
-      const hasSkill = skillRegex.test(resText);
+      const hasSkill = getKeywordRegex(skill).test(resText);
 
       const synonyms = SYNONYMS[skill] || [];
       const hasSynonym = synonyms.some(syn => {
-        const synRegex = new RegExp(`\\b${escapeRegExp(syn)}\\b`, 'i');
-        return synRegex.test(resText);
+        return getKeywordRegex(syn).test(resText);
       });
 
       return hasSkill || hasSynonym;
