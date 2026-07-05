@@ -83,7 +83,7 @@ const TECH_KEYWORDS = [
 ];
 
 // Keyword Weighting Configuration
-const KEYWORD_WEIGHTS: Record<string, number> = {
+export const KEYWORD_WEIGHTS: Record<string, number> = {
   // Hard Skills / Tech (High Impact)
   'react': 2, 'typescript': 2, 'javascript': 2, 'next.js': 2, 'python': 2, 'java': 2,
   'aws': 2, 'azure': 2, 'gcp': 2, 'kubernetes': 2, 'sql': 2, 'postgresql': 2,

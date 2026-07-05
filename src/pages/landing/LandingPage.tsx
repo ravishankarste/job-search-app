@@ -12,7 +12,7 @@ import {
   MapPin
 } from 'lucide-react';
 import { trackEvent } from '../../lib/analytics';
-import { matchAnalysisService, SYNONYMS } from '../../features/jobs/services/matchAnalysisService';
+import { matchAnalysisService, SYNONYMS, KEYWORD_WEIGHTS } from '../../features/jobs/services/matchAnalysisService';
 import { pdfExtractionService } from '../../features/resumes/services/pdfExtractionService';
 import { jobRelevanceService } from '../../features/discovery/services/jobRelevanceService';
 import { apifyService, type DiscoveredJob } from '../../features/discovery/services/apifyService';
@@ -1139,6 +1139,81 @@ export const LandingPage: React.FC = () => {
                           return part;
                         });
                       })()}
+                    </div>
+
+                    {/* Match Math - Dynamic Points Explainer */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                      <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-5 space-y-3">
+                        <p className="text-[9px] font-mono uppercase tracking-[0.2em] text-[#FC6100]">Weighted Match Formula</p>
+                        <div className="space-y-2 text-[10px] text-gray-500 font-mono leading-relaxed">
+                          <p>We weigh core industry requirements higher than secondary keywords to prevent the "laundry list" penalty:</p>
+                          <div className="bg-black/30 p-4 rounded-xl border border-white/5 space-y-2">
+                            <div className="flex justify-between text-white font-bold">
+                              <span>Total Possible Weight:</span>
+                              <span>{(() => {
+                                let total = 0;
+                                [...result.matchingSkills, ...result.missingSkills].forEach(s => {
+                                  total += KEYWORD_WEIGHTS[s.toLowerCase()] || 1;
+                                });
+                                return total.toFixed(1);
+                              })()} pts</span>
+                            </div>
+                            <div className="flex justify-between text-[#00FF00] font-bold">
+                              <span>Earned Match Weight:</span>
+                              <span>{(() => {
+                                let earned = 0;
+                                result.matchingSkills.forEach(s => {
+                                  earned += KEYWORD_WEIGHTS[s.toLowerCase()] || 1;
+                                });
+                                return earned.toFixed(1);
+                              })()} pts</span>
+                            </div>
+                            <div className="border-t border-white/5 my-1.5" />
+                            <div className="flex justify-between text-gray-400">
+                              <span>Raw Keyword Ratio:</span>
+                              <span>{(() => {
+                                let total = 0;
+                                let earned = 0;
+                                [...result.matchingSkills, ...result.missingSkills].forEach(s => {
+                                  total += KEYWORD_WEIGHTS[s.toLowerCase()] || 1;
+                                });
+                                result.matchingSkills.forEach(s => {
+                                  earned += KEYWORD_WEIGHTS[s.toLowerCase()] || 1;
+                                });
+                                return total > 0 ? `${Math.round((earned / total) * 100)}%` : '0%';
+                              })()}</span>
+                            </div>
+                            <div className="flex justify-between text-white font-black">
+                              <span>Calibrated Match:</span>
+                              <span>{result.score}% (Weighted Curves Applied)</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-5 space-y-3">
+                        <p className="text-[9px] font-mono uppercase tracking-[0.2em] text-white">Skills Weight Breakdown</p>
+                        <div className="max-h-[160px] overflow-y-auto space-y-2 text-[9px] font-mono scrollbar-hide">
+                          {result.matchingSkills.map(s => {
+                            const weight = KEYWORD_WEIGHTS[s.toLowerCase()] || 1;
+                            return (
+                              <div key={s} className="flex justify-between items-center text-[#00FF00]/80">
+                                <span>{s} (Match)</span>
+                                <span>+{weight.toFixed(1)} pts</span>
+                              </div>
+                            );
+                          })}
+                          {result.missingSkills.map(s => {
+                            const weight = KEYWORD_WEIGHTS[s.toLowerCase()] || 1;
+                            return (
+                              <div key={s} className="flex justify-between items-center text-gray-500">
+                                <span>{s} (Gap)</span>
+                                <span>0.0 / {weight.toFixed(1)} pts</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )}
