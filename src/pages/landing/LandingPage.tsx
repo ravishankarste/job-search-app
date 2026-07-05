@@ -1125,7 +1125,12 @@ export const LandingPage: React.FC = () => {
                           return [skill, ...(SYNONYMS[skill] || [])];
                         });
                         allTerms.sort((a, b) => b.length - a.length);
-                        const combinedRegex = new RegExp(`(${allTerms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`, 'gi');
+                        const combinedRegex = new RegExp(`(${allTerms.map(t => {
+                          const escaped = t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                          const leading = /^\w/.test(t) ? '\\b' : '(?<=^|\\s|\\p{P})';
+                          const trailing = /\w$/.test(t) ? '\\b' : '(?=$|\\s|\\p{P})';
+                          return `${leading}${escaped}${trailing}`;
+                        }).join('|')})`, 'gi');
                         return jobText.split(combinedRegex).map((part, index) => {
                           const lowerPart = part.toLowerCase();
                           const isMatch = (result?.matchingSkills ?? []).some(s => {
